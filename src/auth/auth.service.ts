@@ -144,8 +144,7 @@ export class AuthService {
       throw new UnauthorizedException('Invalid refresh token');
     }
 
-    // Validate token expiration
-    if (new Date() > storedToken.expiresAt) {
+    if (this.authUtil.isTokenExpired(storedToken.expiresAt)) {
       await this.authUtil.revokeRefreshToken(storedToken.id);
       throw new UnauthorizedException('Refresh token has expired');
     }
