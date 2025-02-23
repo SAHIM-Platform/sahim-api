@@ -1,0 +1,20 @@
+@port = {{$dotenv API_PORT}}
+@baseUrl = http://localhost:{{port}}
+
+### Refresh Access Token
+# Replace the `refreshToken` with the actual value that you got after signing in
+POST {{baseUrl}}/auth/refresh
+Content-Type: application/json
+
+{
+    "refreshToken": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEwLCJ0b2tlblR5cGUiOiJyZWZyZXNoIiwiaWF0IjoxNzQwMzIwNjI4LCJleHAiOjE3NDA5MjU0Mjh9.RPFTUWJ-9S3iPTWcmBytQK5Pt85BBMi-Zf_ig0yDOUFV_z-6OQ1A6ufK-Ah5BtcuWlY0BrT9_nnQrlvNUEcHGvBbanLbzDEjCF1tX8T_j5jKjilZxdB9WfqCCTXIx5LHW-rJLHXf018Ca-KBKhV9s-q-SqTpvIaTREGW3c3cal5A-bhznBkh-HQCpIunQ0Saa1RWj4DzTyPU9OvMh_S8Gj8GnFkO2SWipfugtSj7uFg83J0lO00ZB-H2Bxkjoi-MBUlb-8wrQuuw8bsZkxoqua-l_ngIujh46mHZhMSwcsRqbDnjq67N4BSVSbiYHZFfwHAeCTB6gklizN5kQpDAQw"
+}
+
+### Try to use revoked refresh token (Should Fail)
+# Replace the `refreshToken` with a revoked refresh token
+POST {{baseUrl}}/auth/refresh
+Content-Type: application/json
+
+{
+    "refreshToken": "refreshToken"
+}

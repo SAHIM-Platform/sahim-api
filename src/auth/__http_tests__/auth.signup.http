@@ -1,0 +1,28 @@
+@port = {{$dotenv API_PORT}}
+@baseUrl = http://localhost:{{port}}
+@email = test15@example.com
+@password = Test123!@#
+@username = testuser15
+@name = Test User 14
+
+### Sign Up - Valid Input
+POST {{baseUrl}}/auth/signup
+Content-Type: application/json
+
+{
+    "email": "{{email}}",
+    "username": "{{username}}",
+    "password": "{{password}}",
+    "name": "{{name}}"
+}
+
+### Sign Up - Existing User (Should Fail)
+POST {{baseUrl}}/auth/signup
+Content-Type: application/json
+
+{
+    "email": "{{email}}",
+    "username": "testuser2",
+    "password": "{{password}}",
+    "name": "Test User 2"
+}

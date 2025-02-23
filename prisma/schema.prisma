@@ -13,9 +13,28 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// For testing purposes
 model User {
-  id    Int     @id @default(autoincrement())
-  email String  @unique
-  name  String?
+  id            Int            @id @default(autoincrement())
+  email         String         @unique
+  username      String         @unique
+  password      String
+  name          String
+  createdAt     DateTime       @default(now())
+  lastLoginAt   DateTime?
+  isActive      Boolean        @default(true)
+  refreshTokens RefreshToken[]
+}
+
+model RefreshToken {
+  id         Int       @id @default(autoincrement())
+  lookupId   String    @default(dbgenerated("gen_random_uuid()"))
+  token      String    @unique
+  userId     Int
+  user       User      @relation(fields: [userId], references: [id])
+  revoked    Boolean   @default(false)
+  revokedAt  DateTime?
+  createdAt  DateTime  @default(now())
+  expiresAt  DateTime
+  deviceInfo String?
+  ipAddress  String?
 }
