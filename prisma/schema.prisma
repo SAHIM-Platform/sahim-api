@@ -27,7 +27,6 @@ model User {
 
 model RefreshToken {
   id         Int       @id @default(autoincrement())
-  lookupId   String    @default(dbgenerated("gen_random_uuid()"))
   token      String    @unique
   userId     Int
   user       User      @relation(fields: [userId], references: [id])

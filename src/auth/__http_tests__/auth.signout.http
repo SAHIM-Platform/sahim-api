@@ -7,11 +7,11 @@
 # replace `accessToken` which is next to the `Bearer` with the actual value that you got after signing in
 # replace `refreshToken` with the actual value that you got after signing in
 POST {{baseUrl}}/auth/signout
-Authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjExLCJ0b2tlblR5cGUiOiJhY2Nlc3MiLCJpYXQiOjE3NDAzMjI0MTYsImV4cCI6MTc0MDMyMzMxNn0.1w5Pv6ItLFPuV7CHsNHGGQr3tNxux0Sx6FMniIl1cAPXmRCE-BA5T4KZ6kRwi-p352pJfO-FQX_p2ZG4975BxsDps-2286byUHGzUcE3B36sd7dQ1awVqzjjwTWDuX2fqI4RJyKiKeqIGfkVdwmzko5Wt0soQfqVtHbXtAE3XAIzErNL_H3pP-VMc0IHpbQVHognWuFCTtMqjoF9MuaJb4uh7-N_Bhb8FpzoaPBtcNk2qTorKoiRx4RJ4DLakv8wX1YwkqKnnhfUvt4ESLBCa66TH-SxNphEq-DXN4VTHab0Av5AOL0RcfmLSKe-KlLRvXbq4Wm98JJW00azh6-yzA
+Authorization: Bearer accessToken
 Content-Type: application/json
 
 {
-    "refreshToken": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjExLCJ0b2tlblR5cGUiOiJyZWZyZXNoIiwiaWF0IjoxNzQwMzIyNDE2LCJleHAiOjE3NDA5MjcyMTZ9.uy1DqkN7t51BpvBPnmQgOs7E0nfX2jDSeexusq0SBwUKkVT2U7iZxdmz2YfsGLqYCR7GX6VjwfpPf22hJR8RE-K8WttEp6Hn4pUVuqGXltQbJaq_3RyvsOxEoKIml1owVpyiTD2t_D2DZtsUjBanmZ9zh9HgZs7Yivyp9Dbb5-WIRFr1aCtMhO13lgXnJ4YxlAwZi4GsyIccSG6D9bN7BSnlypKBVpOQVy6N7cavVjyLDvW25YelLuejv5kYX_coIPHaavsLh9e3Qnj01eYfwOZ1Ktkr9wIO3Ii1-avdPRjoiM6wthAE37PaLz53taPycnkAn4qJvvswaJEpIkIGYQ"
+    "refreshToken": "refreshToken"
 }
 
 ### Sign Out - Invalid Access Token (Should Fail)

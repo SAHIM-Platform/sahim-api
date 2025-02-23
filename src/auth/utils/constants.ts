@@ -1,5 +1,6 @@
 import { join } from 'path';
 import { readFileSync, existsSync } from 'fs';
+import * as crypto from 'crypto';
 
 const keyPath = join(process.cwd(), 'storage', 'keys');
 
@@ -17,4 +18,5 @@ export const jwtConstants = {
   privateKey: loadKey('jwt.private.key'),
   expiration: process.env.JWT_EXPIRATION || '15m',
   refreshExpiration: process.env.JWT_REFRESH_EXPIRATION || '7d',
+  tokenEncryptionKey: process.env.TOKEN_ENCRYPTION_KEY || crypto.randomBytes(32).toString('hex'),
 };

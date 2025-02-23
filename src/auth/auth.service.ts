@@ -133,8 +133,10 @@ export class AuthService {
   async refreshAccessToken(
     refreshToken: string,
   ): Promise<{ accessToken: string }> {
+    const encryptedToken = this.authUtil.encryptToken(refreshToken);
+
     const storedToken = await this.prisma.refreshToken.findUnique({
-      where: { token: refreshToken },
+      where: { token: encryptedToken },
       include: { user: true },
     });
 
@@ -182,6 +184,6 @@ export class AuthService {
     const passwordMatch = await bCompare(password, user.password);
     if (!passwordMatch) return null;
 
-    return this.authUtil.sanitizeUser(user);
+    return this.usersService.sanitizeUser(user);
   }
 }

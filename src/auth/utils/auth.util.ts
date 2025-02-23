@@ -105,12 +105,12 @@ export class AuthUtil {
     req?: Request,
   ): Promise<void> {
     const expiresAt = this.calcTokenExpiration('refresh', 'date') as Date;
-
+    const encryptedToken = this.encryptToken(refreshToken);
     await this.revokeAllRefreshTokens(userId);
 
     await this.prisma.refreshToken.create({
       data: {
-        token: refreshToken,
+        token: encryptedToken,
         userId,
         expiresAt,
         deviceInfo: req?.headers['user-agent'] || null,
@@ -134,9 +134,10 @@ export class AuthUtil {
     refreshToken: string,
     userId: number,
   ) {
+    const encryptedToken = this.encryptToken(refreshToken);
     return await this.prisma.refreshToken.findFirst({
       where: {
-        token: refreshToken,
+        token: encryptedToken,
         userId: userId,
         revoked: false,
         expiresAt: {
@@ -147,6 +148,33 @@ export class AuthUtil {
         user: true,
       },
     });
+  }
+
+  /**
+   * Sets a refresh token as an HTTP-only cookie in the response.
+   * @param refreshToken - The refresh token to be set in the cookie.
+   * @param res - The Express response object.
+   */
+  setRefreshTokenCookie(refreshToken: string, @Res() res: Response): void {
+    const env =
+      this.configService.get<string>('NODE_ENV', 'development') || 'production';
+    const isProduction = env === 'production';
+
+    res.cookie('refreshToken', refreshToken, {
+      httpOnly: true,
+      secure: Boolean(isProduction),
+      sameSite: isProduction ? 'none' : 'lax',
+      maxAge: this.calcTokenExpiration('refresh', 'ms') as number,
+      path: '/auth/',
+    });
+  }
+
+  /**
+   * Unset the refresh token cookie in the response.
+   * @param res - The Express response object.
+   */
+  unsetRefreshTokenCookie(@Res() res: Response): void {
+    res.clearCookie('refreshToken', { path: '/auth/' });
   }
 
   /**
@@ -165,20 +193,6 @@ export class AuthUtil {
         ...(exceptTokenId && { id: { not: exceptTokenId } }),
       },
       data: { revoked: true, revokedAt: new Date() },
-    });
-  }
-
-  /**
-   * Marks an expired token as revoked in the database.
-   * @param tokenId - The ID of the token to revoke.
-   */
-  private async revokeExpiredToken(tokenId: number): Promise<void> {
-    await this.prisma.refreshToken.update({
-      where: { id: tokenId },
-      data: {
-        revoked: true,
-        revokedAt: new Date(),
-      },
     });
   }
 
@@ -242,39 +256,36 @@ export class AuthUtil {
   }
 
   /**
-   * Removes sensitive information from a user object.
-   * @param user - The user object to sanitize.
-   * @returns A new object with sensitive fields removed.
+   * Encrypts a string using AES-256-GCM.
+   * @param text - The text to encrypt.
+   * @returns The encrypted text.
    */
-  sanitizeUser(user: any): Omit<any, 'password'> {
-    const { password, ...sanitizedUser } = user;
-    return sanitizedUser;
+  encryptToken(text: string): string {
+    const crypto = require('crypto');
+    const algorithm = 'aes-256-gcm';
+    const key = Buffer.from(jwtConstants.tokenEncryptionKey, 'hex');
+    const iv = crypto.createHash('sha256').update(text).digest().slice(0, 16);
+
+    const cipher = crypto.createCipheriv(algorithm, key, iv);
+    let encrypted = cipher.update(text, 'utf8', 'hex');
+    encrypted += cipher.final('hex');
+
+    return encrypted;
   }
 
-  /**
-   * Sets a refresh token as an HTTP-only cookie in the response.
-   * @param refreshToken - The refresh token to be set in the cookie.
-   * @param res - The Express response object.
-   */
-  setRefreshTokenCookie(refreshToken: string, @Res() res: Response): void {
-    const env =
-      this.configService.get<string>('NODE_ENV', 'development') || 'production';
-    const isProduction = env === 'production';
+  /********** Private Helpers **********/
 
-    res.cookie('refreshToken', refreshToken, {
-      httpOnly: true,
-      secure: Boolean(isProduction),
-      sameSite: isProduction ? 'none' : 'lax',
-      maxAge: this.calcTokenExpiration('refresh', 'ms') as number,
-      path: '/auth/',
+  /**
+   * Marks an expired token as revoked in the database.
+   * @param tokenId - The ID of the token to revoke.
+   */
+  private async revokeExpiredToken(tokenId: number): Promise<void> {
+    await this.prisma.refreshToken.update({
+      where: { id: tokenId },
+      data: {
+        revoked: true,
+        revokedAt: new Date(),
+      },
     });
-  }
-
-  /**
-   * Unset the refresh token cookie in the response.
-   * @param res - The Express response object.
-   */
-  unsetRefreshTokenCookie(@Res() res: Response): void {
-    res.clearCookie('refreshToken', { path: '/auth/' });
   }
 }

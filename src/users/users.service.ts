@@ -40,4 +40,14 @@ export class UsersService {
       where: { id: userId },
     });
   }
+
+  /**
+   * Removes sensitive information from a user object.
+   * @param user - The user object to sanitize.
+   * @returns A new object with sensitive fields removed.
+   */
+  sanitizeUser(user: any): Omit<any, 'password'> {
+    const { password, ...sanitizedUser } = user;
+    return sanitizedUser;
+  }
 }
