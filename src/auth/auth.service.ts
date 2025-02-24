@@ -133,7 +133,7 @@ export class AuthService {
   async refreshAccessToken(
     refreshToken: string,
   ): Promise<{ accessToken: string }> {
-    const encryptedToken = this.authUtil.encryptToken(refreshToken);
+    const encryptedToken = this.authUtil.hashToken(refreshToken);
 
     const storedToken = await this.prisma.refreshToken.findUnique({
       where: { token: encryptedToken },

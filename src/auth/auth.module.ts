@@ -17,7 +17,7 @@ import { JwtStrategy } from './strategies/jwt.strategy';
         publicKey: jwtConstants.publicKey,
         privateKey: jwtConstants.privateKey,
         signOptions: {
-          algorithm: 'RS256',
+          algorithm: jwtConstants.algorithm,
           expiresIn: jwtConstants.expiration,
         },
       }),

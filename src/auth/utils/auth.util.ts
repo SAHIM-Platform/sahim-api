@@ -6,7 +6,7 @@ import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from 'prisma/prisma.service';
 import { ConfigService } from '@nestjs/config';
 import { jwtConstants } from './constants';
-import { RefreshToken } from '@prisma/client';
+import * as crypto from 'crypto';
 
 @Injectable()
 export class AuthUtil {
@@ -105,12 +105,12 @@ export class AuthUtil {
     req?: Request,
   ): Promise<void> {
     const expiresAt = this.calcTokenExpiration('refresh', 'date') as Date;
-    const encryptedToken = this.encryptToken(refreshToken);
+    const hashedToken = this.hashToken(refreshToken);
     await this.revokeAllRefreshTokens(userId);
 
     await this.prisma.refreshToken.create({
       data: {
-        token: encryptedToken,
+        token: hashedToken,
         userId,
         expiresAt,
         deviceInfo: req?.headers['user-agent'] || null,
@@ -134,10 +134,10 @@ export class AuthUtil {
     refreshToken: string,
     userId: number,
   ) {
-    const encryptedToken = this.encryptToken(refreshToken);
+    const hashedToken = this.hashToken(refreshToken);
     return await this.prisma.refreshToken.findFirst({
       where: {
-        token: encryptedToken,
+        token: hashedToken,
         userId: userId,
         revoked: false,
         expiresAt: {
@@ -256,21 +256,15 @@ export class AuthUtil {
   }
 
   /**
-   * Encrypts a string using AES-256-GCM.
-   * @param text - The text to encrypt.
-   * @returns The encrypted text.
+   * Hashes a token using SHA-256 and a secret key.
+   * @param token - The token to be hashed.
+   * @returns The hashed token as a hexadecimal string.
    */
-  encryptToken(text: string): string {
-    const crypto = require('crypto');
-    const algorithm = 'aes-256-gcm';
-    const key = Buffer.from(jwtConstants.tokenEncryptionKey, 'hex');
-    const iv = crypto.createHash('sha256').update(text).digest().slice(0, 16);
-
-    const cipher = crypto.createCipheriv(algorithm, key, iv);
-    let encrypted = cipher.update(text, 'utf8', 'hex');
-    encrypted += cipher.final('hex');
-
-    return encrypted;
+  hashToken(token: string): string {
+    return crypto
+      .createHmac('sha256', jwtConstants.secretKey)
+      .update(token)
+      .digest('hex');
   }
 
   /********** Private Helpers **********/
