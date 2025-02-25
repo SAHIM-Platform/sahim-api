@@ -1,19 +1,19 @@
-FROM node:18.17.0-alpine
+FROM node:20-alpine
 
 WORKDIR /app
 
-COPY package.json yarn.lock ./
+COPY package.json pnpm-lock.yaml ./
 
-RUN yarn
+RUN npm install -g pnpm && pnpm install --frozen-lockfile
 
 COPY . .
 
-EXPOSE 5050
+EXPOSE 5000
 
-RUN yarn prisma generate
+RUN pnpm prisma generate
 
-RUN yarn build
+RUN pnpm build
 
-RUN yarn pm2 set pm2:sysmonit false
+RUN pnpm pm2 set pm2:sysmonit false
 
-CMD ["yarn", "prod:start:pm2"]
+CMD ["pnpm", "prod:start:pm2"]

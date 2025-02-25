@@ -20,7 +20,7 @@
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "init:storage": "node scripts/init-storage.js",
     "update:storage": "pnpm init:storage --clean",
-    "prod:start:pm2": "yarn prisma migrate deploy && pm2-runtime start ./runtime.config.json",
+    "prod:start:pm2": "pnpm prisma migrate deploy && pm2-runtime start ./runtime.config.json",
     "prepare": "husky"
   },
   "dependencies": {
