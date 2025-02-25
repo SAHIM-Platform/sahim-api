@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '@/users/users.service';
-import { compare as bCompare } from 'bcrypt';
+import { compare as bCompare } from 'bcryptjs';
 import { SigninAuthDto } from '@/auth/dto/signin-auth.dto';
 import { SignupAuthDto } from './dto/signup-auth.dto';
 import { PrismaService } from 'prisma/prisma.service';
@@ -125,15 +125,18 @@ export class AuthService {
   }
 
   /**
-   * Refreshes the access token using a valid refresh token.
-   * @param refreshToken - The refresh token to be used for generating a new access token.
+   * Refreshes the access token and generates a new refresh token as part of the refresh token rotation process.
+   * @param oldRefreshToken - The refresh token to be used for generating a new access token and refresh token.
+   * @param res - The response object used to set the new refresh token in a cookie.
+   * 
    * @throws {UnauthorizedException} If the refresh token is invalid, expired, or mismatched.
    * @returns {Promise<{ accessToken: string }>} The new access token.
    */
-  async refreshAccessToken(
-    refreshToken: string,
-  ): Promise<{ accessToken: string }> {
-    const encryptedToken = this.authUtil.hashToken(refreshToken);
+  async refreshToken(
+    oldRefreshToken: string,
+    @Res() res: Response,
+  ): Promise<{accessToken: string}> {
+    const encryptedToken = this.authUtil.hashToken(oldRefreshToken);
 
     const storedToken = await this.prisma.refreshToken.findUnique({
       where: { token: encryptedToken },
@@ -149,7 +152,7 @@ export class AuthService {
       throw new UnauthorizedException('Refresh token has expired');
     }
 
-    const payload = this.jwtService.verify<JwtPayload>(refreshToken);
+    const payload = this.jwtService.verify<JwtPayload>(oldRefreshToken);
     if (payload.tokenType !== 'refresh') {
       throw new UnauthorizedException('Invalid token type');
     }
@@ -160,10 +163,13 @@ export class AuthService {
       throw new UnauthorizedException('Invalid token');
     }
 
-    const accessToken = await this.authUtil.generateJwtToken(
-      payload.sub,
-      'access',
-    );
+    // Revoke the used refresh token to prevent reuse
+    await this.authUtil.revokeRefreshToken(storedToken.id);
+
+    // Generate new JWT tokens (access and refresh tokens)
+    const { accessToken, refreshToken} = await this.authUtil.generateJwtTokens(storedToken.userId);
+    
+    this.authUtil.setRefreshTokenCookie(refreshToken, res);
 
     this.authUtil.cleanupExpiredTokens().catch(console.error);
 

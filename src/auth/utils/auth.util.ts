@@ -1,4 +1,4 @@
-import { hash as bHash } from 'bcrypt';
+import { hash as bHash } from 'bcryptjs';
 import { Injectable, Res } from '@nestjs/common';
 import { Response, Request } from 'express';
 import { JwtPayload, JwtTokens } from '../interfaces/jwt-payload.interface';

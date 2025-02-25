@@ -7,7 +7,7 @@ POST {{baseUrl}}/auth/refresh
 Content-Type: application/json
 
 {
-    "refreshToken": "refreshToken"
+    "refreshToken": "eyJhbGciOiJQUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsInRva2VuVHlwZSI6InJlZnJlc2giLCJpYXQiOjE3NDA0OTI2NzIsImV4cCI6MTc0MTA5NzQ3Mn0.bSE0NPhR3NzsgKdjyz-XGe4T3hZWtZqsMhjpfvszUPNB5Qk1RqKThm9FDQmbbv13Sp2ibwg3nze8SZTR7f8_qbQi0i6VE3_7tUM-l599pWizDzPwBkNlo-ymX_A8YemFEDpkvzFdOPljL0o-Fkchps4bepwJJrhi7Beuy1V2ptTDum0S3M5Y7pRDj1PDpMzcJrbTLpBaCoWum5rIC0k-xD38IFy-od_vLAKL9rky0OgadvVtUKBhXTLe7NvQjQuoFScU_Y49qmx4oT-oYCA08RZnlQLkyK0gagRstbSTXRisXYj3ZMFS0aRhklJdefLVt4dYCxDB3vPX3GzRNPciHQ"
 }
 
 ### Try to use revoked refresh token (Should Fail)
