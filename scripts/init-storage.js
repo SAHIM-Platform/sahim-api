@@ -1,6 +1,10 @@
 const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
+const crypto = require('crypto');
+
+// Parse command line arguments
+const shouldClean = process.argv.includes('--clean');
 
 // Define the base paths
 const storageDir = path.join(__dirname, '..', 'storage');
@@ -26,7 +30,7 @@ function generateJWTKeys() {
     
     try {
         // Generate private key
-        execSync('openssl genrsa -out ./storage/keys/jwt.private.key 2048', {
+        execSync('openssl genpkey -algorithm RSA -out ./storage/keys/jwt.private.key -pkeyopt rsa_keygen_bits:4096', {
             stdio: 'inherit'
         });
         console.log('Generated private key');
@@ -42,10 +46,40 @@ function generateJWTKeys() {
     }
 }
 
+// Generate a random secret key
+function generateSecretKey() {
+    console.log('Generating a secure random secret key...');
+
+    try {
+        const secretKey = crypto.randomBytes(64).toString('hex');
+        fs.writeFileSync('./storage/keys/jwt.secret.key', secretKey);
+        console.log('Generated secret key');
+    } catch (error) {
+        console.error('Error generating secret key:', error.message);
+        process.exit(1);
+    }
+}
+
+// Clean a directory
+function cleanKeysDirectory() {
+    fs.readdirSync(keysDir).forEach(file => {
+        const filePath = path.join(keysDir, file);
+        fs.unlinkSync(filePath);
+        console.log(`Removed file: ${filePath}`);
+    });
+}
+
 // Main execution
 try {
+    if (shouldClean) {
+        console.log('Cleaning existing keys...');
+        cleanKeysDirectory();
+        console.log('Keys cleanup completed.');
+    }
+
     createDirectories();
     generateJWTKeys();
+    generateSecretKey();
     console.log('Storage initialization completed successfully!');
 } catch (error) {
     console.error('Error during storage initialization:', error.message);

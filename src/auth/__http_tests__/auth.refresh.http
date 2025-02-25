@@ -1,0 +1,20 @@
+@port = {{$dotenv API_PORT}}
+@baseUrl = http://localhost:{{port}}
+
+### Refresh Access Token
+# Replace the `refreshToken` with the actual value that you got after signing in
+POST {{baseUrl}}/auth/refresh
+Content-Type: application/json
+
+{
+    "refreshToken": "refreshToken"
+}
+
+### Try to use revoked refresh token (Should Fail)
+# Replace the `refreshToken` with a revoked refresh token
+POST {{baseUrl}}/auth/refresh
+Content-Type: application/json
+
+{
+    "refreshToken": "refreshToken"
+}

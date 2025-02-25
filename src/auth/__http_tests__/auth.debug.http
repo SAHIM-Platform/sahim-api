@@ -1,0 +1,6 @@
+@port = {{$dotenv API_PORT}}
+@baseUrl = http://localhost:{{port}}
+
+### Debug - Get Refresh Tokens
+GET {{baseUrl}}/auth/debug/tokens
+Authorization: Bearer accessToken
