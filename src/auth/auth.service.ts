@@ -60,7 +60,7 @@ export class AuthService {
       },
     });
 
-    const tokens = await this.authUtil.generateJwtTokens(createdUser.id);
+    const tokens = await this.authUtil.generateJwtTokens(createdUser.id, res.req);
     this.authUtil.setRefreshTokenCookie(tokens.refreshToken, res);
 
     return { tokens };
@@ -167,13 +167,13 @@ export class AuthService {
     await this.authUtil.revokeRefreshToken(storedToken.id);
 
     // Generate new JWT tokens (access and refresh tokens)
-    const { accessToken, refreshToken} = await this.authUtil.generateJwtTokens(storedToken.userId);
+    const tokens = await this.authUtil.generateJwtTokens(storedToken.userId, res.req);
     
-    this.authUtil.setRefreshTokenCookie(refreshToken, res);
+    this.authUtil.setRefreshTokenCookie(tokens.refreshToken, res);
 
     this.authUtil.cleanupExpiredTokens().catch(console.error);
 
-    return { accessToken };
+    return { accessToken: tokens.accessToken };
   }
 
   /**
