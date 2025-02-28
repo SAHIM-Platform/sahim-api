@@ -6,6 +6,8 @@ import {
   Request,
   Res,
   Get,
+  Req,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { Response } from 'express';
 import { AuthService } from './auth.service';
@@ -23,30 +25,41 @@ export class AuthController {
 
   @Post('signup')
   async signup(@Body() input: SignupAuthDto, @Res() res: Response) {
-    const { tokens } = await this.authService.signup(input, res);
-    res.json({ message: 'User registered successfully', tokens });
+    const { accessToken } = await this.authService.signup(input, res);
+    res.json({ message: 'User registered successfully', accessToken });
   }
 
   @Post('signin')
   async signin(@Body() input: SigninAuthDto, @Res() res: Response) {
-    const { tokens } = await this.authService.signin(input, res);
-    res.json({ message: 'Sign in successful', tokens });
+    const { accessToken } = await this.authService.signin(input, res);
+    res.json({ message: 'Sign in successful', accessToken });
   }
 
   @Post('refresh')
-  async refreshToken(@Body('refreshToken') refreshToken: string, @Res() res: Response) {
-    const { accessToken } = await this.authService.refreshToken(refreshToken, res);
+  async refreshToken(
+    @Body('refreshToken') refreshToken: string,
+    @Res() res: Response,
+  ) {
+    const { accessToken } = await this.authService.refreshToken(
+      refreshToken,
+      res,
+    );
     res.json({ message: 'Access token refreshed successfully', accessToken });
   }
 
   @UseGuards(JwtAuthGuard)
   @Post('signout')
-  async signout(
-    @Request() req,
-    @Body('refreshToken') refreshToken: string,
-    @Res() res: Response,
-  ) {
-    const { userId } = req.user;
+  async signout(@Req() req, @Res() res: Response) {
+    const userId = req.user?.sub;
+    const refreshToken = req.cookies?.refreshToken;
+    if (userId === undefined) {
+      throw new UnauthorizedException(
+        'User ID is undefined. This might be due to incorrect JWT payload structure or authentication issues.',
+      );
+    }
+    if (!refreshToken) {
+      throw new UnauthorizedException('Refresh token not found in cookies');
+    }
     await this.authService.signout(refreshToken, userId, res);
     res.json({ message: 'Sign out successful' });
   }

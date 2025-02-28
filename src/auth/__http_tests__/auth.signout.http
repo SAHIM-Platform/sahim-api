@@ -4,32 +4,25 @@
 @password = Test123!@#
 
 ### Sign Out - Valid Token
-# replace `accessToken` which is next to the `Bearer` with the actual value that you got after signing in
-# replace `refreshToken` with the actual value that you got after signing in
+# Replace the following placeholders with actual values:
+# 1. accessToken: Replace with the access token received after signing in
+# 2. refreshToken: Replace with the refresh token from the signin response
+# Note: Only include the refresh token value up to the "Expires" parameter
+# If you encounter issues, try removing the "Max-Age"
+# e.g: Cookie: refreshToken=eyJ..Ig; Path=/auth/; Expires=Fri, 07 Mar 2025 23:10:52 GMT;
 POST {{baseUrl}}/auth/signout
 Authorization: Bearer accessToken
+Cookie: refreshToken
 Content-Type: application/json
-
-{
-    "refreshToken": "refreshToken"
-}
 
 ### Sign Out - Invalid Access Token (Should Fail)
-# replace `refreshToken` with the actual value that you got after signing in
 POST {{baseUrl}}/auth/signout
 Authorization: Bearer invalid_token
+Cookie: refreshToken
 Content-Type: application/json
 
-{
-    "refreshToken": "refreshToken"
-}
-
-### Sign Out - Invalid Refresh Token (Should Fail)
-# replace `accessToken` with the actual value that you got after signing in
+### Sign Out - No Refresh Token Cookie (Should Fail)
+# Clear your cookies before running this test
 POST {{baseUrl}}/auth/signout
 Authorization: Bearer accessToken
 Content-Type: application/json
-
-{
-    "refreshToken": "invalid_refresh_token"
-}

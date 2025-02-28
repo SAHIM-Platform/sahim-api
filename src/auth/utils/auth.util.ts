@@ -1,6 +1,6 @@
 import { hash as bHash } from 'bcryptjs';
 import { Injectable, Res } from '@nestjs/common';
-import { Response, Request } from 'express';
+import { Response, Request, CookieOptions } from 'express';
 import { JwtPayload, JwtTokens } from '../interfaces/jwt-payload.interface';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from 'prisma/prisma.service';
@@ -30,17 +30,25 @@ export class AuthUtil {
    * Generates a JWT token for a user.
    * @param sub - The subject (user ID) for the token.
    * @param tokenType - The type of token ('access' or 'refresh').
+   * @param req - Optional Express request object for IP and device info.
    * @returns A promise that resolves to the generated JWT token.
    * @throws Error if token generation fails.
    */
   async generateJwtToken(
     sub: number,
     tokenType: 'access' | 'refresh',
+    req?: Request,
   ): Promise<string> {
     const payload: JwtPayload = { sub, tokenType };
     const expiration = this.getTokenExpiration(tokenType);
     try {
-      return this.jwtService.signAsync(payload, { expiresIn: expiration });
+      const token = await this.jwtService.signAsync(payload, {
+        expiresIn: expiration,
+      });
+      if (tokenType === 'refresh') {
+        await this.storeRefreshToken(sub, token, req);
+      }
+      return token;
     } catch (error) {
       throw new Error(`Error generating JWT token: ${error.message}`);
     }
@@ -87,9 +95,8 @@ export class AuthUtil {
   async generateJwtTokens(sub: number, req?: Request): Promise<JwtTokens> {
     const [accessToken, refreshToken] = await Promise.all([
       this.generateJwtToken(sub, 'access'),
-      this.generateJwtToken(sub, 'refresh'),
+      this.generateJwtToken(sub, 'refresh', req),
     ]);
-    await this.storeRefreshToken(sub, refreshToken, req);
     return { accessToken, refreshToken };
   }
 
@@ -151,21 +158,30 @@ export class AuthUtil {
   }
 
   /**
+   * Returns common cookie options for setting and clearing cookies.
+   */
+  private getCookieOptions(): CookieOptions {
+    const env =
+      this.configService.get<string>('NODE_ENV', 'development') || 'production';
+    const isProduction = env === 'production';
+
+    return {
+      httpOnly: true,
+      secure: isProduction,
+      sameSite: isProduction ? ('none' as const) : ('lax' as const),
+      path: '/auth/',
+    };
+  }
+
+  /**
    * Sets a refresh token as an HTTP-only cookie in the response.
    * @param refreshToken - The refresh token to be set in the cookie.
    * @param res - The Express response object.
    */
   setRefreshTokenCookie(refreshToken: string, @Res() res: Response): void {
-    const env =
-      this.configService.get<string>('NODE_ENV', 'development') || 'production';
-    const isProduction = env === 'production';
-
     res.cookie('refreshToken', refreshToken, {
-      httpOnly: true,
-      secure: Boolean(isProduction),
-      sameSite: isProduction ? 'none' : 'lax',
+      ...this.getCookieOptions(),
       maxAge: this.calcTokenExpiration('refresh', 'ms') as number,
-      path: '/auth/',
     });
   }
 
@@ -174,7 +190,7 @@ export class AuthUtil {
    * @param res - The Express response object.
    */
   unsetRefreshTokenCookie(@Res() res: Response): void {
-    res.clearCookie('refreshToken', { path: '/auth/' });
+    res.clearCookie('refreshToken', this.getCookieOptions());
   }
 
   /**
