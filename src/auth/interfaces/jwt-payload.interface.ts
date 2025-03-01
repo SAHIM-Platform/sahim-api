@@ -11,5 +11,6 @@ export interface JwtTokens {
 }
 
 export interface AuthResponse {
-  tokens: JwtTokens;
+  accessToken: string;
+  refreshToken?: string;
 }

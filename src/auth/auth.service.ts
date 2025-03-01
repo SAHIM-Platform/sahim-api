@@ -60,10 +60,13 @@ export class AuthService {
       },
     });
 
-    const tokens = await this.authUtil.generateJwtTokens(createdUser.id, res.req);
+    const tokens = await this.authUtil.generateJwtTokens(
+      createdUser.id,
+      res.req,
+    );
     this.authUtil.setRefreshTokenCookie(tokens.refreshToken, res);
 
-    return { tokens };
+    return { accessToken: tokens.accessToken };
   }
 
   /**
@@ -97,7 +100,7 @@ export class AuthService {
     const tokens = await this.authUtil.generateJwtTokens(user.id, res.req);
     this.authUtil.setRefreshTokenCookie(tokens.refreshToken, res);
 
-    return { tokens };
+    return { accessToken: tokens.accessToken };
   }
 
   /**
@@ -128,14 +131,14 @@ export class AuthService {
    * Refreshes the access token and generates a new refresh token as part of the refresh token rotation process.
    * @param oldRefreshToken - The refresh token to be used for generating a new access token and refresh token.
    * @param res - The response object used to set the new refresh token in a cookie.
-   * 
+   *
    * @throws {UnauthorizedException} If the refresh token is invalid, expired, or mismatched.
    * @returns {Promise<{ accessToken: string }>} The new access token.
    */
   async refreshToken(
     oldRefreshToken: string,
     @Res() res: Response,
-  ): Promise<{accessToken: string}> {
+  ): Promise<{ accessToken: string }> {
     const encryptedToken = this.authUtil.hashToken(oldRefreshToken);
 
     const storedToken = await this.prisma.refreshToken.findUnique({
@@ -167,8 +170,11 @@ export class AuthService {
     await this.authUtil.revokeRefreshToken(storedToken.id);
 
     // Generate new JWT tokens (access and refresh tokens)
-    const tokens = await this.authUtil.generateJwtTokens(storedToken.userId, res.req);
-    
+    const tokens = await this.authUtil.generateJwtTokens(
+      storedToken.userId,
+      res.req,
+    );
+
     this.authUtil.setRefreshTokenCookie(tokens.refreshToken, res);
 
     this.authUtil.cleanupExpiredTokens().catch(console.error);

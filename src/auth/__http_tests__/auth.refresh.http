@@ -2,19 +2,10 @@
 @baseUrl = http://localhost:{{port}}
 
 ### Refresh Access Token
-# Replace the `refreshToken` with the actual value that you got after signing in
+# Replace the ` with the refresh token from the signin response
+# Note: Only include the refresh token value up to the "Expires" parameter
+# If you encounter issues, try removing the "Max-Age"
+# e.g: Cookie: refreshToken=eyJ..Ig; Path=/auth/; Expires=Fri, 07 Mar 2025 23:10:52 GMT;
 POST {{baseUrl}}/auth/refresh
+Cookie: refreshToken
 Content-Type: application/json
-
-{
-    "refreshToken": "refreshToken"
-}
-
-### Try to use revoked refresh token (Should Fail)
-# Replace the `refreshToken` with a revoked refresh token
-POST {{baseUrl}}/auth/refresh
-Content-Type: application/json
-
-{
-    "refreshToken": "refreshToken"
-}
