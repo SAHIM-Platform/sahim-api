@@ -36,10 +36,11 @@ export class AuthController {
   }
 
   @Post('refresh')
-  async refreshToken(
-    @Body('refreshToken') refreshToken: string,
-    @Res() res: Response,
-  ) {
+  async refreshToken(@Req() req, @Res() res: Response) {
+    const refreshToken = req.cookies?.refreshToken;
+    if (!refreshToken) {
+      throw new UnauthorizedException('Refresh token not found in cookies');
+    }
     const { accessToken } = await this.authService.refreshToken(
       refreshToken,
       res,
@@ -62,25 +63,5 @@ export class AuthController {
     }
     await this.authService.signout(refreshToken, userId, res);
     res.json({ message: 'Sign out successful' });
-  }
-
-  // ⚠️ Only for debugging purposes, I am going to remove it later.
-  @UseGuards(JwtAuthGuard)
-  @Get('debug/tokens')
-  async getRefreshTokens(@Request() req) {
-    const { userId } = req.user;
-    const tokens = await this.prisma.refreshToken.findMany({
-      where: { userId },
-      include: {
-        user: {
-          select: {
-            email: true,
-            username: true,
-          },
-        },
-      },
-      orderBy: { createdAt: 'desc' },
-    });
-    return tokens;
   }
 }
