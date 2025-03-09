@@ -13,6 +13,21 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum Department {
+  IT
+  SE
+  COM
+  IMSE
+  CND
+  MRE
+}
+
+enum ApprovalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
 model User {
   id            Int            @id @default(autoincrement())
   email         String         @unique
@@ -23,6 +38,7 @@ model User {
   lastLoginAt   DateTime?
   isActive      Boolean        @default(true)
   refreshTokens RefreshToken[]
+  student       Student?
 }
 
 model RefreshToken {
@@ -36,4 +52,14 @@ model RefreshToken {
   expiresAt  DateTime
   deviceInfo String?
   ipAddress  String?
+}
+
+model Student {
+  id             Int            @id @default(autoincrement())
+  userId         Int            @unique
+  academicNumber Int            @unique
+  department     Department
+  studyLevel     Int // بعدين ارجع افعله
+  approvalStatus ApprovalStatus @default(PENDING)
+  user           User           @relation(fields: [userId], references: [id])
 }
