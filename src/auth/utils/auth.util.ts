@@ -1,5 +1,5 @@
 import { hash as bHash } from 'bcryptjs';
-import { Injectable, Res } from '@nestjs/common';
+import { Injectable, Res, UnauthorizedException } from '@nestjs/common';
 import { Response, Request, CookieOptions } from 'express';
 import { JwtPayload, JwtTokens } from '../interfaces/jwt-payload.interface';
 import { JwtService } from '@nestjs/jwt';
@@ -7,6 +7,8 @@ import { PrismaService } from 'prisma/prisma.service';
 import { ConfigService } from '@nestjs/config';
 import { jwtConstants } from './constants';
 import * as crypto from 'crypto';
+import { UserRole } from "@prisma/client";
+import { UsersService } from '@/users/users.service';
 
 @Injectable()
 export class AuthUtil {
@@ -14,6 +16,7 @@ export class AuthUtil {
     private readonly jwtService: JwtService,
     private readonly prisma: PrismaService,
     private readonly configService: ConfigService,
+    private readonly usersService: UsersService,
   ) {}
 
   /**
@@ -36,10 +39,11 @@ export class AuthUtil {
    */
   async generateJwtToken(
     sub: number,
+    role: UserRole,
     tokenType: 'access' | 'refresh',
     req?: Request,
   ): Promise<string> {
-    const payload: JwtPayload = { sub, tokenType };
+    const payload: JwtPayload = { sub, tokenType, role };
     const expiration = this.getTokenExpiration(tokenType);
     try {
       const token = await this.jwtService.signAsync(payload, {
@@ -93,10 +97,15 @@ export class AuthUtil {
    * @returns A promise that resolves to an object containing the access and refresh tokens.
    */
   async generateJwtTokens(sub: number, req?: Request): Promise<JwtTokens> {
+    const user = await this.usersService.findUserById(sub);
+    if (!user) {
+      throw new UnauthorizedException('User not found');
+    }
     const [accessToken, refreshToken] = await Promise.all([
-      this.generateJwtToken(sub, 'access'),
-      this.generateJwtToken(sub, 'refresh', req),
+      this.generateJwtToken(sub, user.role, 'access'),
+      this.generateJwtToken(sub, user.role, 'refresh', req),
     ]);
+
     return { accessToken, refreshToken };
   }
 

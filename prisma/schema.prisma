@@ -22,6 +22,7 @@ model User {
   createdAt     DateTime       @default(now())
   lastLoginAt   DateTime?
   isActive      Boolean        @default(true)
+  role          UserRole       @default(STUDENT)
   refreshTokens RefreshToken[]
 }
 
@@ -36,4 +37,9 @@ model RefreshToken {
   expiresAt  DateTime
   deviceInfo String?
   ipAddress  String?
+}
+
+enum UserRole {
+  ADMIN
+  STUDENT
 }

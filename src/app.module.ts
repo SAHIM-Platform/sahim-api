@@ -5,8 +5,9 @@ import { PrismaModule } from 'prisma/prisma.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
-import { RolesGuard } from './auth/auth.role.guard';
 import { UsersModule } from './users/users.module';
+import { RolesGuard } from './auth/guards/role-auth.guard';
+import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 
 @Module({
   imports: [
@@ -16,9 +17,16 @@ import { UsersModule } from './users/users.module';
     PrismaModule,
   ],
   controllers: [AppController],
-  providers: [AppService , {
-    provide: APP_GUARD,
-    useClass: RolesGuard,
-  }],
+  providers: [
+    AppService,
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: RolesGuard,
+    },
+  ],
 })
 export class AppModule {}
