@@ -22,6 +22,7 @@ model User {
   createdAt     DateTime       @default(now())
   lastLoginAt   DateTime?
   isActive      Boolean        @default(true)
+  role          UserRole       @default(STUDENT)
   refreshTokens RefreshToken[]
   student       Student?
 }
@@ -47,6 +48,11 @@ model Student {
   studyLevel     Int
   approvalStatus ApprovalStatus @default(PENDING)
   user           User           @relation(fields: [userId], references: [id])
+}
+
+enum UserRole {
+  ADMIN
+  STUDENT
 }
 
 enum Department {
