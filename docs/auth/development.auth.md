@@ -4,7 +4,7 @@ This document provides a simple explanation for developers on **how authenticati
 
 ---
 
-- [1How Authentication Works](#1how-authentication-works)
+- [How Authentication Works](#how-authentication-works)
 - [How to Make an Endpoint Public](#how-to-make-an-endpoint-public)
   - [Example: Public Route (No Authentication Required)](#example-public-route-no-authentication-required)
 - [How to Restrict an Endpoint to Specific Roles (`@Roles()`)](#how-to-restrict-an-endpoint-to-specific-roles-roles)
@@ -20,7 +20,7 @@ This document provides a simple explanation for developers on **how authenticati
 
 ---
 
-## 1How Authentication Works
+## How Authentication Works
 
 - The system uses **JWT authentication** to secure endpoints.
 - Upon **signin/signup**, users receive two tokens:
@@ -31,8 +31,7 @@ This document provides a simple explanation for developers on **how authenticati
      - Stored in an **HTTP-only cookie**.
      - Hashed and stored in the database.
      - Used in **signout** and **refresh token rotation**.
-
-🔹 **Authentication is enforced globally** using `JwtAuthGuard`, meaning that all routes require authentication by default unless explicitly made public. See [How to Make an Endpoint Public](#-making-an-endpoint-public-public)
+- **Authentication is enforced globally** using `JwtAuthGuard`, meaning that all routes require authentication by default unless explicitly made public. See [How to Make an Endpoint Public](#-making-an-endpoint-public-public)
 
 ---
 
