@@ -1,3 +1,4 @@
+import { SignupAuthDto } from '@/auth/dto/signup-auth.dto';
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'prisma/prisma.service';
 
@@ -50,4 +51,5 @@ export class UsersService {
     const { password, ...sanitizedUser } = user;
     return sanitizedUser;
   }
+  
 }

@@ -197,4 +197,8 @@ export class AuthService {
 
     return this.usersService.sanitizeUser(user);
   }
+  async validateGoogleUser(googleUser:SigninAuthDto){
+    const user=await this.usersService.findUserByEmail(googleUser.email);
+    if(user)return user;
+  }
 }

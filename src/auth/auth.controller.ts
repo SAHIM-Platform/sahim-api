@@ -6,6 +6,7 @@ import {
   Request,
   Res,
   Get,
+  
   Req,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -15,6 +16,7 @@ import { SigninAuthDto } from './dto/signin-auth.dto';
 import { SignupAuthDto } from './dto/signup-auth.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { PrismaService } from 'prisma/prisma.service';
+import { GoogleAuthGuard } from './guards/google-auth/google-auth.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -64,4 +66,18 @@ export class AuthController {
     await this.authService.signout(refreshToken, userId, res);
     res.json({ message: 'Sign out successful' });
   }
+  @Public()
+  @UseGuards(GoogleAuthGuard)
+  @Get("google/login")
+  googleLogin(){}
+
+  @Public()
+  @UseGuards(GoogleAuthGuard)
+  @Get("google/callback")
+  googleCallback(@Req() req,@Res() res){
+    req.user;
+  }
+
+
 }
+
