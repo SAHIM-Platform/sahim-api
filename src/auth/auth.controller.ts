@@ -10,6 +10,8 @@ import { Response } from 'express';
 import { AuthService } from './auth.service';
 import { SigninAuthDto } from './dto/signin-auth.dto';
 import { SignupAuthDto } from './dto/signup-auth.dto';
+import { StudentSignupDto } from './dto/student-signup.dto';
+
 import { PrismaService } from 'prisma/prisma.service';
 import { Public } from './decorators/public.decorator';
 
@@ -18,7 +20,13 @@ export class AuthController {
   constructor(
     private readonly authService: AuthService,
     private readonly prisma: PrismaService,
-  ) {}
+  ) { }
+
+  @Public()
+  @Post('signup/student')
+  async studentSignup(@Body() studentSignupDto: StudentSignupDto) {
+    return this.authService.studentSignup(studentSignupDto);
+  }
 
   @Public()
   @Post('signup')
