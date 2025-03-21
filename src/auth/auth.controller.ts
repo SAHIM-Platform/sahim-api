@@ -16,13 +16,15 @@ import { SigninAuthDto } from './dto/signin-auth.dto';
 import { SignupAuthDto } from './dto/signup-auth.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { PrismaService } from 'prisma/prisma.service';
-import { GoogleAuthGuard } from './guards/google-auth/google-auth.guard';
+import { GoogleAuthGuard } from './guards/google-auth-guard.dto';
+import { AuthUtil } from './utils/auth.util';
+import { Public } from '@prisma/client/runtime/library';
 
 @Controller('auth')
 export class AuthController {
   constructor(
     private readonly authService: AuthService,
-    private readonly prisma: PrismaService,
+    private readonly authUtil: AuthUtil,
   ) {}
 
   @Post('signup')
@@ -66,18 +68,30 @@ export class AuthController {
     await this.authService.signout(refreshToken, userId, res);
     res.json({ message: 'Sign out successful' });
   }
-  @Public()
-  @UseGuards(GoogleAuthGuard)
-  @Get("google/login")
-  googleLogin(){}
 
-  @Public()
+  @Get('google/login')
   @UseGuards(GoogleAuthGuard)
-  @Get("google/callback")
-  googleCallback(@Req() req,@Res() res){
-    req.user;
+  handleGoogleLogin() {
+    return { msg: 'Google Authentication' };
   }
 
+  @Get('google/callback')
+  @UseGuards(GoogleAuthGuard)
+  async handleGoogleRedirect(@Req() req, @Res() res: Response) {
+    const user = req.user;
+    const { accessToken, refreshToken } = await this.authUtil.generateJwtTokens(user.id, req);
+
+    this.authUtil.setRefreshTokenCookie(refreshToken, res);
+
+    return res.json({ msg: 'Logged in successfully using google', accessToken: accessToken });
+  }
+
+  @Get('status')
+  @UseGuards(JwtAuthGuard)
+  user(@Req() request: any) {
+    console.log(request.user);
+    return { msg: "Authenticated"};
+  }
 
 }
 

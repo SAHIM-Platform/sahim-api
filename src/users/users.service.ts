@@ -17,6 +17,12 @@ export class UsersService {
     });
   }
 
+  async findUserByUsername(username: string) {
+    return await this.prisma.user.findUnique({
+      where: { username }
+    })
+  }
+
   /**
    * Finds a user by their email address or username.
    * @param email - The email address to search for.

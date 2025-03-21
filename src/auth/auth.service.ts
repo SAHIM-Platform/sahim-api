@@ -14,6 +14,8 @@ import { PrismaService } from 'prisma/prisma.service';
 import { JwtPayload, AuthResponse } from './interfaces/jwt-payload.interface';
 import { AuthUtil } from './utils/auth.util';
 import { Response } from 'express';
+import { GoogleUser } from './interfaces/google-user.interface';
+import * as crypto from 'crypto';
 
 @Injectable()
 export class AuthService {
@@ -197,8 +199,61 @@ export class AuthService {
 
     return this.usersService.sanitizeUser(user);
   }
-  async validateGoogleUser(googleUser:SigninAuthDto){
-    const user=await this.usersService.findUserByEmail(googleUser.email);
-    if(user)return user;
+
+  /**
+   * Validates a Google user and registers them if they do not exist.
+   * @param googleUser - The Google user object containing name and email.
+   * @throws {Error} If the Google user information is incomplete.
+   * @returns {Promise<any>} The authenticated or newly created user.
+   */
+  async validateGoogleUser(googleUser: GoogleUser) {
+    const { name, email } = googleUser;
+    
+    if (!email || !name) {
+      throw new Error('Google user information is incomplete');
+    }
+    
+    let user = await this.usersService.findUserByEmail(email);
+
+    if (!user) {
+      const { defaultUsername, defaultPassword } = await this.generateDefaultUsernameAndPassword(googleUser);
+      const hashedPassword = await this.authUtil.hashPassword(defaultPassword);
+      user = await this.prisma.user.create({
+        data: {
+          username: defaultUsername,
+          email,
+          password: hashedPassword, 
+          name, 
+        },
+      });
+    }
+    
+    return user;
   }
+
+  /**
+   * Generates a unique username based on the Google user's name and a secure random password.
+   * @param googleUser - The Google user object containing the user's name.
+   * @returns {Promise<{ defaultUsername: string, defaultPassword: string }>} The generated username and password.
+   */
+  private async generateDefaultUsernameAndPassword(googleUser: GoogleUser) {
+    let defaultUsername = googleUser.name.replace(/\s+/g, '_').toLowerCase();
+  
+    // Check if the generated username already exists
+    let existingUser = await this.usersService.findUserByUsername(defaultUsername);
+    
+    // If the username exists, append a number to make it unique
+    let counter = 1;
+    while (existingUser) {
+      defaultUsername = `${googleUser.name.replace(/\s+/g, '_').toLowerCase()}_${counter}`;
+      existingUser = await this.usersService.findUserByUsername(defaultUsername);
+      counter++;
+    }
+  
+    // Generate a secure random password
+    const defaultPassword = crypto.randomBytes(16).toString('hex');
+    
+    return { defaultUsername, defaultPassword };
+  }
+
 }
