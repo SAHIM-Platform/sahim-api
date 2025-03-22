@@ -7,11 +7,15 @@ import { JwtModule } from '@nestjs/jwt';
 import { jwtConstants } from './utils/constants';
 import { AuthUtil } from './utils/auth.util';
 import { JwtStrategy } from './strategies/jwt.strategy';
+import googleOauthConfig from './config/google.oauth.config';
+import { GoogleStrategy } from './strategies/google.strategy';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
     UsersModule,
     PassportModule,
+    ConfigModule.forFeature(googleOauthConfig),
     JwtModule.registerAsync({
       useFactory: () => ({
         publicKey: jwtConstants.publicKey,
@@ -24,6 +28,6 @@ import { JwtStrategy } from './strategies/jwt.strategy';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, AuthUtil, JwtStrategy],
+  providers: [AuthService, AuthUtil, JwtStrategy,GoogleStrategy],
 })
 export class AuthModule {}
