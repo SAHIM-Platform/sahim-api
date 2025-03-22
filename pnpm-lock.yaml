@@ -30,7 +30,7 @@ importers:
         specifier: ^11.0.1
         version: 11.0.10(@nestjs/common@11.0.10(class-transformer@0.5.1)(class-validator@0.14.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.0.10)
       '@prisma/client':
-        specifier: ^6.4.0
+        specifier: ^6.4.1
         version: 6.4.1(prisma@6.4.1(typescript@5.7.3))(typescript@5.7.3)
       '@types/passport-google-oauth20':
         specifier: ^2.0.16
@@ -142,7 +142,7 @@ importers:
         specifier: ^3.4.2
         version: 3.5.2
       prisma:
-        specifier: ^6.4.0
+        specifier: ^6.4.1
         version: 6.4.1(typescript@5.7.3)
       source-map-support:
         specifier: ^0.5.21

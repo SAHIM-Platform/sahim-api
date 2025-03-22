@@ -22,7 +22,9 @@ model User {
   createdAt     DateTime       @default(now())
   lastLoginAt   DateTime?
   isActive      Boolean        @default(true)
+  role          UserRole       @default(STUDENT)
   refreshTokens RefreshToken[]
+  student       Student?
 }
 
 model RefreshToken {
@@ -36,4 +38,34 @@ model RefreshToken {
   expiresAt  DateTime
   deviceInfo String?
   ipAddress  String?
+}
+
+model Student {
+  id             Int            @id @default(autoincrement())
+  userId         Int            @unique
+  academicNumber Int            @unique
+  department     Department
+  studyLevel     Int
+  approvalStatus ApprovalStatus @default(PENDING)
+  user           User           @relation(fields: [userId], references: [id])
+}
+
+enum UserRole {
+  ADMIN
+  STUDENT
+}
+
+enum Department {
+  IT
+  SE
+  COM
+  IMSE
+  CND
+  MRE
+}
+
+enum ApprovalStatus {
+  PENDING
+  APPROVED
+  REJECTED
 }

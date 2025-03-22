@@ -2,11 +2,8 @@ import {
   Controller,
   Post,
   Body,
-  UseGuards,
-  Request,
   Res,
   Get,
-  
   Req,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -14,11 +11,11 @@ import { Response } from 'express';
 import { AuthService } from './auth.service';
 import { SigninAuthDto } from './dto/signin-auth.dto';
 import { SignupAuthDto } from './dto/signup-auth.dto';
-import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { PrismaService } from 'prisma/prisma.service';
 import { GoogleAuthGuard } from './guards/google-auth-guard.dto';
 import { AuthUtil } from './utils/auth.util';
 import { Public } from '@prisma/client/runtime/library';
+
 
 @Controller('auth')
 export class AuthController {
@@ -27,18 +24,21 @@ export class AuthController {
     private readonly authUtil: AuthUtil,
   ) {}
 
+  @Public()
   @Post('signup')
   async signup(@Body() input: SignupAuthDto, @Res() res: Response) {
     const { accessToken } = await this.authService.signup(input, res);
     res.json({ message: 'User registered successfully', accessToken });
   }
 
+  @Public()
   @Post('signin')
   async signin(@Body() input: SigninAuthDto, @Res() res: Response) {
     const { accessToken } = await this.authService.signin(input, res);
     res.json({ message: 'Sign in successful', accessToken });
   }
 
+  @Public()
   @Post('refresh')
   async refreshToken(@Req() req, @Res() res: Response) {
     const refreshToken = req.cookies?.refreshToken;
@@ -52,7 +52,6 @@ export class AuthController {
     res.json({ message: 'Access token refreshed successfully', accessToken });
   }
 
-  @UseGuards(JwtAuthGuard)
   @Post('signout')
   async signout(@Req() req, @Res() res: Response) {
     const userId = req.user?.sub;
