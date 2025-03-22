@@ -1,3 +1,4 @@
+import { Department } from '@prisma/client';
 import {
   IsEmail,
   IsString,
@@ -36,4 +37,5 @@ export class SignupAuthDto {
     },
   )
   password: string;
+  
 }

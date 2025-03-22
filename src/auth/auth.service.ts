@@ -10,7 +10,6 @@ import { UsersService } from '@/users/users.service';
 import { compare as bCompare } from 'bcryptjs';
 import { SigninAuthDto } from '@/auth/dto/signin-auth.dto';
 import { SignupAuthDto } from './dto/signup-auth.dto';
-import { StudentSignupDto } from './dto/student-signup.dto';
 import { PrismaService } from 'prisma/prisma.service';
 import { JwtPayload, AuthResponse } from './interfaces/jwt-payload.interface';
 import { AuthUtil } from './utils/auth.util';
@@ -18,6 +17,8 @@ import { Response } from 'express';
 import { ConflictException } from '@nestjs/common';
 import * as bcrypt from 'bcryptjs';
 import { InternalServerErrorException } from '@nestjs/common';
+import { ApprovalStatus, UserRole } from '@prisma/client';
+import { studentSignUpDto } from './dto/student-signup.dto';
 
 
 
@@ -33,56 +34,6 @@ export class AuthService {
 
 
   /**
- * Handles student signup process.
- * 
- * @param {StudentSignupDto} dto - The data transfer object containing student signup details.
- * @returns {Promise<{ message: string, user: any, student: any }>} - A success message along with the created user and student records.
- * @throws {ConflictException} - If the email or academic number already exists.
- */
-  async studentSignup(dto: StudentSignupDto) {
-    const existingUser = await this.prisma.user.findUnique({
-      where: { email: dto.email },
-    });
-
-    if (existingUser) {
-      throw new ConflictException('Email already exists');
-    }
-
-    const existingStudent = await this.prisma.student.findUnique({
-      where: { academicNumber: dto.academicNumber },
-    });
-
-    if (existingStudent) {
-      throw new ConflictException('Academic number already exists');
-    }
-
-    const hashedPassword = await bcrypt.hash(dto.password, 10);
-
-    const user = await this.prisma.user.create({
-      data: {
-        email: dto.email,
-        username: dto.email.split('@')[0],
-        password: hashedPassword,
-        name: dto.name,
-        role: 'STUDENT',
-      },
-    });
-
-    const student = await this.prisma.student.create({
-      data: {
-        userId: user.id,
-        academicNumber: dto.academicNumber,
-        department: dto.department,
-        studyLevel: dto.studyLevel,
-        approvalStatus: 'PENDING',
-      },
-    });
-
-    return { message: 'Student registered successfully', user, student };
-  }
-
-
-  /**
    * Registers a new user with the provided information.
    * @param input - The user's signup information.
    * @param res - The Express response object (used for setting cookies).
@@ -90,10 +41,10 @@ export class AuthService {
    * @returns {Promise<AuthResponse>} Authentication response with tokens.
    */
   async signup(
-    input: SignupAuthDto,
+    input: studentSignUpDto,
     @Res() res: Response,
   ): Promise<AuthResponse> {
-    const { email, username, password } = input;
+    const { email, username, name, password, academicNumber, department, studyLevel } = input;
 
     const existingUser = await this.usersService.findUserByEmailOrUsername(
       email,
@@ -113,8 +64,19 @@ export class AuthService {
 
     const createdUser = await this.prisma.user.create({
       data: {
-        ...input,
+        email,
+        username,
+        name: name,
         password: hashedPassword,
+        role: UserRole.STUDENT,
+        student: {
+          create: {
+            academicNumber,
+            department,
+            studyLevel,
+            approvalStatus: ApprovalStatus.PENDING
+          }
+        }
       },
     });
 

@@ -10,10 +10,10 @@ import { Response } from 'express';
 import { AuthService } from './auth.service';
 import { SigninAuthDto } from './dto/signin-auth.dto';
 import { SignupAuthDto } from './dto/signup-auth.dto';
-import { StudentSignupDto } from './dto/student-signup.dto';
 
 import { PrismaService } from 'prisma/prisma.service';
 import { Public } from './decorators/public.decorator';
+import { studentSignUpDto } from './dto/student-signup.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -23,14 +23,8 @@ export class AuthController {
   ) { }
 
   @Public()
-  @Post('signup/student')
-  async studentSignup(@Body() studentSignupDto: StudentSignupDto) {
-    return this.authService.studentSignup(studentSignupDto);
-  }
-
-  @Public()
   @Post('signup')
-  async signup(@Body() input: SignupAuthDto, @Res() res: Response) {
+  async signup(@Body() input: studentSignUpDto, @Res() res: Response) {
     const { accessToken } = await this.authService.signup(input, res);
     res.json({ message: 'User registered successfully', accessToken });
   }
