@@ -14,6 +14,8 @@ import { PrismaService } from 'prisma/prisma.service';
 import { JwtPayload, AuthResponse } from './interfaces/jwt-payload.interface';
 import { AuthUtil } from './utils/auth.util';
 import { Response } from 'express';
+import { ApprovalStatus, UserRole } from '@prisma/client';
+import { studentSignUpDto } from './dto/student-signup.dto';
 import { GoogleUser } from './interfaces/google-user.interface';
 import * as crypto from 'crypto';
 
@@ -24,7 +26,8 @@ export class AuthService {
     private readonly jwtService: JwtService,
     private readonly prisma: PrismaService,
     private readonly authUtil: AuthUtil,
-  ) {}
+  ) { }
+
 
   /**
    * Registers a new user with the provided information.
@@ -34,10 +37,10 @@ export class AuthService {
    * @returns {Promise<AuthResponse>} Authentication response with tokens.
    */
   async signup(
-    input: SignupAuthDto,
+    input: studentSignUpDto,
     @Res() res: Response,
   ): Promise<AuthResponse> {
-    const { email, username, password } = input;
+    const { email, username, name, password, academicNumber, department, studyLevel } = input;
 
     const existingUser = await this.usersService.findUserByEmailOrUsername(
       email,
@@ -53,12 +56,32 @@ export class AuthService {
       }
     }
 
+    const existingStudent = await this.prisma.student.findUnique({
+      where: { academicNumber },  
+    });
+
+    if (existingStudent) {
+      // If academic number is already taken
+      throw new BadRequestException('Academic number already registered');
+    }
+
     const hashedPassword = await this.authUtil.hashPassword(password);
 
     const createdUser = await this.prisma.user.create({
       data: {
-        ...input,
+        email,
+        username,
+        name: name,
         password: hashedPassword,
+        role: UserRole.STUDENT,
+        student: {
+          create: {
+            academicNumber,
+            department,
+            studyLevel,
+            approvalStatus: ApprovalStatus.PENDING
+          }
+        }
       },
     });
 

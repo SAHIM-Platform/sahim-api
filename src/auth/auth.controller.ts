@@ -11,10 +11,12 @@ import { Response } from 'express';
 import { AuthService } from './auth.service';
 import { SigninAuthDto } from './dto/signin-auth.dto';
 import { SignupAuthDto } from './dto/signup-auth.dto';
+
 import { PrismaService } from 'prisma/prisma.service';
+import { Public } from './decorators/public.decorator';
+import { studentSignUpDto } from './dto/student-signup.dto';
 import { GoogleAuthGuard } from './guards/google-auth-guard.dto';
 import { AuthUtil } from './utils/auth.util';
-import { Public } from '@prisma/client/runtime/library';
 
 
 @Controller('auth')
@@ -26,7 +28,7 @@ export class AuthController {
 
   @Public()
   @Post('signup')
-  async signup(@Body() input: SignupAuthDto, @Res() res: Response) {
+  async signup(@Body() input: studentSignUpDto, @Res() res: Response) {
     const { accessToken } = await this.authService.signup(input, res);
     res.json({ message: 'User registered successfully', accessToken });
   }
