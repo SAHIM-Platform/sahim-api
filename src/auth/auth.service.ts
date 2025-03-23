@@ -60,6 +60,15 @@ export class AuthService {
       }
     }
 
+    const existingStudent = await this.prisma.student.findUnique({
+      where: { academicNumber },  
+    });
+
+    if (existingStudent) {
+      // If academic number is already taken
+      throw new BadRequestException('Academic number already registered');
+    }
+
     const hashedPassword = await this.authUtil.hashPassword(password);
 
     const createdUser = await this.prisma.user.create({
