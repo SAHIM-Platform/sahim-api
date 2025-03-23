@@ -3,6 +3,7 @@ import {
   Post,
   Body,
   Res,
+  Get,
   Req,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -14,13 +15,16 @@ import { SignupAuthDto } from './dto/signup-auth.dto';
 import { PrismaService } from 'prisma/prisma.service';
 import { Public } from './decorators/public.decorator';
 import { studentSignUpDto } from './dto/student-signup.dto';
+import { GoogleAuthGuard } from './guards/google-auth-guard.dto';
+import { AuthUtil } from './utils/auth.util';
+
 
 @Controller('auth')
 export class AuthController {
   constructor(
     private readonly authService: AuthService,
-    private readonly prisma: PrismaService,
-  ) { }
+    private readonly authUtil: AuthUtil,
+  ) {}
 
   @Public()
   @Post('signup')
@@ -65,4 +69,30 @@ export class AuthController {
     await this.authService.signout(refreshToken, userId, res);
     res.json({ message: 'Sign out successful' });
   }
+
+  @Get('google/login')
+  @UseGuards(GoogleAuthGuard)
+  handleGoogleLogin() {
+    return { msg: 'Google Authentication' };
+  }
+
+  @Get('google/callback')
+  @UseGuards(GoogleAuthGuard)
+  async handleGoogleRedirect(@Req() req, @Res() res: Response) {
+    const user = req.user;
+    const { accessToken, refreshToken } = await this.authUtil.generateJwtTokens(user.id, req);
+
+    this.authUtil.setRefreshTokenCookie(refreshToken, res);
+
+    return res.json({ msg: 'Logged in successfully using google', accessToken: accessToken });
+  }
+
+  @Get('status')
+  @UseGuards(JwtAuthGuard)
+  user(@Req() request: any) {
+    console.log(request.user);
+    return { msg: "Authenticated"};
+  }
+
 }
+

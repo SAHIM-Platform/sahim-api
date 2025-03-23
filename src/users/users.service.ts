@@ -1,3 +1,4 @@
+import { SignupAuthDto } from '@/auth/dto/signup-auth.dto';
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'prisma/prisma.service';
 
@@ -14,6 +15,12 @@ export class UsersService {
     return await this.prisma.user.findUnique({
       where: { email },
     });
+  }
+
+  async findUserByUsername(username: string) {
+    return await this.prisma.user.findUnique({
+      where: { username }
+    })
   }
 
   /**
@@ -50,4 +57,5 @@ export class UsersService {
     const { password, ...sanitizedUser } = user;
     return sanitizedUser;
   }
+  
 }

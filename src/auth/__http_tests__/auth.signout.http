@@ -11,8 +11,8 @@
 # If you encounter issues, try removing the "Max-Age"
 # e.g: Cookie: refreshToken=eyJ..Ig; Path=/auth/; Expires=Fri, 07 Mar 2025 23:10:52 GMT;
 POST {{baseUrl}}/auth/signout
-Authorization: Bearer accessToken
-Cookie: refreshToken
+Authorization: Bearer eyJhbGciOiJQUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsInRva2VuVHlwZSI6ImFjY2VzcyIsImlhdCI6MTc0MDc4OTgwMywiZXhwIjoxNzQwNzkwNzAzfQ.KJwj22oYfiNjETl_IdLLWIS3Et6vvjEJ4monamoxLfZF9iJLs8furs9RjN5UaZdLODcCt3jmUHIHhcggdWgjpus9mBlJrciysKUej0VVI0ZW6-5Ou0rmSqjOe3VwEJffhFjHYIhJW9zNJ1MM11vC3DZVgPEyv6nqTbieJtoRxaXM1eNzPp7rWgz9OXBqtvJ6Nx-0RM6iotmuFs-RTeHDJVK2NbUH_Ov0LVaTFHGvoFsOGj6rjtTUYYxlEtgaxb67j9xMQRJDl4W9tmJnqA7Wa47qVyqoAfJUBZG_mOhODqOKE2DzRhzus9zi0-RAUXphXXzZZYAsVHwWHfDIZltj9Q
+Cookie: refreshToken=eyJhbGciOiJQUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsInRva2VuVHlwZSI6InJlZnJlc2giLCJpYXQiOjE3NDA3ODk4MDMsImV4cCI6MTc0MTM5NDYwM30.gqSCq_5bI9yDPf69UIAddpHPxG_utzFvMq6xHshj3t0OlY1ajlKt1FocBucdRR1S7rbWLLI6RcuAUexft8NFnvNZstDzUZwWvgbVfcm0T__z09qokCU6F1oYZ0HEsUuEIJA2mdaOlVsH2-Yu1lLDf9bdr8LwwxWK-hmPD3xGLhu1EIGnfgCdevDB-kJQxVOQ1MOZzG30tUMrz76nbl7S4kAVPxJZ_qXwV7mAfnAhsP2qeUa8RERqAFjtTwYfbeizqrMPVrqNlCNe-XW63vndMRtaA5I-y1IIfnlUh1vM1ujyY8PSZdIedGAfFnLqJlCj-2eA-jR85QrTGf1EveTRQQ; Max-Age=604800; Path=/auth/; Expires=Sat, 08 Mar 2025 00:43:23 GMT; HttpOnly; SameSite=Lax
 Content-Type: application/json
 
 ### Sign Out - Invalid Access Token (Should Fail)
