@@ -53,6 +53,7 @@ model Student {
 enum UserRole {
   ADMIN
   STUDENT
+  SUPER_ADMIN
 }
 
 enum Department {
