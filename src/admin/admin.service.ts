@@ -66,6 +66,26 @@ export class AdminService implements OnModuleInit {
         });
             
         return { message: "Admin created successfully" };
-      }      
+      }
+      
+      async deleteAdmin(adminId: number, requesterId: number, requesterRole: UserRole) {
+        const admin = await this.usersService.findUserById(adminId);
+
+        if (!admin) {
+          throw new BadRequestException('Admin not found');
+        }
+
+        if (admin.role === UserRole.SUPER_ADMIN) {
+          throw new BadRequestException("Super admin cannot be deleted");
+        }
+        
+        if (requesterRole === UserRole.ADMIN && requesterId!=adminId) {
+          throw new ForbiddenException('You are not allowed to delete other admins');
+        }
+        
+        await this.prisma.user.delete({ where: { id: adminId }});
+
+        return { message: "Admin deleted successfully"};
+      }
       
 }

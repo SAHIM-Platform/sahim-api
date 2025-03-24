@@ -1,11 +1,10 @@
 import { Roles } from '@/auth/decorators/role.decorator';
-import { Body, Controller, Post, Res} from '@nestjs/common';
+import { Body, Controller, Delete, Param, ParseIntPipe, Post, Req, Res} from '@nestjs/common';
 import { UserRole } from '@prisma/client';
 import { AdminService } from './admin.service';
 import { AdminSignupDto } from './dto/create-admin.dto';
 
 @Controller('admin')
-@Roles(UserRole.ADMIN)
 export class AdminController {
     constructor (private readonly adminService: AdminService) {}
 
@@ -15,4 +14,11 @@ export class AdminController {
         return await this.adminService.createAdmin(dto, res);
     }
 
+    @Delete(':id')
+    @Roles(UserRole.SUPER_ADMIN, UserRole.ADMIN)
+    async deleteAdmin(@Req() req, @Param('id', ParseIntPipe) adminId: number) {
+        const requesterId = req.user?.sub;
+        const requesterRole = req.user?.role;
+        return await this.adminService.deleteAdmin(adminId, requesterId, requesterRole);
+    }
 }
