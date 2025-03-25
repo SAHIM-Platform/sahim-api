@@ -31,7 +31,7 @@ model RefreshToken {
   id         Int       @id @default(autoincrement())
   token      String    @unique
   userId     Int
-  user       User      @relation(fields: [userId], references: [id])
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   revoked    Boolean   @default(false)
   revokedAt  DateTime?
   createdAt  DateTime  @default(now())
@@ -53,6 +53,7 @@ model Student {
 enum UserRole {
   ADMIN
   STUDENT
+  SUPER_ADMIN
 }
 
 enum Department {

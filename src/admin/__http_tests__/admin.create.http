@@ -1,0 +1,18 @@
+@port = {{$dotenv API_PORT}}
+@baseUrl = http://localhost:{{port}}
+@email = admin@example.com
+@password = Admin$123
+@name = admin1
+@username = admin1
+
+### Create Admin
+POST {{baseUrl}}/admin
+Authorization: Bearer accessToken
+Content-Type: application/json
+
+{
+    "email": "{{email}}",
+    "password": "{{password}}",
+    "name": "{{name}}",
+    "username": "{{username}}"
+}

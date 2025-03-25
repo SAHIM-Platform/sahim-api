@@ -6,6 +6,7 @@ import {
   Get,
   Req,
   UnauthorizedException,
+  UseGuards,
 } from '@nestjs/common';
 import { Response } from 'express';
 import { AuthService } from './auth.service';
@@ -17,6 +18,7 @@ import { Public } from './decorators/public.decorator';
 import { studentSignUpDto } from './dto/student-signup.dto';
 import { GoogleAuthGuard } from './guards/google-auth-guard.dto';
 import { AuthUtil } from './utils/auth.util';
+import { JwtAuthGuard } from './guards/jwt-auth.guard';
 
 
 @Controller('auth')

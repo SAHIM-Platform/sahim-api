@@ -37,5 +37,4 @@ export class SignupAuthDto {
     },
   )
   password: string;
-  
 }
