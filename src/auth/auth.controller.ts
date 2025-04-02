@@ -72,12 +72,14 @@ export class AuthController {
     res.json({ message: 'Sign out successful' });
   }
 
+  @Public()
   @Get('google/login')
   @UseGuards(GoogleAuthGuard)
   handleGoogleLogin() {
     return { msg: 'Google Authentication' };
   }
 
+  @Public()
   @Get('google/callback')
   @UseGuards(GoogleAuthGuard)
   async handleGoogleRedirect(@Req() req, @Res() res: Response) {
