@@ -1,5 +1,7 @@
 import {
   BadRequestException,
+  HttpException,
+  HttpStatus,
   Injectable,
   NotFoundException,
   Res,
@@ -229,26 +231,29 @@ export class AuthService {
    * @throws {Error} If the Google user information is incomplete.
    * @returns {Promise<any>} The authenticated or newly created user.
    */
-  async validateGoogleUser(googleUser: GoogleUser) {
+  async validateGoogleUser(googleUser: GoogleUser ) {
     const { name, email } = googleUser;
     
     if (!email || !name) {
-      throw new Error('Google user information is incomplete');
+      throw new HttpException('Google user information is incomplete', HttpStatus.BAD_REQUEST);
     }
     
     let user = await this.usersService.findUserByEmail(email);
 
     if (!user) {
       const { defaultUsername, defaultPassword } = await this.generateDefaultUsernameAndPassword(googleUser);
-      const hashedPassword = await this.authUtil.hashPassword(defaultPassword);
-      user = await this.prisma.user.create({
-        data: {
-          username: defaultUsername,
-          email,
-          password: hashedPassword, 
-          name, 
+
+      const incompleteUser = { ...googleUser, userName: defaultUsername, password: defaultPassword}
+      
+      throw new HttpException(
+        {
+          status: 'incomplete',
+          message: 'User not fully registered. Please complete your information.',
+          incompleteUser: incompleteUser,
         },
-      });
+        HttpStatus.PRECONDITION_REQUIRED // 428: Means additional steps are required
+      );
+
     }
     
     return user;
