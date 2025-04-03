@@ -1,0 +1,34 @@
+@port = {{$dotenv API_PORT}}
+@baseUrl = http://localhost:{{port}}
+@authToken = eyJhbGciOiJQUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjE0LCJ0b2tlblR5cGUiOiJhY2Nlc3MiLCJyb2xlIjoiU1VQRVJfQURNSU4iLCJpYXQiOjE3NDM3MTk0ODEsImV4cCI6MTc0MzcyMDM4MX0.IhPXO59E9ytHcI5_hOvBmAEmiQ3JadxpqdQu4ybW9XhTSVE2JSNtBro02qpjQDrPLHhhkmXERpir6UCLgFwb7vjuG3_Ej39sWySm3y4_IZGJEKCzhr6kqn0T9yUURLO8kqgJvfdLXxEGDp20dh2yjiWXjFhPStMOXLNdg89LzakXh_lM9P7VEjx8-4qtp2-y-pE8KWcSpiHB5VrxNFPqfYSm9HvDprpy87HKsK8QmnDKtGklEp8ul4_DxVwnEMHwqoqCuo4vPjqdWUCGVRyIBfYaI1LH9YbJccoCbVL492qNxpKkH_P9tjE0yA4GYawIzJzx049emeuhci9gxBKtvIcaHVA3Ggil-43taVKBJDZSnmJ0rgSKgQvHSPrCGAIRda3bAU--yXwpnik7jWHkMBNX97NrIasPmYP-4DQTA7AYtP8Jbwr2whwio1dwKMJNKrnKbRv_WidKW3MSFyHrgEoIjK4tN3tR1byUOLXrRPjMUgD6_KMqb9WhkTmWQLeW2MYCSl_mPKrPFmuYEcIf3hpL5LrDHuhhyWpPPiMclkKXsQqRMk0oZBLuAeAhcMpJOuLrKmTtGtwuLfs-0Iy8iQ4YQr4Mgd626Fj7ChX7dgfqUJ_cWnuee-3xMdd_ymqPMoPmHdUq_sBI7Y5k2p9MRGfKkryYecTaDnbgLs7R6k0
+@threadId = 3
+
+### Get thread with default parameters
+GET {{baseUrl}}/threads/{{threadId}}
+Authorization: Bearer {{authToken}}
+Accept: application/json
+
+### Get thread without comments
+GET {{baseUrl}}/threads/{{threadId}}?includeComments=false
+Authorization: Bearer {{authToken}}
+Accept: application/json
+
+### Get thread with paginated comments (page 2, 5 per page)
+GET {{baseUrl}}/threads/{{threadId}}?commentsPage=2&commentsLimit=5
+Authorization: Bearer {{authToken}}
+Accept: application/json
+
+### Get thread without votes
+GET {{baseUrl}}/threads/{{threadId}}?includeVotes=false
+Authorization: Bearer {{authToken}}
+Accept: application/json
+
+### Get thread with minimal data (no comments or votes)
+GET {{baseUrl}}/threads/{{threadId}}?includeComments=false&includeVotes=false
+Authorization: Bearer {{authToken}}
+Accept: application/json
+
+### Get non-existent thread (should return 404)
+GET {{baseUrl}}/threads/999999
+Authorization: Bearer {{authToken}}
+Accept: application/json
