@@ -1,9 +1,9 @@
 @port = {{$dotenv API_PORT}}
 @baseUrl = http://localhost:{{port}}
 @studentId = 1
-@accessToken = eyJhbGciOiJQUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjE0LCJ0b2tlblR5cGUiOiJhY2Nlc3MiLCJyb2xlIjoiU1VQRVJfQURNSU4iLCJpYXQiOjE3NDM2MzAxODUsImV4cCI6MTc0MzYzMTA4NX0.JKpFCh5LmoZiAa4ZVy6OidsHWnLUn4bNO0oTwF56r5cIo1Z7SBy6OhQRFgOnOpztutDxjYNSETAbNRQ4ZreoIG4WvwKDf34acxw88Kcmay2bdRLNzRio671V0AJmX32aHURNlGUsBiFOpqDmW9yE4DbNM7ULBhobAGPl2vT23jE1aeXnJdKxxfjeTmZjWU1xTfR4YSldB2GfaYwWP_VBCt1suOtTZJT_FRevdyq3xrqfUV83fYCnzU9EqyWIo2gL6t9g87fgHT6UXhA9dn1TBQuj1uxsZleepgBP2f56uiVg-C1cyhIZg5uK0d8p-ZMlzvwNim0XKemX2X24UTo5l5Ngaw1beEs1vZpOJdUV-UUqbmdrUoOwnvouj2CSGk5TP3iyXmnLWLbWxx2IR7ogE4v8hMn1t50F7gWtcybkOAUbpz4JbO-ror5xC1Twjzg91BCgnYFz6_8TzGArYvM6MFJyYarQj1wqAwKqlaVL9Y-za8xRsjlZ4oDR21dpUh-S7RNwbY3LycccWfFCI7opXB-rif6G1KxK4uePvSBDS6LMvstR8stMgi-Jzje-1EwOmFWbQkRzHm9GcRJR5-zIEKiKzrb3pR_DbQL4DZ9hYnoYpL2eDogqu1nZyEGUyRkEmp1fWBIPzj82W1f6_sLWyvei5FJR08A-39BWOEXn8jg
+@accessToken = 
 
 ### Approve Student
-PATCH {{baseUrl}}/admin/approve-student/{{studentId}}
+PATCH {{baseUrl}}/admin/students/{{studentId}}/approve
 Authorization: Bearer {{accessToken}}
 Content-Type: application/json

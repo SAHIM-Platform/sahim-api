@@ -6,7 +6,6 @@ import { UsersService } from '@/users/users.service';
 import { PrismaService } from 'prisma/prisma.service';
 import { AuthUtil } from '@/auth/utils/auth.util';
 import { SUPER_ADMIN_EMAIL, SUPER_ADMIN_PASSWORD, SUPER_ADMIN_USERNAME } from './utils/constans';
-import { CreateCategoryDto } from '@/threads/dto/create-category.dto';
 
 @Injectable()
 export class AdminService implements OnModuleInit {

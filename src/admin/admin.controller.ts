@@ -3,7 +3,6 @@ import { Body, Controller, Delete, Param, ParseIntPipe, Patch, Post, Req, Res} f
 import { UserRole } from '@prisma/client';
 import { AdminService } from './admin.service';
 import { AdminSignupDto } from './dto/create-admin.dto';
-import { CreateCategoryDto } from '@/threads/dto/create-category.dto';
 
 @Controller('admin')
 export class AdminController {
