@@ -28,4 +28,9 @@ export class AdminController {
         return await this.adminService.approveStudent(studentId);
     }
 
+    @Patch('students/:id/reject')
+    @Roles(UserRole.SUPER_ADMIN, UserRole.ADMIN)
+    async rejectStudent(@Param('id', ParseIntPipe) studentId: number) {
+        return await this.adminService.rejectStudent(studentId);
+    }
 }

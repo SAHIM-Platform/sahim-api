@@ -145,4 +145,40 @@ export class AdminService implements OnModuleInit {
 
         return { message: "Student approved successfully" };
     }
+
+    /**
+     * Rejects a student by updating their approval status.
+     * @param {number} studentId - ID of the student to reject.
+     * @returns {Promise<{ message: string }>} Success message.
+     * @throws {BadRequestException} If the student does not exist, is not a student, or is already approved/rejected.
+     */
+    async rejectStudent(studentId: number) {
+        const student = await this.prisma.student.findUnique({
+            where: { id: studentId },
+            include: { user: true }  
+        });
+
+        if (!student) {
+            throw new BadRequestException('Student not found');
+        }
+
+        if (student.user.role !== UserRole.STUDENT) {
+            throw new BadRequestException('User is not a student');
+        }
+
+        if (student.approvalStatus === ApprovalStatus.REJECTED) {
+            throw new BadRequestException('Student is already rejected');
+        }
+
+        if (student.approvalStatus === ApprovalStatus.APPROVED) {
+            throw new BadRequestException('Cannot reject an approved student');
+        }
+
+        await this.prisma.student.update({
+            where: { id: studentId },
+            data: { approvalStatus: ApprovalStatus.REJECTED },
+        });
+
+        return { message: "Student rejected successfully" };
+    }
 }

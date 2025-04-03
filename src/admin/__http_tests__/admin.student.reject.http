@@ -1,0 +1,9 @@
+@port = {{$dotenv API_PORT}}
+@baseUrl = http://localhost:{{port}}
+@studentId = 2
+@accessToken = 
+
+### Reject Student
+PATCH {{baseUrl}}/admin/students/{{studentId}}/reject
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json 
