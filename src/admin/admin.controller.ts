@@ -1,5 +1,5 @@
 import { Roles } from '@/auth/decorators/role.decorator';
-import { Body, Controller, Delete, Param, ParseIntPipe, Post, Req, Res} from '@nestjs/common';
+import { Body, Controller, Delete, Param, ParseIntPipe, Patch, Post, Req, Res} from '@nestjs/common';
 import { UserRole } from '@prisma/client';
 import { AdminService } from './admin.service';
 import { AdminSignupDto } from './dto/create-admin.dto';
@@ -7,7 +7,7 @@ import { AdminSignupDto } from './dto/create-admin.dto';
 @Controller('admin')
 export class AdminController {
     constructor (private readonly adminService: AdminService) {}
-
+    
     @Post()
     @Roles(UserRole.SUPER_ADMIN)
     async createAdmin(@Body() dto: AdminSignupDto, @Res() res) {
@@ -20,5 +20,17 @@ export class AdminController {
         const requesterId = req.user?.sub;
         const requesterRole = req.user?.role;
         return await this.adminService.deleteAdmin(adminId, requesterId, requesterRole);
+    }
+
+    @Patch('students/:id/approve')
+    @Roles(UserRole.SUPER_ADMIN, UserRole.ADMIN)
+    async approveStudent(@Param('id', ParseIntPipe) studentId: number) {
+        return await this.adminService.approveStudent(studentId);
+    }
+
+    @Patch('students/:id/reject')
+    @Roles(UserRole.SUPER_ADMIN, UserRole.ADMIN)
+    async rejectStudent(@Param('id', ParseIntPipe) studentId: number) {
+        return await this.adminService.rejectStudent(studentId);
     }
 }
