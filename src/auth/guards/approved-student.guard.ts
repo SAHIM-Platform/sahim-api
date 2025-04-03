@@ -26,9 +26,11 @@ export class ApprovedStudentGuard implements CanActivate {
         throw new ForbiddenException('Student not found');
       }
 
-      if (student.approvalStatus !== ApprovalStatus.APPROVED) {
-        throw new ForbiddenException('Student not approved');
+      if (student.approvalStatus === ApprovalStatus.APPROVED) {
+        return true;
       }
+
+      throw new ForbiddenException('Student not approved');
     }
 
     // If not admin and not student, block access
