@@ -411,8 +411,73 @@ import { VoteDto } from './dto/vote.dto';
         updatedVotes: formatVotes(updatedVotes, userId),
       };
     }
-  
 
+  
+  /**
+   * Bookmarks a specific thread for a user.
+   * 
+   * @param {number} userId - The ID of the user who is bookmarking the thread.
+   * @param {number} threadId - The ID of the thread to be bookmarked.
+   * @returns {Promise<Object>} The newly created bookmark.
+   * @throws {ForbiddenException} If the thread is already bookmarked by the user.
+   */
+  async bookmarkThread(userId: number, threadId: number) {
+    await this.ensureThreadExists(threadId);
+    
+    const existingBookmark = await this.prisma.bookmarkedThread.findUnique({
+      where: {
+        user_id_thread_id: {
+          user_id: userId,
+          thread_id: threadId,
+        },
+      },
+    });
+    
+    if (existingBookmark) {
+      throw new ForbiddenException('Thread already bookmarked');
+    }
+
+    return this.prisma.bookmarkedThread.create({
+      data: {
+        user_id: userId,
+        thread_id: threadId,
+      },
+    });
+  }
+
+  /**
+   * Removes a bookmark for a specific thread for the user.
+   * 
+   * @param {number} userId - The ID of the user who is unbookmarking the thread.
+   * @param {number} threadId - The ID of the thread to be removed from bookmarks.
+   * @returns {Promise<Object>} The deleted bookmark.
+   * @throws {NotFoundException} If the bookmark does not exist.
+   */
+  async unbookmarkThread(userId: number, threadId: number) {
+    const bookmarkedThread = await this.prisma.bookmarkedThread.findUnique({
+      where: {
+        user_id_thread_id: {
+          user_id: userId,
+          thread_id: threadId,
+        },
+      },
+    });
+    
+    if (!bookmarkedThread) {
+      throw new NotFoundException(`Bookmark not found`);
+    }
+
+    return this.prisma.bookmarkedThread.delete({
+      where: {
+        user_id_thread_id: {
+          user_id: userId,
+          thread_id: threadId,
+        },
+      },
+    });
+  }
+
+  
   /**
    * Retrieves a thread by ID with basic validation
    * @param threadId - ID of the thread to retrieve

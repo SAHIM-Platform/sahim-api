@@ -70,4 +70,14 @@ export class ThreadsController {
     return this.threadsService.voteComment(userId, params.id, params.commentId, voteDto);
   }
 
+  @Post(':id/bookmark')
+  bookmarkThread(@GetUser('sub') userId, @Param() params: ThreadParamsDto) {
+    return this.threadsService.bookmarkThread(userId, params.id);
+  }
+
+  @Delete(':id/bookmark')
+  unbookmarkThread(@GetUser('sub') userId, @Param() params: ThreadParamsDto) {
+    return this.threadsService.unbookmarkThread(userId, params.id);
+  }
+
 }
