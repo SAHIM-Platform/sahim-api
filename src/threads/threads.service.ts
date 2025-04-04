@@ -14,6 +14,7 @@ import { buildThreadIncludeOptions, formatVotes } from './utils/threads.utils';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { UpdateCommentDto } from './dto/update-comment.dto';
 import { CommentQueryDto } from './dto/comment-query.dto';
+import { VoteDto } from './dto/vote.dto';
   
   @Injectable()
   export class ThreadsService {
@@ -321,6 +322,97 @@ import { CommentQueryDto } from './dto/comment-query.dto';
     };
   }
 
+    /**
+   * Votes on a thread (upvote/downvote)
+   * @param userId - ID of the user casting the vote
+   * @param threadId - ID of the thread being voted on
+   * @param voteDto - Contains the vote type (upvote/downvote)
+   * @returns Updated vote counts for the thread
+   * @throws NotFoundException if the thread does not exist
+   */
+    async voteThread(userId: number, threadId: number, voteDto: VoteDto) {
+      await this.ensureThreadExists(threadId);
+  
+      await this.prisma.threadVote.upsert({
+        where: {
+          thread_id_voter_user_id: {
+            thread_id: threadId,
+            voter_user_id: userId,
+          },
+        },
+        update: {
+          vote_type: voteDto.vote_type,
+        },
+        create: {
+          thread_id: threadId,
+          voter_user_id: userId,
+          vote_type: voteDto.vote_type,
+        },
+      });
+  
+      const updatedVotes = await this.prisma.threadVote.findMany({
+        where: { thread_id: threadId },
+        select: { vote_type: true, voter_user_id: true },
+      });
+  
+      return {
+        success: true,
+        updatedVotes: formatVotes(updatedVotes, userId),
+      };
+    }
+  
+    /**
+     * Votes on a comment (upvote/downvote)
+     * @param userId - ID of the user casting the vote
+     * @param threadId - ID of the thread containing the comment
+     * @param commentId - ID of the comment being voted on
+     * @param voteDto - Contains the vote type (upvote/downvote)
+     * @returns Updated vote counts for the comment
+     * @throws NotFoundException if the comment does not exist
+     */
+    async voteComment(
+      userId: number,
+      threadId: number,
+      commentId: number,
+      voteDto: VoteDto,
+    ) {
+      const comment = await this.prisma.threadComment.findUnique({
+        where: { comment_id: commentId, thread_id: threadId },
+      });
+  
+      if (!comment) {
+        throw new NotFoundException(`Comment with ID ${commentId} not found`);
+      }
+  
+      await this.prisma.commentVote.upsert({
+        where: {
+          comment_id_voter_user_id: {
+            comment_id: commentId,
+            voter_user_id: userId,
+          },
+        },
+        update: {
+          vote_type: voteDto.vote_type,
+        },
+        create: {
+          comment_id: commentId,
+          voter_user_id: userId,
+          vote_type: voteDto.vote_type,
+        },
+      });
+  
+      const updatedVotes = await this.prisma.commentVote.findMany({
+        where: { comment_id: commentId },
+        select: { vote_type: true, voter_user_id: true },
+      });
+  
+      return {
+        success: true,
+        updatedVotes: formatVotes(updatedVotes, userId),
+      };
+    }
+  
+
   /**
    * Retrieves a thread by ID with basic validation
    * @param threadId - ID of the thread to retrieve
@@ -382,5 +474,5 @@ import { CommentQueryDto } from './dto/comment-query.dto';
       throw new NotFoundException(`Thread with ID ${threadId} not found`);
     }
   }
-    
-  }
+
+}
