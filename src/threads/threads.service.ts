@@ -14,6 +14,7 @@ import { buildThreadIncludeOptions, formatVotes } from './utils/threads.utils';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { UpdateCommentDto } from './dto/update-comment.dto';
 import { CommentQueryDto } from './dto/comment-query.dto';
+import { CategoryNotFoundException } from './exceptions/category-not-found.exception';
   
   @Injectable()
   export class ThreadsService {
@@ -24,8 +25,18 @@ import { CommentQueryDto } from './dto/comment-query.dto';
    * @param userId - ID of the user creating the thread
    * @param createThreadDto - Data for the new thread
    * @returns The created thread with author information and vote counts
+   * @throws CategoryNotFoundException if category doesn't exist
    */
     async create(userId: number, createThreadDto: CreateThreadDto) {
+      // Check if category exists
+      const category = await this.prisma.category.findUnique({
+        where: { category_id: createThreadDto.category_id },
+      });
+
+      if (!category) {
+        throw new CategoryNotFoundException(createThreadDto.category_id);
+      }
+
       const thread = await this.prisma.thread.create({
         data: {
           ...createThreadDto,
