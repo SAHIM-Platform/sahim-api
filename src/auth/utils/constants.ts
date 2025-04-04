@@ -1,7 +1,7 @@
 import { join } from 'path';
 import { readFileSync, existsSync } from 'fs';
 
-const keyPath = join(process.cwd(), 'storage', 'keys');
+const keyPath = '/etc/secrets/';
 
 function loadKey(fileName: string): string {
   const filePath = join(keyPath, fileName);
