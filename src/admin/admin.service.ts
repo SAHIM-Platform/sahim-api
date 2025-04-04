@@ -8,6 +8,8 @@ import { AuthUtil } from '@/auth/utils/auth.util';
 import { SUPER_ADMIN_EMAIL, SUPER_ADMIN_PASSWORD, SUPER_ADMIN_USERNAME } from './utils/constans';
 import { CreateCategoryDto } from '@/admin/dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
+import { CategoryNotFoundException } from '@/admin/exceptions/category-not-found.exception';
+import { CategoryAlreadyExistsException } from './exceptions/category-already-exists.exception';
 
 @Injectable()
 export class AdminService implements OnModuleInit {
@@ -199,7 +201,7 @@ export class AdminService implements OnModuleInit {
           });
   
           if (existingCategory) {
-              throw new BadRequestException('Category with this name already exists');
+              throw new CategoryAlreadyExistsException(name);
           }
   
           // Create the new category
@@ -216,7 +218,7 @@ export class AdminService implements OnModuleInit {
        * Deletes a category by its ID.
        * @param {number} categoryId - The ID of the category to delete.
        * @returns {Promise<{ message: string }>} Success message.
-       * @throws {BadRequestException} If the category does not exist.
+       * @throws {CategoryNotFoundException} If the category does not exist.
        */
       async deleteCategory(categoryId: number) {
           // Check if category exists
@@ -225,7 +227,7 @@ export class AdminService implements OnModuleInit {
           });
   
           if (!category) {
-              throw new BadRequestException('Category not found');
+              throw new CategoryNotFoundException(categoryId);
           }
   
           // Delete the category
@@ -241,7 +243,7 @@ export class AdminService implements OnModuleInit {
    * @param {number} categoryId - The ID of the category to update.
    * @param {CreateCategoryDto} input - The updated category data.
    * @returns {Promise<any>} - The updated category.
-   * @throws {BadRequestException} If category not found.
+   * @throws {CategoryNotFoundException} If category not found.
    */
   async updateCategory(categoryId: number, input: UpdateCategoryDto) {
     const { name } = input;
@@ -251,7 +253,7 @@ export class AdminService implements OnModuleInit {
     });
 
     if (!existingCategory) {
-      throw new BadRequestException('Category not found');
+        throw new CategoryNotFoundException(categoryId);
     }
 
     return await this.prisma.category.update({
