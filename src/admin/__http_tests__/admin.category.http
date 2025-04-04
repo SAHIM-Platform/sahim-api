@@ -1,0 +1,29 @@
+@port = {{$dotenv API_PORT}}
+@baseUrl = http://localhost:{{port}}
+@accessToken =  
+
+@updatedCategoryName = Updated Category
+@categoryName = Test Category
+@categoryId = 4  
+
+### Create Category
+POST {{baseUrl}}/admin/categories
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+    "name": "{{categoryName}}"
+}
+
+### Delete Category
+DELETE {{baseUrl}}/admin/categories/{{categoryId}}
+Authorization: Bearer {{accessToken}}
+
+### Update Category
+PATCH {{baseUrl}}/admin/categories/{{categoryId}}
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+    "name": "{{updatedCategoryName}}"
+}
