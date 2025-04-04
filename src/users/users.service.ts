@@ -57,5 +57,37 @@ export class UsersService {
     const { password, ...sanitizedUser } = user;
     return sanitizedUser;
   }
-  
+
+  /**
+   * Retrieves all bookmarks for a specific user.
+   * 
+   * @param {number} userId - The ID of the user whose bookmarks are to be retrieved.
+   * @returns {Promise<Array>} A list of bookmarked threads with additional information about the thread, including the author, category, and counts for comments and votes.
+   */
+  async getUserBookmarks(userId: number) {
+    return this.prisma.bookmarkedThread.findMany({
+      where: { user_id: userId },
+      include: {
+        thread: {
+          include: {
+            author: {
+              select: { id: true, username: true, name: true }
+            },
+            category: {
+              select: { category_id: true, name: true }
+            },
+            _count: {
+              select: { comments: true, votes: true }
+            }
+          }
+        }
+      },
+      orderBy: {
+        thread: {
+          created_at: 'desc', 
+        }
+      }
+    });
+  }
+
 }
