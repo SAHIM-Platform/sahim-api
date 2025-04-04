@@ -3,6 +3,8 @@ import { Body, Controller, Delete, Param, ParseIntPipe, Patch, Post, Req, Res} f
 import { UserRole } from '@prisma/client';
 import { AdminService } from './admin.service';
 import { AdminSignupDto } from './dto/create-admin.dto';
+import { CreateCategoryDto } from '@/admin/dto/create-category.dto';
+import { UpdateCategoryDto } from './dto/update-category.dto';
 
 @Controller('admin')
 export class AdminController {
@@ -33,4 +35,25 @@ export class AdminController {
     async rejectStudent(@Param('id', ParseIntPipe) studentId: number) {
         return await this.adminService.rejectStudent(studentId);
     }
+
+    @Post('categories')
+    @Roles(UserRole.SUPER_ADMIN, UserRole.ADMIN)
+    async createCategory(@Body() input: CreateCategoryDto) {
+        return await this.adminService.createCategory(input);
+    }
+
+    @Delete('categories/:id')
+    @Roles(UserRole.SUPER_ADMIN, UserRole.ADMIN)
+    async deleteCategory(@Param('id', ParseIntPipe) categoryId: number) {
+        return await this.adminService.deleteCategory(categoryId);
+    }
+
+    @Patch('categories/:id')
+  async updateCategory(
+    @Param('id') categoryId: number,
+    @Body() input: UpdateCategoryDto
+  ) {
+    return this.adminService.updateCategory(categoryId, input);
+  }
+
 }
