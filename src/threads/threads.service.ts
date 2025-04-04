@@ -429,7 +429,7 @@ export class ThreadsService {
    * 
    * @param {number} userId - The ID of the user who is bookmarking the thread.
    * @param {number} threadId - The ID of the thread to be bookmarked.
-   * @returns {Promise<Object>} The newly created bookmark.
+   * @returns {Promise<{ message: string, success: boolean }>} Success message and status.
    * @throws {ForbiddenException} If the thread is already bookmarked by the user.
    */
   async bookmarkThread(userId: number, threadId: number) {
@@ -445,15 +445,24 @@ export class ThreadsService {
     });
 
     if (existingBookmark) {
-      throw new ForbiddenException('Thread already bookmarked');
+      throw new ForbiddenException({
+        message: 'Thread already bookmarked',
+        error: 'Forbidden',
+        statusCode: 403,
+      });
     }
 
-    return this.prisma.bookmarkedThread.create({
+    await this.prisma.bookmarkedThread.create({
       data: {
         user_id: userId,
         thread_id: threadId,
       },
     });
+
+    return {
+      message: 'Thread bookmarked successfully',
+      success: true,
+    };
   }
 
   /**
@@ -461,10 +470,12 @@ export class ThreadsService {
    * 
    * @param {number} userId - The ID of the user who is unbookmarking the thread.
    * @param {number} threadId - The ID of the thread to be removed from bookmarks.
-   * @returns {Promise<Object>} The deleted bookmark.
-   * @throws {NotFoundException} If the bookmark does not exist.
+   * @returns {Promise<{ message: string, success: boolean }>} Success message and status.
+   * @throws {ForbiddenException} If the thread is not bookmarked by the user.
    */
   async unbookmarkThread(userId: number, threadId: number) {
+    await this.ensureThreadExists(threadId);
+
     const bookmarkedThread = await this.prisma.bookmarkedThread.findUnique({
       where: {
         user_id_thread_id: {
@@ -475,10 +486,14 @@ export class ThreadsService {
     });
 
     if (!bookmarkedThread) {
-      throw new NotFoundException(`Bookmark not found`);
+      throw new ForbiddenException({
+        message: 'Thread is not bookmarked',
+        error: 'Forbidden',
+        statusCode: 403,
+      });
     }
 
-    return this.prisma.bookmarkedThread.delete({
+    await this.prisma.bookmarkedThread.delete({
       where: {
         user_id_thread_id: {
           user_id: userId,
@@ -486,6 +501,11 @@ export class ThreadsService {
         },
       },
     });
+
+    return {
+      message: 'Thread unbookmarked successfully',
+      success: true
+    };
   }
 
 
