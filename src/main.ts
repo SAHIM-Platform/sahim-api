@@ -6,10 +6,10 @@ import { ValidationPipe } from '@nestjs/common';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  const port = process.env.API_PORT ?? 5000;
+  const port = process.env.PORT || 5000;  // Use the port from Render
   setupCors(app);
   app.use(cookieParser());
-
+  
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true, // Removes any properties that are not explicitly defined in the DTO
