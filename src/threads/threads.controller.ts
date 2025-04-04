@@ -4,8 +4,11 @@ import { CreateThreadDto } from './dto/create-thread.dto';
 import { UpdateThreadDto } from './dto/update-thread.dto';
 import { ThreadQueryDto } from './dto/thread-query.dto';
 import { GetUser } from '@/auth/decorators/get-user.decorator';
-import { ThreadParamsDto } from './dto/thread-params.dto';
+import { CommentParamsDto, ThreadParamsDto } from './dto/thread-params.dto';
 import { FindOneThreadQueryDto } from './dto/find-thread-query.dto';
+import { CreateCommentDto } from './dto/create-comment.dto';
+import { UpdateCommentDto } from './dto/update-comment.dto';
+import { CommentQueryDto } from './dto/comment-query.dto';
 
 @Controller('threads')
 export class ThreadsController {
@@ -34,6 +37,26 @@ export class ThreadsController {
   @Delete(':id')
   remove(@GetUser('sub') userId, @Param() params: ThreadParamsDto) {
     return this.threadsService.remove(userId, params.id);
+  }
+
+  @Post(':id/comments')
+  createComment(@GetUser('sub') userId, @Param() params: ThreadParamsDto, @Body() createCommentDto: CreateCommentDto) {
+    return this.threadsService.createComment(userId, params.id, createCommentDto);
+  }
+
+  @Get(':id/comments')
+  getThreadComments(@Param() params: ThreadParamsDto, @Query() query: CommentQueryDto) {
+    return this.threadsService.getThreadComments(params.id, query);
+  }
+
+  @Put(':id/comments/:commentId')
+  updateComment(@GetUser('sub') userId, @Param() params: CommentParamsDto, @Body() updateCommentDto: UpdateCommentDto) {
+    return this.threadsService.updateComment(userId, params.id, params.commentId, updateCommentDto);
+  }
+
+  @Delete(':id/comments/:commentId')
+  deleteComment(@GetUser('sub') userId, @Param() params: CommentParamsDto) {
+    return this.threadsService.deleteComment(userId, params.id, params.commentId);
   }
 
 }

@@ -1,0 +1,6 @@
+@port = {{$dotenv API_PORT}}
+@baseUrl = http://localhost:{{port}}
+
+GET {{baseUrl}}/threads/2/comments?sort=oldest&page=2&limit=5
+Accept: application/json
+Authorization: Bearer 

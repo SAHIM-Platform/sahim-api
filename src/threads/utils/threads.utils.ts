@@ -7,7 +7,7 @@ export function formatVotes(
 ): FormattedVote {
   const upvotes = votes.filter(v => v.vote_type === 'UP').length;
   const downvotes = votes.length - upvotes;
-  
+
   return {
     score: upvotes - downvotes,
     user_vote: userId
@@ -40,7 +40,7 @@ export function buildThreadIncludeOptions(
       include: {
         author: { select: { id: true, username: true } },
         ...(includeVotes && { 
-          votes: { select: { vote_type: true, user_id: true } } 
+          votes: { select: { vote_type: true, voter_user_id: true } } 
         }),
       },
     } : false,

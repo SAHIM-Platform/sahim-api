@@ -1,0 +1,5 @@
+@port = {{$dotenv API_PORT}}
+@baseUrl = http://localhost:{{port}}
+
+DELETE {{baseUrl}}/threads/1/comments/12
+Authorization: Bearer 

@@ -1,0 +1,10 @@
+@port = {{$dotenv API_PORT}}
+@baseUrl = http://localhost:{{port}}
+
+PUT {{baseUrl}}/threads/2/comments/11
+Content-Type: application/json
+Authorization: Bearer 
+
+{
+  "content": "Updated comment content"
+}
