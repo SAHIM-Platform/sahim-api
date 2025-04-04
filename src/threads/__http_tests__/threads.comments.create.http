@@ -1,0 +1,10 @@
+@port = {{$dotenv API_PORT}}
+@baseUrl = http://localhost:{{port}}
+
+POST {{baseUrl}}/threads/2/comments
+Content-Type: application/json
+Authorization: Bearer 
+
+{
+  "content": "This is another comment on the thread"
+}

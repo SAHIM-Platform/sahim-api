@@ -1,0 +1,13 @@
+@port = {{$dotenv API_PORT}}
+@baseUrl = http://localhost:{{port}}
+
+
+POST {{baseUrl}}/threads
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJQUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjE0LCJ0b2tlblR5cGUiOiJhY2Nlc3MiLCJyb2xlIjoiU1VQRVJfQURNSU4iLCJpYXQiOjE3NDM3MTg1MDksImV4cCI6MTc0MzcxOTQwOX0.L0yKvcEhji8RFg4uuRpZ1wCzdHYghptGIJe6AOeF7hx8aTvUXx94WIlbJiWpTsFt_IQkR0RQpQk1pp8Wgsb8ehLT_y8G-jzzS7SyBewBOjtu36x7IKa0NPHAUeqy5OSG54rm0GL4fUYy7NdTgig2uiftAAbTPI2AaB_idddp-8vzPw70TUypOWSeHhfPR5Jd51BRy7fDdBhrrht5HIN0PYcon2cKtqyXa_9-Z8Bch1JTjtClGFTLvzAolD7yW4UP4Afu1OkRNdo9iEDgoOso9OiFrEPtteTgZaQtg4zAtCMLUq4t-QGU_hoSZqWefK5wouEDjG1z7AMCa9KRe69hzyXzySbBRdNWO2Urd_HA2kEmAuT8kGmtTT1paoXFZNEGnqJy6FNC5-Lf9BHw-WcKZHzkNjGmVHu1EpFrby4qGscsnJWYdmMz0GrxAy8olYAgLmTlt3hmbESedCHgLQY-cPRBbLbz6_2XF_WwKjFItu_3uIlGu8_2feMZEJiBMXQE_ifPONC7bUWPP7zDFRbOIVq2JI9dC_E7lhHMwt4PuQg5A8TqALS9Cfjl1t87YUmZ7o6fxx4By0jCFjQo4P5xycGUl-AerVfjA3sVa9nor7m4nOQREvk6E9Vuq22bcB9oUzkxVxc7XSstjo2z3fsbP3Fo33ksdJtIpYU0U-rEaIg
+
+{
+  "title": "New Discussion Thread",
+  "content": "This is the content of my new thread",
+  "category_id": 2
+}
