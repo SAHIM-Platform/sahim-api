@@ -9,6 +9,7 @@ import { FindOneThreadQueryDto } from './dto/find-thread-query.dto';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { UpdateCommentDto } from './dto/update-comment.dto';
 import { CommentQueryDto } from './dto/comment-query.dto';
+import { VoteDto } from './dto/vote.dto';
 
 @Controller('threads')
 export class ThreadsController {
@@ -57,6 +58,16 @@ export class ThreadsController {
   @Delete(':id/comments/:commentId')
   deleteComment(@GetUser('sub') userId, @Param() params: CommentParamsDto) {
     return this.threadsService.deleteComment(userId, params.id, params.commentId);
+  }
+
+  @Post(':id/vote')
+  voteThread(@GetUser('sub') userId, @Param() params: ThreadParamsDto, @Body() voteDto: VoteDto) {
+    return this.threadsService.voteThread(userId, params.id, voteDto);
+  }
+
+  @Post(':id/comments/:commentId/vote')
+  voteComment(@GetUser('sub') userId, @Param() params: CommentParamsDto, @Body() voteDto: VoteDto) {
+    return this.threadsService.voteComment(userId, params.id, params.commentId, voteDto);
   }
 
 }

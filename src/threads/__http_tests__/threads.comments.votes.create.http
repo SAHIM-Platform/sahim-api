@@ -1,0 +1,14 @@
+@port = {{$dotenv API_PORT}}
+@baseUrl = http://localhost:{{port}}
+
+@voteType = DOWN
+
+@accessToken = eyJhbGciOiJQUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjE0LCJ0b2tlblR5cGUiOiJhY2Nlc3MiLCJyb2xlIjoiU1VQRVJfQURNSU4iLCJpYXQiOjE3NDM3MzMzMTYsImV4cCI6MTc0MzczNDIxNn0.nEQtxBZh1HnRizLcaiXdRgGVNyH1LJ5iDzDn_9a0wupP_qS8fUb_ixkZGzAqOZ-MxEd6DWvTSybh5w7gOiWQEWRhXOD5McHXbuC_tR52381v1oWKvRLKLZtWKrjoMM2E6bBr0C0IWamz8FNDL4uBa7xuR7ptpg2OguYk3NWShvhmcJ134krFwhLR0DSvyMFWHpr6SkA9_lZ7rHYhX7TIfiE9ZigKUvb3WUWHpgWpeIx-67e3SUqVuHCdXXCQJEaw6d_eb9QxuHPrpaaWTxlKoE3Y5n4wUDUOGp9EHFpEI5CrrkcXJRWDBmrsaUD_R_vJShz2XjPIu1ix37bHvBliKcHeF8iiv-tYJx7rJB-spHljBaRMp756DqyrqwUNRtAderDgN5BlJNhRra0vXlRk8YVn7thjh7U0iNXpr39Uk7bvsf8m1opt8iztYJDWWrbgppVJKyTjdCdqyMaDKjsIXvPhe2LOI2DITMLHZomCAfQosST4q4tcp8vm7yZfSDhdcD9oPBpf4ZUMWYkbP0oyNU9WB5Kr4i_nTkWbf3DeFJE2HMgysOPnQaFlKjfmTlWwNf-o2HM7s9Cn1aOJ3rNhNFH7yAk6zUPh2SVkA3PUjUYzmboILKuJ86NsiYN0QEVr8ScKS48m2G5PMX0s4lfGx_-HSNG3vkVV3eFrgILGNXU
+
+POST {{baseUrl}}/threads/2/comments/10/vote
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "vote_type": "{{voteType}}"
+}
