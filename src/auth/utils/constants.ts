@@ -1,7 +1,7 @@
 import { join } from 'path';
 import { readFileSync, existsSync } from 'fs';
 
-const keyPath = '/etc/secrets/';
+const keyPath = process.env.NODE_ENV === 'development'? (process.cwd, 'storage/keys'):'/etc/secrets/';
 
 function loadKey(fileName: string): string {
   const filePath = join(keyPath, fileName);
