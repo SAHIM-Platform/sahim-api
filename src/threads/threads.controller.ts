@@ -19,13 +19,28 @@ export class ThreadsController {
 
 
 
+  /**
+  * Endpoint for searching threads.
+  * 
+  * This route handles GET requests to the '/search' endpoint. It expects a query parameter `query`
+  * to search for threads in the database. If the query parameter is missing or empty, a BadRequestException
+  * is thrown. If a valid query is provided, it will call the service to search for threads and return
+  * a formatted list of results.
+  * 
+  * @param query - The search query string to filter threads by.
+  * @returns An array of threads with relevant details such as id, title, creation date, author, and comment count.
+  * @throws BadRequestException if the query parameter is missing or empty.
+  */
   @Get('search')
   async searchThreads(@Query('query') query: string) {
+
     if (!query || query.trim() === '') {
       throw new BadRequestException('Query parameter is required');
     }
 
+
     const results = await this.threadsService.searchThreads(query);
+
 
     return results.map(thread => ({
       id: thread.thread_id,
@@ -35,6 +50,7 @@ export class ThreadsController {
       commentsCount: thread._count.comments,
     }));
   }
+
 
 
   @Post()
