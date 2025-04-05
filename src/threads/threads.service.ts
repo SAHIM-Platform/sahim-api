@@ -21,8 +21,20 @@ import { CategoryNotFoundException } from '@/admin/exceptions/category-not-found
 export class ThreadsService {
   constructor(private prisma: PrismaService) { }
 
-
-
+  /**
+   * Searches for threads based on the provided query string.
+   * The search checks for matching titles and content of threads.
+   * The search is case-insensitive.
+   * 
+   * @param {string} query - The search query string.
+   * @returns {Promise<Array>} - A list of threads that match the query.
+   * Each thread contains:
+   * - `thread_id`: Unique identifier for the thread.
+   * - `title`: The title of the thread.
+   * - `created_at`: The creation timestamp of the thread.
+   * - `author`: An object with the `id` and `name` of the thread's author.
+   * - `commentsCount`: The number of comments on the thread.
+   */
   async searchThreads(query: string) {
     return this.prisma.thread.findMany({
       where: {
@@ -49,6 +61,7 @@ export class ThreadsService {
       },
     });
   }
+
 
 
 
