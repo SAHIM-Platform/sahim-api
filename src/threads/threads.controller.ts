@@ -10,7 +10,7 @@ import { CreateCommentDto } from './dto/create-comment.dto';
 import { UpdateCommentDto } from './dto/update-comment.dto';
 import { CommentQueryDto } from './dto/comment-query.dto';
 import { VoteDto } from './dto/vote.dto';
-
+import { BadRequestException } from '@nestjs/common';
 
 
 @Controller('threads')
