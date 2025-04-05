@@ -21,6 +21,38 @@ import { CategoryNotFoundException } from '@/admin/exceptions/category-not-found
 export class ThreadsService {
   constructor(private prisma: PrismaService) { }
 
+
+
+  async searchThreads(query: string) {
+    return this.prisma.thread.findMany({
+      where: {
+        OR: [
+          { title: { contains: query, mode: 'insensitive' } },
+          { content: { contains: query, mode: 'insensitive' } },
+        ],
+      },
+      select: {
+        thread_id: true,
+        title: true,
+        created_at: true,
+        author: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+        _count: {
+          select: {
+            comments: true,
+          },
+        },
+      },
+    });
+  }
+
+
+
+
   /**
    * Creates a new thread
    * @param userId - ID of the user creating the thread
@@ -570,5 +602,11 @@ export class ThreadsService {
       throw new NotFoundException(`Thread with ID ${threadId} not found`);
     }
   }
+
+
+
+
+
+
 
 }
