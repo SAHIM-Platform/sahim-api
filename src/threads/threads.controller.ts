@@ -11,14 +11,37 @@ import { UpdateCommentDto } from './dto/update-comment.dto';
 import { CommentQueryDto } from './dto/comment-query.dto';
 import { VoteDto } from './dto/vote.dto';
 
+
+
 @Controller('threads')
 export class ThreadsController {
-  constructor(private readonly threadsService: ThreadsService) {}
+  constructor(private readonly threadsService: ThreadsService) { }
+
+
+
+  @Get('search')
+  async searchThreads(@Query('query') query: string) {
+    if (!query || query.trim() === '') {
+      throw new BadRequestException('Query parameter is required');
+    }
+
+    const results = await this.threadsService.searchThreads(query);
+
+    return results.map(thread => ({
+      id: thread.thread_id,
+      title: thread.title,
+      createdAt: thread.created_at,
+      author: thread.author,
+      commentsCount: thread._count.comments,
+    }));
+  }
+
 
   @Post()
   create(@GetUser('sub') userId, @Body() createThreadDto: CreateThreadDto) {
     return this.threadsService.create(userId, createThreadDto);
   }
+
 
   @Get()
   findAll(@Query() query: ThreadQueryDto) {
