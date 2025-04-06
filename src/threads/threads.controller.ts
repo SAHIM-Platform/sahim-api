@@ -11,6 +11,7 @@ import { UpdateCommentDto } from './dto/update-comment.dto';
 import { CommentQueryDto } from './dto/comment-query.dto';
 import { VoteDto } from './dto/vote.dto';
 import { BadRequestException } from '@nestjs/common';
+import { SearchThreadsDto } from './dto/search-threads.dto';
 
 
 @Controller('threads')
@@ -32,12 +33,9 @@ export class ThreadsController {
   * @throws BadRequestException if the query parameter is missing or empty.
   */
   @Get('search')
-  async searchThreads(@Query('query') query: string) {
+  async searchThreads(@Query() queryDto: SearchThreadsDto) {
 
-    if (!query || query.trim() === '') {
-      throw new BadRequestException('Query parameter is required');
-    }
-
+    const { query } = queryDto;
 
     const results = await this.threadsService.searchThreads(query);
 

@@ -48,10 +48,7 @@ export class ThreadsService {
         title: true,
         created_at: true,
         author: {
-          select: {
-            id: true,
-            name: true,
-          },
+          select: {id: true, name: true},
         },
         _count: {
           select: {

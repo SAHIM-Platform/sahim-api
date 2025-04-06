@@ -1,1 +1,9 @@
-GET http://localhost:5000/threads/search?query=nestjs
+@port = {{$dotenv API_PORT}}
+@baseUrl = http://localhost:{{port}}
+@authToken = 
+@query = 
+
+
+GET {{baseUrl}}/threads/search?query="  "
+Authorization: Bearer {{authToken}}
+Accept: application/json
