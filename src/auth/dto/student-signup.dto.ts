@@ -2,9 +2,14 @@ import { Department } from '@prisma/client';
 import { IsInt, IsEnum, Min, Max } from 'class-validator';
 import { SignupAuthDto } from './signup-auth.dto';
 
-export class studentSignUpDto extends SignupAuthDto {
-  @IsInt({ message: 'Academic number must be an integer' })
-  academicNumber: number;
+
+export class StudentSignUpDto extends SignupAuthDto {
+  @IsString({ message: 'Academic number must be a string' })
+  @Matches(/^\d{13}$/, {
+    message: 'Academic number must be exactly 13 digits',
+  })
+  academicNumber: string;
+
 
   @IsEnum(Department, { message: 'Invalid department selection' })
   department: Department;
