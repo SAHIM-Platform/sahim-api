@@ -45,7 +45,7 @@ model RefreshToken {
 model Student {
   id             Int            @id @default(autoincrement())
   userId         Int            @unique
-  academicNumber Int            @unique
+  academicNumber String         @unique
   department     Department
   studyLevel     Int
   approvalStatus ApprovalStatus @default(PENDING)
