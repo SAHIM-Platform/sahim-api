@@ -15,7 +15,7 @@ import { SignupAuthDto } from './dto/signup-auth.dto';
 
 import { PrismaService } from 'prisma/prisma.service';
 import { Public } from './decorators/public.decorator';
-import { studentSignUpDto } from './dto/student-signup.dto';
+import { StudentSignUpDto } from './dto/student-signup.dto';
 import { GoogleAuthGuard } from './guards/google-auth-guard.dto';
 import { AuthUtil } from './utils/auth.util';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
@@ -26,11 +26,11 @@ export class AuthController {
   constructor(
     private readonly authService: AuthService,
     private readonly authUtil: AuthUtil,
-  ) {}
+  ) { }
 
   @Public()
   @Post('signup')
-  async signup(@Body() input: studentSignUpDto, @Res() res: Response) {
+  async signup(@Body() input: StudentSignUpDto, @Res() res: Response) {
     const { accessToken } = await this.authService.signup(input, res);
     res.json({ message: 'User registered successfully', accessToken });
   }
@@ -95,7 +95,7 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   user(@Req() request: any) {
     console.log(request.user);
-    return { msg: "Authenticated"};
+    return { msg: "Authenticated" };
   }
 
 }
