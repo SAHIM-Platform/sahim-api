@@ -11,7 +11,7 @@ import { APP_GUARD } from '@nestjs/core';
 import { AdminModule } from './admin/admin.module';
 import { ThreadsModule } from './threads/threads.module';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
-import { ThrottlerConfigService } from './config/cors/throttler-config.service';
+import { ThrottlerConfigService } from './config/throttler-config.service';
 
 @Module({
   imports: [
