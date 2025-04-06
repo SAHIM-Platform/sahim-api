@@ -19,6 +19,7 @@ Content-Type: application/json
     "studyLevel": 2
 }
 
+
 ### Sign Up - Existing User (Should Fail)
 POST {{baseUrl}}/auth/signup
 Content-Type: application/json

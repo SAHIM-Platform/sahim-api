@@ -10,15 +10,52 @@ import { CreateCommentDto } from './dto/create-comment.dto';
 import { UpdateCommentDto } from './dto/update-comment.dto';
 import { CommentQueryDto } from './dto/comment-query.dto';
 import { VoteDto } from './dto/vote.dto';
+import { BadRequestException } from '@nestjs/common';
+import { SearchThreadsDto } from './dto/search-threads.dto';
+
 
 @Controller('threads')
 export class ThreadsController {
-  constructor(private readonly threadsService: ThreadsService) {}
+  constructor(private readonly threadsService: ThreadsService) { }
+
+
+
+  /**
+  * Endpoint for searching threads.
+  * 
+  * This route handles GET requests to the '/search' endpoint. It expects a query parameter `query`
+  * to search for threads in the database. If the query parameter is missing or empty, a BadRequestException
+  * is thrown. If a valid query is provided, it will call the service to search for threads and return
+  * a formatted list of results.
+  * 
+  * @param query - The search query string to filter threads by.
+  * @returns An array of threads with relevant details such as id, title, creation date, author, and comment count.
+  * @throws BadRequestException if the query parameter is missing or empty.
+  */
+  @Get('search')
+  async searchThreads(@Query() queryDto: SearchThreadsDto) {
+
+    const { query } = queryDto;
+
+    const results = await this.threadsService.searchThreads(query);
+
+
+    return results.map(thread => ({
+      id: thread.thread_id,
+      title: thread.title,
+      createdAt: thread.created_at,
+      author: thread.author,
+      commentsCount: thread._count.comments,
+    }));
+  }
+
+
 
   @Post()
   create(@GetUser('sub') userId, @Body() createThreadDto: CreateThreadDto) {
     return this.threadsService.create(userId, createThreadDto);
   }
+
 
   @Get()
   findAll(@Query() query: ThreadQueryDto) {
