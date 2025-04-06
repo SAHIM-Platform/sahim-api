@@ -1,5 +1,5 @@
 import { Department } from '@prisma/client';
-import { IsInt, IsEnum, Min, Max } from 'class-validator';
+import { IsInt, IsEnum, Min, Max, Matches, IsString } from 'class-validator';
 import { SignupAuthDto } from './signup-auth.dto';
 
 
