@@ -14,6 +14,7 @@ export class StudentSignUpDto extends SignupAuthDto {
   @IsEnum(Department, { message: 'Invalid department selection' })
   department: Department;
 
+
   @IsInt({ message: 'Study level must be an integer' })
   @Min(1, { message: 'Study level must be at least 1' })
   @Max(5, { message: 'Study level must not exceed 5' })
