@@ -18,8 +18,6 @@ import { SearchThreadsDto } from './dto/search-threads.dto';
 export class ThreadsController {
   constructor(private readonly threadsService: ThreadsService) { }
 
-
-
   /**
   * Endpoint for searching threads.
   * 
@@ -32,25 +30,26 @@ export class ThreadsController {
   * @returns An array of threads with relevant details such as id, title, creation date, author, and comment count.
   * @throws BadRequestException if the query parameter is missing or empty.
   */
-  @Get('search')
-  async searchThreads(@Query() queryDto: SearchThreadsDto) {
-
-    const { query } = queryDto;
-
-    const results = await this.threadsService.searchThreads(query);
-
-
-    return results.map(thread => ({
-      id: thread.thread_id,
-      title: thread.title,
-      createdAt: thread.created_at,
-      author: thread.author,
-      commentsCount: thread._count.comments,
+ @Get('search')
+ async searchThreads(@Query() queryDto: SearchThreadsDto) {
+   
+   const { query } = queryDto;
+   
+   const results = await this.threadsService.searchThreads(query);
+   
+   
+   return results.map(thread => ({
+     id: thread.thread_id,
+     title: thread.title,
+     createdAt: thread.created_at,
+     author: thread.author,
+     commentsCount: thread._count.comments,
     }));
   }
-
-
-
+  
+  
+  
+  
   @Post()
   create(@GetUser('sub') userId, @Body() createThreadDto: CreateThreadDto) {
     return this.threadsService.create(userId, createThreadDto);
@@ -61,9 +60,10 @@ export class ThreadsController {
   findAll(@Query() query: ThreadQueryDto) {
     return this.threadsService.findAll(query);
   }
-  
+
   @Get('categories')
-  async getAllCategories() {
+  getAllCategories() {
+    console.log('inside get categories')
     return this.threadsService.getAllCategories();;
   }
 
