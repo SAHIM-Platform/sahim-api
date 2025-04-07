@@ -1,9 +1,9 @@
+import { CreateCategoryDto } from '@/admin/dto/create-category.dto';
 import { Roles } from '@/auth/decorators/role.decorator';
-import { Body, Controller, Delete, Param, ParseIntPipe, Patch, Post, Req, Res} from '@nestjs/common';
+import { Body, Controller, Delete, Param, ParseIntPipe, Patch, Post, Req, Res } from '@nestjs/common';
 import { UserRole } from '@prisma/client';
 import { AdminService } from './admin.service';
 import { AdminSignupDto } from './dto/create-admin.dto';
-import { CreateCategoryDto } from '@/admin/dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 
 @Controller('admin')
@@ -26,14 +26,16 @@ export class AdminController {
 
     @Patch('students/:id/approve')
     @Roles(UserRole.SUPER_ADMIN, UserRole.ADMIN)
-    async approveStudent(@Param('id', ParseIntPipe) studentId: number) {
-        return await this.adminService.approveStudent(studentId);
+    async approveStudent(@Param('id', ParseIntPipe) studentId: number, @Req() req) {
+        const userId = req.user?.sub;
+        return await this.adminService.approveStudent(studentId, userId);
     }
 
     @Patch('students/:id/reject')
     @Roles(UserRole.SUPER_ADMIN, UserRole.ADMIN)
-    async rejectStudent(@Param('id', ParseIntPipe) studentId: number) {
-        return await this.adminService.rejectStudent(studentId);
+    async rejectStudent(@Param('id', ParseIntPipe) studentId: number, @Req() req) {
+        const userId = req.user?.sub;
+        return await this.adminService.rejectStudent(studentId, userId);
     }
 
     @Post('categories')

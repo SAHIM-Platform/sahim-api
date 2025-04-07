@@ -20,7 +20,7 @@ async function seed() {
                 role: UserRole.STUDENT,
                 student: {
                     create: {
-                        academicNumber: 123457,
+                        academicNumber: "123457",
                         department: Department.IT,
                         studyLevel: 4,
                     },

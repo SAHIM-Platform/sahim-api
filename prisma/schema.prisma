@@ -21,7 +21,8 @@ model User {
   isActive      Boolean           @default(true)
   role          UserRole          @default(STUDENT)
   refreshTokens RefreshToken[]
-  student       Student?
+  student       Student?          @relation("StudentUser")
+  approvedStudents Student[]        @relation("ApprovalUpdatedByUser")
   threads       Thread[]
   threadComments ThreadComment[]
   threadVotes   ThreadVote[]
@@ -49,7 +50,9 @@ model Student {
   department     Department
   studyLevel     Int
   approvalStatus ApprovalStatus @default(PENDING)
-  user           User           @relation(fields: [userId], references: [id])
+  user           User           @relation("StudentUser", fields: [userId], references: [id])
+  approvalUpdatedByUserId Int?
+  approvalUpdatedByUser   User?      @relation("ApprovalUpdatedByUser", fields: [approvalUpdatedByUserId], references: [id], onDelete: SetNull)
 }
 
 enum UserRole {
