@@ -19,27 +19,25 @@ export class AdminController {
 
     @Delete(':id')
     @Roles(UserRole.SUPER_ADMIN, UserRole.ADMIN)
-    async deleteAdmin(@GetUser() user,@Req() req, @Param('id', ParseIntPipe) adminId: number) {
+    async deleteAdmin(@GetUser() user, @Param('id', ParseIntPipe) adminId: number) {
         return await this.adminService.deleteAdmin(adminId, user.id, user.role);
     }
 
     @Patch('students/:id/approve')
     @Roles(UserRole.SUPER_ADMIN, UserRole.ADMIN)
-    async approveStudent(@Param('id', ParseIntPipe) studentId: number, @Req() req) {
-        const userId = req.user?.sub;
+    async approveStudent(@GetUser('sub') userId, @Param('id', ParseIntPipe) studentId: number) {
         return await this.adminService.approveStudent(studentId, userId);
     }
 
     @Patch('students/:id/reject')
     @Roles(UserRole.SUPER_ADMIN, UserRole.ADMIN)
-    async rejectStudent(@Param('id', ParseIntPipe) studentId: number, @Req() req) {
-        const userId = req.user?.sub;
+    async rejectStudent(@GetUser('sub') userId,@Param('id', ParseIntPipe) studentId: number) {
         return await this.adminService.rejectStudent(studentId, userId);
     }
 
     @Post('categories')
     @Roles(UserRole.SUPER_ADMIN, UserRole.ADMIN)
-    async createCategory(@GetUser('sub') userId: number,@Body() input: CreateCategoryDto, @Req() req) {
+    async createCategory(@GetUser('sub') userId: number,@Body() input: CreateCategoryDto) {
         return await this.adminService.createCategory(input, userId);
     }
 
