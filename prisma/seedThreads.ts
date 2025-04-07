@@ -1,4 +1,4 @@
-import { PrismaClient, UserRole, Department } from '@prisma/client';
+import { Department, PrismaClient, UserRole } from '@prisma/client';
 import * as bcrypt from 'bcryptjs';
 
 
