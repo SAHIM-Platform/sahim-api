@@ -28,6 +28,7 @@ model User {
   threadVotes   ThreadVote[]
   commentVotes  CommentVote[]
   bookmarks     BookmarkedThread[]
+  categories      Category[]        @relation("CategoryAuthor")
 }
 
 model RefreshToken {
@@ -75,11 +76,13 @@ enum ApprovalStatus {
   APPROVED
   REJECTED
 }
-
 model Category {
-  category_id    Int      @id @default(autoincrement())
-  name           String   @unique
-  threads        Thread[]
+  category_id     Int      @id @default(autoincrement())
+  name            String   @unique
+  threads         Thread[]
+
+  author_user_id  Int?
+  author          User?    @relation("CategoryAuthor",fields: [author_user_id], references: [id], onDelete: SetNull)
 }
 
 model Thread {

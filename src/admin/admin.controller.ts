@@ -5,6 +5,7 @@ import { UserRole } from '@prisma/client';
 import { AdminService } from './admin.service';
 import { AdminSignupDto } from './dto/create-admin.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
+import { GetUser } from '@/auth/decorators/get-user.decorator';
 
 @Controller('admin')
 export class AdminController {
@@ -18,10 +19,8 @@ export class AdminController {
 
     @Delete(':id')
     @Roles(UserRole.SUPER_ADMIN, UserRole.ADMIN)
-    async deleteAdmin(@Req() req, @Param('id', ParseIntPipe) adminId: number) {
-        const requesterId = req.user?.sub;
-        const requesterRole = req.user?.role;
-        return await this.adminService.deleteAdmin(adminId, requesterId, requesterRole);
+    async deleteAdmin(@GetUser() user,@Req() req, @Param('id', ParseIntPipe) adminId: number) {
+        return await this.adminService.deleteAdmin(adminId, user.id, user.role);
     }
 
     @Patch('students/:id/approve')
@@ -40,8 +39,8 @@ export class AdminController {
 
     @Post('categories')
     @Roles(UserRole.SUPER_ADMIN, UserRole.ADMIN)
-    async createCategory(@Body() input: CreateCategoryDto) {
-        return await this.adminService.createCategory(input);
+    async createCategory(@GetUser('sub') userId: number,@Body() input: CreateCategoryDto, @Req() req) {
+        return await this.adminService.createCategory(input, userId);
     }
 
     @Delete('categories/:id')

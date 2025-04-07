@@ -194,7 +194,7 @@ export class AdminService implements OnModuleInit {
      * @returns {Promise<{ id: number, name: string }>} The created category.
      * @throws {BadRequestException} If a category with the same name already exists.
      */
-        async createCategory(input: CreateCategoryDto) {
+        async createCategory(input: CreateCategoryDto, userId: number) {
           const { name } = input;
   
           // Check if category already exists
@@ -210,6 +210,7 @@ export class AdminService implements OnModuleInit {
           const createdCategory = await this.prisma.category.create({
               data: {
                   name,
+                  author_user_id: userId,
               },
           });
   
