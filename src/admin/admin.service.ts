@@ -123,7 +123,7 @@ export class AdminService implements OnModuleInit {
      * @returns {Promise<{ message: string }>} Success message.
      * @throws {BadRequestException} If the student does not exist, is not a student, or is already approved.
      */
-    async approveStudent(studentId: number) {
+    async approveStudent(studentId: number , adminUserId: number) {
         const student = await this.prisma.student.findUnique({
             where: { id: studentId },
             include: { user: true }  
@@ -143,7 +143,8 @@ export class AdminService implements OnModuleInit {
 
         await this.prisma.student.update({
             where: { id: studentId },
-            data: { approvalStatus: ApprovalStatus.APPROVED },
+            data: { approvalStatus: ApprovalStatus.APPROVED , approvalUpdatedByUserId: adminUserId},
+            
         });
 
         return { message: "Student approved successfully" };
@@ -155,7 +156,7 @@ export class AdminService implements OnModuleInit {
      * @returns {Promise<{ message: string }>} Success message.
      * @throws {BadRequestException} If the student does not exist, is not a student, or is already approved/rejected.
      */
-    async rejectStudent(studentId: number) {
+    async rejectStudent(studentId: number, adminUserId: number) {
         const student = await this.prisma.student.findUnique({
             where: { id: studentId },
             include: { user: true }  
@@ -179,7 +180,9 @@ export class AdminService implements OnModuleInit {
 
         await this.prisma.student.update({
             where: { id: studentId },
-            data: { approvalStatus: ApprovalStatus.REJECTED },
+            data: { approvalStatus: ApprovalStatus.REJECTED,
+            approvalUpdatedByUserId: adminUserId ,
+            }, 
         });
 
         return { message: "Student rejected successfully" };
