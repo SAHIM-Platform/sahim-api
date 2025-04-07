@@ -10,6 +10,7 @@ import { CreateCategoryDto } from '@/admin/dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { CategoryNotFoundException } from '@/admin/exceptions/category-not-found.exception';
 import { CategoryAlreadyExistsException } from './exceptions/category-already-exists.exception';
+import { StudentQueryDto } from './dto/student-query.dto';
 
 @Injectable()
 export class AdminService implements OnModuleInit {
@@ -264,5 +265,29 @@ export class AdminService implements OnModuleInit {
     });
 
   }
-  
+
+  async getAllStudents(query: StudentQueryDto) {
+    const { page = 1, limit = 10, status } = query;
+
+    let orderBy: any = { createdAt: 'desc' }; 
+
+    const where: any = { role: UserRole.STUDENT };
+
+    if (status) {
+        where.student = { approvalStatus: status };
+    }
+
+    return this.prisma.user.findMany({
+      where,
+      skip: (page - 1) * limit,
+      take: limit,
+      orderBy,
+      select: {
+        id: true,
+      name: true,
+      email: true, 
+      student: true,
+      },
+    });
+  }
 }
