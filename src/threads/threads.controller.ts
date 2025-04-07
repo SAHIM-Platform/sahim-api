@@ -61,6 +61,11 @@ export class ThreadsController {
   findAll(@Query() query: ThreadQueryDto) {
     return this.threadsService.findAll(query);
   }
+  
+  @Get('categories')
+  async getAllCategories() {
+    return this.threadsService.getAllCategories();;
+  }
 
   @Get(':id')
   findOne(@GetUser('sub') userId, @Param() params: ThreadParamsDto, @Query() query: FindOneThreadQueryDto) {
