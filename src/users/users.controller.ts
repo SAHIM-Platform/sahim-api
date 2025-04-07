@@ -5,7 +5,7 @@ import { GetUser } from '@/auth/decorators/get-user.decorator';
 
 @Controller('users')
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(private readonly usersService: UsersService) { }
 
   @Get('test-approved-student')
   @UseGuards(ApprovedStudentGuard)
@@ -17,4 +17,14 @@ export class UsersController {
   getUserBookmarks(@GetUser('sub') userId) {
     return this.usersService.getUserBookmarks(userId);
   }
+
+
+  @UseGuards(JwtAuthGuard)
+  @Get('me')
+  getMe(@GetUser() user: User) {
+    const { id, name, username, email, role } = user;
+    return { id, name, username, email, role };
+  }
+
+
 }
