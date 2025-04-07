@@ -1,9 +1,9 @@
+import { CreateCategoryDto } from '@/admin/dto/create-category.dto';
 import { Roles } from '@/auth/decorators/role.decorator';
-import { Body, Controller, Delete, Param, ParseIntPipe, Patch, Post, Req, Res} from '@nestjs/common';
+import { Body, Controller, Delete, Param, ParseIntPipe, Patch, Post, Req, Res } from '@nestjs/common';
 import { UserRole } from '@prisma/client';
 import { AdminService } from './admin.service';
 import { AdminSignupDto } from './dto/create-admin.dto';
-import { CreateCategoryDto } from '@/admin/dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 
 @Controller('admin')
@@ -38,8 +38,9 @@ export class AdminController {
 
     @Post('categories')
     @Roles(UserRole.SUPER_ADMIN, UserRole.ADMIN)
-    async createCategory(@Body() input: CreateCategoryDto) {
-        return await this.adminService.createCategory(input);
+    async createCategory(@Body() input: CreateCategoryDto, @Req() req) {
+        const userId = req.user?.sub;
+        return await this.adminService.createCategory(input, userId);
     }
 
     @Delete('categories/:id')
