@@ -31,9 +31,9 @@
     "@nestjs/mapped-types": "*",
     "@nestjs/passport": "^11.0.5",
     "@nestjs/platform-express": "^11.0.1",
-
-    "@types/passport-google-oauth20": "^2.0.16",
+    "@nestjs/throttler": "^6.4.0",
     "@prisma/client": "^6.4.1",
+    "@types/passport-google-oauth20": "^2.0.16",
     "bcrypt": "^5.0.1",
     "bcryptjs": "^3.0.2",
     "class-transformer": "^0.5.1",
@@ -98,5 +98,8 @@
     ],
     "coverageDirectory": "../coverage",
     "testEnvironment": "node"
+  },
+  "prisma": {
+    "seed": "ts-node ./prisma/seedThreads.ts"
   }
 }

@@ -22,6 +22,44 @@ export class ThreadsService {
   constructor(private prisma: PrismaService) { }
 
   /**
+   * Searches for threads based on the provided query string.
+   * The search checks for matching titles and content of threads.
+   * The search is case-insensitive.
+   * 
+   * @param {string} query - The search query string.
+   * @returns {Promise<Array>} - A list of threads that match the query.
+   * Each thread contains:
+   * - `thread_id`: Unique identifier for the thread.
+   * - `title`: The title of the thread.
+   * - `created_at`: The creation timestamp of the thread.
+   * - `author`: An object with the `id` and `name` of the thread's author.
+   * - `commentsCount`: The number of comments on the thread.
+   */
+  async searchThreads(query: string) {
+    return this.prisma.thread.findMany({
+      where: {
+        OR: [
+          { title: { contains: query, mode: 'insensitive' } },
+          { content: { contains: query, mode: 'insensitive' } },
+        ],
+      },
+      select: {
+        thread_id: true,
+        title: true,
+        created_at: true,
+        author: {
+          select: { id: true, name: true },
+        },
+        _count: {
+          select: {
+            comments: true,
+          },
+        },
+      },
+    });
+  }
+
+  /**
    * Creates a new thread
    * @param userId - ID of the user creating the thread
    * @param createThreadDto - Data for the new thread
@@ -571,4 +609,25 @@ export class ThreadsService {
     }
   }
 
+  /**
+   * Retrieves all available thread categories.
+   * 
+   * @returns {Promise<{ data: Array<{ category_id: number, name: string }> }>} List of categories.
+   * @throws NotFoundException if no categories exist
+   */
+  async getAllCategories() {
+    const categories = await this.prisma.category.findMany({
+      select: {
+        category_id: true,
+        name: true,
+      },
+      orderBy: {
+        name: 'asc',
+      },
+    });
+
+    return {
+      data: categories,
+    };
+  }
 }

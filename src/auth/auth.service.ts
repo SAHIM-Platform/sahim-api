@@ -17,7 +17,7 @@ import { JwtPayload, AuthResponse } from './interfaces/jwt-payload.interface';
 import { AuthUtil } from './utils/auth.util';
 import { Response } from 'express';
 import { ApprovalStatus, UserRole } from '@prisma/client';
-import { studentSignUpDto } from './dto/student-signup.dto';
+import { StudentSignUpDto } from './dto/student-signup.dto';
 import { GoogleUser } from './interfaces/google-user.interface';
 import * as crypto from 'crypto';
 
@@ -39,7 +39,7 @@ export class AuthService {
    * @returns {Promise<AuthResponse>} Authentication response with tokens.
    */
   async signup(
-    input: studentSignUpDto,
+    input: StudentSignUpDto,
     @Res() res: Response,
   ): Promise<AuthResponse> {
     const { email, username, name, password, academicNumber, department, studyLevel } = input;
@@ -59,7 +59,7 @@ export class AuthService {
     }
 
     const existingStudent = await this.prisma.student.findUnique({
-      where: { academicNumber },  
+      where: { academicNumber },
     });
 
     if (existingStudent) {
@@ -231,20 +231,20 @@ export class AuthService {
    * @throws {Error} If the Google user information is incomplete.
    * @returns {Promise<any>} The authenticated or newly created user.
    */
-  async validateGoogleUser(googleUser: GoogleUser ) {
+  async validateGoogleUser(googleUser: GoogleUser) {
     const { name, email } = googleUser;
-    
+
     if (!email || !name) {
       throw new HttpException('Google user information is incomplete', HttpStatus.BAD_REQUEST);
     }
-    
+
     let user = await this.usersService.findUserByEmail(email);
 
     if (!user) {
       const { defaultUsername, defaultPassword } = await this.generateDefaultUsernameAndPassword(googleUser);
 
-      const incompleteUser = { ...googleUser, userName: defaultUsername, password: defaultPassword}
-      
+      const incompleteUser = { ...googleUser, userName: defaultUsername, password: defaultPassword }
+
       throw new HttpException(
         {
           status: 'incomplete',
@@ -255,7 +255,7 @@ export class AuthService {
       );
 
     }
-    
+
     return user;
   }
 
@@ -266,10 +266,10 @@ export class AuthService {
    */
   private async generateDefaultUsernameAndPassword(googleUser: GoogleUser) {
     let defaultUsername = googleUser.name.replace(/\s+/g, '_').toLowerCase();
-  
+
     // Check if the generated username already exists
     let existingUser = await this.usersService.findUserByUsername(defaultUsername);
-    
+
     // If the username exists, append a number to make it unique
     let counter = 1;
     while (existingUser) {
@@ -277,10 +277,10 @@ export class AuthService {
       existingUser = await this.usersService.findUserByUsername(defaultUsername);
       counter++;
     }
-  
+
     // Generate a secure random password
     const defaultPassword = crypto.randomBytes(16).toString('hex');
-    
+
     return { defaultUsername, defaultPassword };
   }
 

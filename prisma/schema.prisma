@@ -21,12 +21,14 @@ model User {
   isActive      Boolean           @default(true)
   role          UserRole          @default(STUDENT)
   refreshTokens RefreshToken[]
-  student       Student?
+  student       Student?          @relation("StudentUser")
+  approvedStudents Student[]        @relation("ApprovalUpdatedByUser")
   threads       Thread[]
   threadComments ThreadComment[]
   threadVotes   ThreadVote[]
   commentVotes  CommentVote[]
   bookmarks     BookmarkedThread[]
+  categories      Category[]        @relation("CategoryAuthor")
 }
 
 model RefreshToken {
@@ -45,11 +47,13 @@ model RefreshToken {
 model Student {
   id             Int            @id @default(autoincrement())
   userId         Int            @unique
-  academicNumber Int            @unique
+  academicNumber String         @unique
   department     Department
   studyLevel     Int
   approvalStatus ApprovalStatus @default(PENDING)
-  user           User           @relation(fields: [userId], references: [id])
+  user           User           @relation("StudentUser", fields: [userId], references: [id])
+  approvalUpdatedByUserId Int?
+  approvalUpdatedByUser   User?      @relation("ApprovalUpdatedByUser", fields: [approvalUpdatedByUserId], references: [id], onDelete: SetNull)
 }
 
 enum UserRole {
@@ -72,11 +76,13 @@ enum ApprovalStatus {
   APPROVED
   REJECTED
 }
-
 model Category {
-  category_id    Int      @id @default(autoincrement())
-  name           String   @unique
-  threads        Thread[]
+  category_id     Int      @id @default(autoincrement())
+  name            String   @unique
+  threads         Thread[]
+
+  author_user_id  Int?
+  author          User?    @relation("CategoryAuthor",fields: [author_user_id], references: [id], onDelete: SetNull)
 }
 
 model Thread {

@@ -1,15 +1,14 @@
-import { AuthResponse } from '@/auth/interfaces/jwt-payload.interface'; 
+import { CreateCategoryDto } from '@/admin/dto/create-category.dto';
+import { CategoryNotFoundException } from '@/admin/exceptions/category-not-found.exception';
+import { AuthUtil } from '@/auth/utils/auth.util';
+import { UsersService } from '@/users/users.service';
 import { BadRequestException, ForbiddenException, Injectable, OnModuleInit, Res } from '@nestjs/common';
 import { ApprovalStatus, UserRole } from '@prisma/client';
-import { AdminSignupDto } from './dto/create-admin.dto';
-import { UsersService } from '@/users/users.service';
 import { PrismaService } from 'prisma/prisma.service';
-import { AuthUtil } from '@/auth/utils/auth.util';
-import { SUPER_ADMIN_EMAIL, SUPER_ADMIN_PASSWORD, SUPER_ADMIN_USERNAME } from './utils/constans';
-import { CreateCategoryDto } from '@/admin/dto/create-category.dto';
+import { AdminSignupDto } from './dto/create-admin.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
-import { CategoryNotFoundException } from '@/admin/exceptions/category-not-found.exception';
 import { CategoryAlreadyExistsException } from './exceptions/category-already-exists.exception';
+import { SUPER_ADMIN_EMAIL, SUPER_ADMIN_PASSWORD, SUPER_ADMIN_USERNAME } from './utils/constans';
 
 @Injectable()
 export class AdminService implements OnModuleInit {
@@ -124,7 +123,7 @@ export class AdminService implements OnModuleInit {
      * @returns {Promise<{ message: string }>} Success message.
      * @throws {BadRequestException} If the student does not exist, is not a student, or is already approved.
      */
-    async approveStudent(studentId: number) {
+    async approveStudent(studentId: number , adminUserId: number) {
         const student = await this.prisma.student.findUnique({
             where: { id: studentId },
             include: { user: true }  
@@ -144,7 +143,8 @@ export class AdminService implements OnModuleInit {
 
         await this.prisma.student.update({
             where: { id: studentId },
-            data: { approvalStatus: ApprovalStatus.APPROVED },
+            data: { approvalStatus: ApprovalStatus.APPROVED , approvalUpdatedByUserId: adminUserId},
+            
         });
 
         return { message: "Student approved successfully" };
@@ -156,7 +156,7 @@ export class AdminService implements OnModuleInit {
      * @returns {Promise<{ message: string }>} Success message.
      * @throws {BadRequestException} If the student does not exist, is not a student, or is already approved/rejected.
      */
-    async rejectStudent(studentId: number) {
+    async rejectStudent(studentId: number, adminUserId: number) {
         const student = await this.prisma.student.findUnique({
             where: { id: studentId },
             include: { user: true }  
@@ -180,7 +180,9 @@ export class AdminService implements OnModuleInit {
 
         await this.prisma.student.update({
             where: { id: studentId },
-            data: { approvalStatus: ApprovalStatus.REJECTED },
+            data: { approvalStatus: ApprovalStatus.REJECTED,
+            approvalUpdatedByUserId: adminUserId ,
+            }, 
         });
 
         return { message: "Student rejected successfully" };
@@ -192,7 +194,7 @@ export class AdminService implements OnModuleInit {
      * @returns {Promise<{ id: number, name: string }>} The created category.
      * @throws {BadRequestException} If a category with the same name already exists.
      */
-        async createCategory(input: CreateCategoryDto) {
+        async createCategory(input: CreateCategoryDto, userId: number) {
           const { name } = input;
   
           // Check if category already exists
@@ -208,6 +210,7 @@ export class AdminService implements OnModuleInit {
           const createdCategory = await this.prisma.category.create({
               data: {
                   name,
+                  author_user_id: userId,
               },
           });
   
