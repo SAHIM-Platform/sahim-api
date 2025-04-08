@@ -31,15 +31,15 @@ export class AuthController {
   @Public()
   @Post('signup')
   async signup(@Body() input: StudentSignUpDto, @Res() res: Response) {
-    const { accessToken } = await this.authService.signup(input, res);
-    res.json({ message: 'User registered successfully', accessToken });
+    const { accessToken, user } = await this.authService.signup(input, res);
+    res.json({ message: 'User registered successfully', accessToken, user });
   }
 
   @Public()
   @Post('signin')
   async signin(@Body() input: SigninAuthDto, @Res() res: Response) {
-    const { accessToken } = await this.authService.signin(input, res);
-    res.json({ message: 'Sign in successful', accessToken });
+    const { accessToken, user } = await this.authService.signin(input, res);
+    res.json({ message: 'Sign in successful', accessToken, user });
   }
 
   @Public()
