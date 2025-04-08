@@ -48,7 +48,7 @@ export class ThreadsService {
         title: true,
         created_at: true,
         author: {
-          select: {id: true, name: true},
+          select: { id: true, name: true },
         },
         _count: {
           select: {
@@ -58,10 +58,6 @@ export class ThreadsService {
       },
     });
   }
-
-
-
-
 
   /**
    * Creates a new thread
@@ -613,10 +609,25 @@ export class ThreadsService {
     }
   }
 
+  /**
+   * Retrieves all available thread categories.
+   * 
+   * @returns {Promise<{ data: Array<{ category_id: number, name: string }> }>} List of categories.
+   * @throws NotFoundException if no categories exist
+   */
+  async getAllCategories() {
+    const categories = await this.prisma.category.findMany({
+      select: {
+        category_id: true,
+        name: true,
+      },
+      orderBy: {
+        name: 'asc',
+      },
+    });
 
-
-
-
-
-
+    return {
+      data: categories,
+    };
+  }
 }
