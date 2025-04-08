@@ -100,13 +100,17 @@ export class ThreadsService {
    * @param query - Query parameters including sort type, page, and limit
    * @returns Paginated list of threads with metadata
    */
-  async findAll({ sort = SortType.LATEST, page = 1, limit = 10 }: ThreadQueryDto, userId?: number) {
+  async findAll({ sort = SortType.LATEST, page = 1, limit = 10 , category_id}: ThreadQueryDto, userId?: number) {
     const orderBy = {
       created_at: sort === SortType.LATEST ? 'desc' as const : 'asc' as const,
     };
 
+    // Filter by category if provided
+    const where = category_id ? { category_id } : {};
+
     const [threads, total] = await Promise.all([
       this.prisma.thread.findMany({
+        where,
         skip: (page - 1) * limit,
         take: limit,
         orderBy,
