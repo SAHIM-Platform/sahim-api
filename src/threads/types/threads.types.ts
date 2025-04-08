@@ -33,6 +33,7 @@ export interface ThreadWithDetails {
   title: string;
   content: string;
   created_at: Date;
+  bookmarked?: boolean;
   author: {
     id: number;
     username: string;
