@@ -21,12 +21,24 @@ export class UsersController {
   }
 
 
+
+
+
   @UseGuards(JwtAuthGuard)
   @Get('me')
-  getMe(@GetUser() user: User) {
-    const { id, name, username, email, role } = user;
+  async getMe(@GetUser('sub') userId: number) {
+    const userData = await this.usersService.findUserById(userId);
+
+    if (!userData) {
+      throw new Error('User not found');
+    }
+
+    const { id, name, username, email, role } = userData;
     return { id, name, username, email, role };
   }
+
+
+
 
 
 }
