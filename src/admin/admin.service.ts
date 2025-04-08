@@ -8,6 +8,7 @@ import { PrismaService } from 'prisma/prisma.service';
 import { AdminSignupDto } from './dto/create-admin.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { CategoryAlreadyExistsException } from './exceptions/category-already-exists.exception';
+import { StudentQueryDto } from './dto/student-query.dto';
 import { SUPER_ADMIN_EMAIL, SUPER_ADMIN_PASSWORD, SUPER_ADMIN_USERNAME } from './utils/constans';
 
 @Injectable()
@@ -267,5 +268,29 @@ export class AdminService implements OnModuleInit {
     });
 
   }
-  
+
+  async getAllStudents(query: StudentQueryDto) {
+    const { page = 1, limit = 10, status } = query;
+
+    let orderBy: any = { createdAt: 'desc' }; 
+
+    const where: any = { role: UserRole.STUDENT };
+
+    if (status) {
+        where.student = { approvalStatus: status };
+    }
+
+    return this.prisma.user.findMany({
+      where,
+      skip: (page - 1) * limit,
+      take: limit,
+      orderBy,
+      select: {
+        id: true,
+      name: true,
+      email: true, 
+      student: true,
+      },
+    });
+  }
 }
