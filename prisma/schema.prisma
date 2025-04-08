@@ -93,13 +93,11 @@ model Thread {
   author         User              @relation(fields: [author_user_id], references: [id])
   title          String
   content        String
-  thumbnail_url  String?          
   created_at     DateTime          @default(now())
   comments       ThreadComment[]
   votes          ThreadVote[]
   bookmarks      BookmarkedThread[]
 }
-
 
 model ThreadComment {
   comment_id     Int            @id @default(autoincrement())

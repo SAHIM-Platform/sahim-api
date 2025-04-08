@@ -4,8 +4,7 @@ import {
     MinLength, 
     MaxLength,
     IsInt,
-    Min,
-    IsUrl
+    Min
   } from 'class-validator';
   
   export class UpdateThreadDto {
@@ -25,10 +24,4 @@ import {
     @MinLength(10)
     @MaxLength(5000)
     content?: string;
-
-    @IsOptional()
-    @IsString()
-    @IsUrl({}, { message: 'Invalid URL format' })
-    @MaxLength(500, { message: 'Thumbnail URL cannot be longer than 500 characters' })
-    thumbnail_url?: string;
   }
