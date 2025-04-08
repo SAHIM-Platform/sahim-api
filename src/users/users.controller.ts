@@ -1,4 +1,4 @@
-import { Controller, Get, Req, UseGuards } from '@nestjs/common';
+import { Controller, Get, NotFoundException, Req, UseGuards } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { ApprovedStudentGuard } from '@/auth/guards/approved-student.guard';
 import { GetUser } from '@/auth/decorators/get-user.decorator';
@@ -20,25 +20,16 @@ export class UsersController {
     return this.usersService.getUserBookmarks(userId);
   }
 
-
-
-
-
-  @UseGuards(JwtAuthGuard)
   @Get('me')
   async getMe(@GetUser('sub') userId: number) {
     const userData = await this.usersService.findUserById(userId);
 
     if (!userData) {
-      throw new Error('User not found');
+      throw new NotFoundException('User not found');
     }
 
     const { id, name, username, email, role } = userData;
     return { id, name, username, email, role };
   }
-
-
-
-
 
 }
