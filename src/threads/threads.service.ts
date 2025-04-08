@@ -48,7 +48,7 @@ export class ThreadsService {
         title: true,
         created_at: true,
         author: {
-          select: {id: true, name: true},
+          select: { id: true, name: true },
         },
         _count: {
           select: {
@@ -58,10 +58,6 @@ export class ThreadsService {
       },
     });
   }
-
-
-
-
 
   /**
    * Creates a new thread
@@ -104,7 +100,7 @@ export class ThreadsService {
    * @param query - Query parameters including sort type, page, and limit
    * @returns Paginated list of threads with metadata
    */
-  async findAll({ sort = SortType.LATEST, page = 1, limit = 10 }: ThreadQueryDto) {
+  async findAll({ sort = SortType.LATEST, page = 1, limit = 10 }: ThreadQueryDto, userId?: number) {
     const orderBy = {
       created_at: sort === SortType.LATEST ? 'desc' as const : 'asc' as const,
     };
@@ -119,15 +115,19 @@ export class ThreadsService {
           category: true,
           _count: { select: { comments: true, votes: true } },
           votes: { select: { vote_type: true, voter_user_id: true } },
+          bookmarks: userId
+            ? { where: { user_id: userId }, select: { user_id: true } }
+            : false,
         },
       }),
       this.prisma.thread.count(),
     ]);
 
     return {
-      data: threads.map(thread => ({
+      data: threads.map(({ bookmarks, ...thread }) => ({
         ...thread,
-        votes: formatVotes(thread.votes),
+        votes: formatVotes(thread.votes, userId),
+        bookmarked: !!(bookmarks?.some(b => b.user_id === userId)),
       })),
       meta: { total, page, limit, totalPages: Math.ceil(total / limit) },
     };
@@ -155,7 +155,12 @@ export class ThreadsService {
 
     const thread = await this.prisma.thread.findUnique({
       where: { thread_id: threadId },
-      include: buildThreadIncludeOptions(includeComments, includeVotes, commentsPage, commentsLimit),
+      include: {
+        ...buildThreadIncludeOptions(includeComments, includeVotes, commentsPage, commentsLimit),
+        bookmarks: userId
+          ? { where: { user_id: userId }, select: { user_id: true } }
+          : false,
+      },
     });
 
     if (!thread) {
@@ -580,12 +585,16 @@ export class ThreadsService {
     userId?: number,
     includeComments?: boolean,
     includeVotes?: boolean
+
   ): ThreadWithDetails {
+    const { bookmarks, ...threadWithoutBookmarks } = thread;
+
     const baseResponse: ThreadWithDetails = {
-      ...thread,
+      ...threadWithoutBookmarks,
       ...(includeVotes && {
         votes: formatVotes(thread.votes, userId)
       }),
+      bookmarked: !!(thread.bookmarks?.some((b: any) => b.user_id === userId)),
     };
 
     if (includeComments) {
@@ -613,10 +622,25 @@ export class ThreadsService {
     }
   }
 
+  /**
+   * Retrieves all available thread categories.
+   * 
+   * @returns {Promise<{ data: Array<{ category_id: number, name: string }> }>} List of categories.
+   * @throws NotFoundException if no categories exist
+   */
+  async getAllCategories() {
+    const categories = await this.prisma.category.findMany({
+      select: {
+        category_id: true,
+        name: true,
+      },
+      orderBy: {
+        name: 'asc',
+      },
+    });
 
-
-
-
-
-
+    return {
+      data: categories,
+    };
+  }
 }
