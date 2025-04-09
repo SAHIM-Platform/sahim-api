@@ -21,7 +21,8 @@
     "init:storage": "node scripts/init-storage.js",
     "update:storage": "pnpm init:storage --clean",
     "prod:start:pm2": "pnpm prisma migrate deploy && pm2-runtime start ./runtime.config.json",
-    "prepare": "husky"
+    "prepare": "husky",
+    "docs:generate": "ts-node -r tsconfig-paths/register scripts/generate-swagger.ts"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",
