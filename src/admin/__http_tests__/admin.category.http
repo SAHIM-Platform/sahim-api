@@ -1,9 +1,10 @@
 @port = {{$dotenv API_PORT}}
 @baseUrl = http://localhost:{{port}}
-@accessToken =  
+
+@accessToken =  eyJhbGciOiJQUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsInRva2VuVHlwZSI6ImFjY2VzcyIsInJvbGUiOiJTVVBFUl9BRE1JTiIsImlhdCI6MTc0NDAzNzYxNiwiZXhwIjoxNzQ0MDM4NTE2fQ.BBn8iP1VK77762hJS381cxB7k3wuhJ_Pv4kcV5VZa95bsgrMWJu8GABO5CRn_LwnDDZ_ej2eSvBWMJCU7SBTZcBz7YUvoQxJ8n1VGHcApeyP1NX1bg5uQdRYmppTm-tCwR8YkZtzkqQn0fplNEYM96EBPmfzQmKyd3BMEt3CjjrKNIeZAVtGBcXpLfpTWV3ymNpl3cXmXP93eNEO59AoVWnOYwJ0RyqRkWMQ-4ZLL9MJAOKM2WYGMZS4krPX62wKBrAtvB6ZEgwHrksLtl4lew61Uqq97Z2Q3QvEXyllrj3n6FGqaT3KAXlldpb4mvu5S3IzyZu66gkoe8XvG_5ophcjEPrrR36Nmmv15pkWEIWCfGmulJEDkQmLih7DGJcn4m2DCp5mKtaOs-EChJPtQ7HW7B-1ZDqNuI4aoLzgV38CO_GUN-aLirAYxgjQ19iYINd-Ft83PH1wSvJWge3bg4_8-gafRJyqo8b6N-Z-ETJ6WFA_ciuYvXiT-1iOrEyxDSjCOdMR0xGb6Vg-uqdC9bHlF2V7F0cDbJKO-i1t32KNGYGz0OGndlXz2cn7ViayzeA-uOXZ2BSgunKvPLS_PCOVCaJ8rrcYiVWHi6wQoIo83AEqZpMMymokglhLReRgX8qZx4oB-xOl0copIrx8BmSVvvTQE7KN-L-b0MSjf3A
 
 @updatedCategoryName = Updated Category
-@categoryName = Test Category
+@categoryName = Test Category 2
 @categoryId = 4  
 
 ### Create Category
