@@ -93,7 +93,14 @@ export class AuthService {
     );
     this.authUtil.setRefreshTokenCookie(tokens.refreshToken, res);
 
-    return { accessToken: tokens.accessToken };
+    return {
+      accessToken: tokens.accessToken,
+      user: {
+        id: createdUser.id,
+        name: createdUser.name,
+        username: createdUser.username
+      }
+    };
   }
 
   /**
@@ -127,7 +134,14 @@ export class AuthService {
     const tokens = await this.authUtil.generateJwtTokens(user.id, res.req);
     this.authUtil.setRefreshTokenCookie(tokens.refreshToken, res);
 
-    return { accessToken: tokens.accessToken };
+    return {
+      accessToken: tokens.accessToken,
+      user: {
+        id: user.id,
+        name: user.name,
+        username: user.username
+      }
+    };
   }
 
   /**
