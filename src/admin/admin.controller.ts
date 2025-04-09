@@ -8,7 +8,7 @@ import { UpdateCategoryDto } from './dto/update-category.dto';
 import { StudentQueryDto } from './dto/student-query.dto';
 import { GetUser } from '@/auth/decorators/get-user.decorator';
 
-@Controller('admin')
+@Controller('admins')
 export class AdminController {
     constructor (private readonly adminService: AdminService) {}
     
