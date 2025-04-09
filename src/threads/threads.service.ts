@@ -124,7 +124,7 @@ export class ThreadsService {
             : false,
         },
       }),
-      this.prisma.thread.count(),
+      this.prisma.thread.count({ where }),
     ]);
 
     return {
