@@ -1,0 +1,7 @@
+@port = {{$dotenv API_PORT}}
+@baseUrl = http://localhost:{{port}}
+@accessToken = 
+
+### Test Approved Student Access
+GET {{baseUrl}}/users/me
+Authorization: Bearer {{accessToken}}

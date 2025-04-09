@@ -100,13 +100,17 @@ export class ThreadsService {
    * @param query - Query parameters including sort type, page, and limit
    * @returns Paginated list of threads with metadata
    */
-  async findAll({ sort = SortType.LATEST, page = 1, limit = 10 }: ThreadQueryDto) {
+  async findAll({ sort = SortType.LATEST, page = 1, limit = 10 , category_id}: ThreadQueryDto, userId?: number) {
     const orderBy = {
       created_at: sort === SortType.LATEST ? 'desc' as const : 'asc' as const,
     };
 
+    // Filter by category if provided
+    const where = category_id ? { category_id } : {};
+
     const [threads, total] = await Promise.all([
       this.prisma.thread.findMany({
+        where,
         skip: (page - 1) * limit,
         take: limit,
         orderBy,
@@ -115,15 +119,19 @@ export class ThreadsService {
           category: true,
           _count: { select: { comments: true, votes: true } },
           votes: { select: { vote_type: true, voter_user_id: true } },
+          bookmarks: userId
+            ? { where: { user_id: userId }, select: { user_id: true } }
+            : false,
         },
       }),
-      this.prisma.thread.count(),
+      this.prisma.thread.count({ where }),
     ]);
 
     return {
-      data: threads.map(thread => ({
+      data: threads.map(({ bookmarks, ...thread }) => ({
         ...thread,
-        votes: formatVotes(thread.votes),
+        votes: formatVotes(thread.votes, userId),
+        bookmarked: !!(bookmarks?.some(b => b.user_id === userId)),
       })),
       meta: { total, page, limit, totalPages: Math.ceil(total / limit) },
     };
@@ -151,7 +159,12 @@ export class ThreadsService {
 
     const thread = await this.prisma.thread.findUnique({
       where: { thread_id: threadId },
-      include: buildThreadIncludeOptions(includeComments, includeVotes, commentsPage, commentsLimit),
+      include: {
+        ...buildThreadIncludeOptions(includeComments, includeVotes, commentsPage, commentsLimit),
+        bookmarks: userId
+          ? { where: { user_id: userId }, select: { user_id: true } }
+          : false,
+      },
     });
 
     if (!thread) {
@@ -576,12 +589,16 @@ export class ThreadsService {
     userId?: number,
     includeComments?: boolean,
     includeVotes?: boolean
+
   ): ThreadWithDetails {
+    const { bookmarks, ...threadWithoutBookmarks } = thread;
+
     const baseResponse: ThreadWithDetails = {
-      ...thread,
+      ...threadWithoutBookmarks,
       ...(includeVotes && {
         votes: formatVotes(thread.votes, userId)
       }),
+      bookmarked: !!(thread.bookmarks?.some((b: any) => b.user_id === userId)),
     };
 
     if (includeComments) {
