@@ -1,13 +1,13 @@
 @port = {{$dotenv API_PORT}}
 @baseUrl = http://localhost:{{port}}
-@email = admin@example.com
+@email = admin2@example.com
 @password = Admin$123
 @name = admin1
-@username = admin1
+@username = admin2
 
 ### Create Admin
 POST {{baseUrl}}/admin
-Authorization: Bearer accessToken
+Authorization: Bearer eyJhbGciOiJQUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsInRva2VuVHlwZSI6ImFjY2VzcyIsInJvbGUiOiJTVVBFUl9BRE1JTiIsImlhdCI6MTc0NDI0MjA2OCwiZXhwIjoxNzQ0MjQyOTY4fQ.ejk9y4Hp0IWpzhUJZSjquHW0J5r2erl5pmBSvla12A-b6y4KYHVQi__c_lPlbU3ttSYC3dz60DIOgFszbDAx5AVepjChwWEdk9zGzikLFDTRErCG9uy0tGxK3Wvgu46COeRbIUgYs3jOwUnzrru_-4B70qiP2DnyTX2Xk1rTK1W1QgXpf00o7qJZvnVI9YLGDEynBS7rw9OuZSMVVAc-41Xez4sUzp4f5if5rnZo5qlegOwGLwCEaAii_mkj2gXKzY1Y9pT46fGl0vpKLUCU4n0pw7OUxHT053dj7B2U_K2Vn3syR_9mhcX4EVfLonXw_YRD8GU5WB9ClrDDOEgdYja8-0tmEJWmkWuYFg37t27hq8mW02yZ9Co6c_iIrQWH_LNNERCkVnm3W4pHaj4y99mBtyAeQQf7FFGtQEPyi9wng-tXE9dVn94zR8Z_mIlBw3i9drHZlSHIJCd6ny1mQNHT1x10Sx7tNMRaOgclkawShx1cmkpiILF2Oc4nOtbGDiYYn9oXYYGpMLoj58QHEqScY4ZMwDCVnnNM7IfGTyS31S85L1JaW0di-R-eAR0PwROJmAL-qL_FIT5C27U6dqBffXmR62veWaBhWX85X_TQmU63OG9crp6ICDhoU9xgsYAS_zQr9CMvq_pF2waCT-PavcczntP_0flcu82V6wQ
 Content-Type: application/json
 
 {
