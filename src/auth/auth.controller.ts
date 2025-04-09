@@ -12,7 +12,7 @@ import { Response } from 'express';
 import { AuthService } from './auth.service';
 import { SigninAuthDto } from './dto/signin-auth.dto';
 import { SignupAuthDto } from './dto/signup-auth.dto';
-import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiCookieAuth } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiCookieAuth, ApiBearerAuth } from '@nestjs/swagger';
 import { PrismaService } from 'prisma/prisma.service';
 import { Public } from './decorators/public.decorator';
 import { StudentSignUpDto } from './dto/student-signup.dto';
@@ -85,6 +85,7 @@ export class AuthController {
   @Public()
   @Post('refresh')
   @ApiOperation({ summary: 'Refresh access token using refresh token' })
+  @ApiCookieAuth('refreshToken')
   @ApiResponse({ 
     status: 200, 
     description: 'Access token refreshed successfully',
@@ -109,6 +110,7 @@ export class AuthController {
   }
 
   @Post('signout')
+  @ApiBearerAuth('access-token')
   @ApiOperation({ summary: 'Sign out user and invalidate refresh token' })
   @ApiCookieAuth('refreshToken')
   @ApiResponse({ 
@@ -170,6 +172,7 @@ export class AuthController {
 
   @Get('status')
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('access-token')
   @ApiOperation({ summary: 'Check authentication status' })
   @ApiResponse({ 
     status: 200, 
