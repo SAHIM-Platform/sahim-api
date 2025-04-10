@@ -6,7 +6,7 @@
 @username = admin1
 
 ### Create Admin
-POST {{baseUrl}}/admin
+POST {{baseUrl}}/admins
 Authorization: Bearer accessToken
 Content-Type: application/json
 

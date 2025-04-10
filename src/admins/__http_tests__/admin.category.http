@@ -8,7 +8,7 @@
 @categoryId = 4  
 
 ### Create Category
-POST {{baseUrl}}/admin/categories
+POST {{baseUrl}}/admins/categories
 Authorization: Bearer {{accessToken}}
 Content-Type: application/json
 
@@ -17,11 +17,11 @@ Content-Type: application/json
 }
 
 ### Delete Category
-DELETE {{baseUrl}}/admin/categories/{{categoryId}}
+DELETE {{baseUrl}}/admins/categories/{{categoryId}}
 Authorization: Bearer {{accessToken}}
 
 ### Update Category
-PATCH {{baseUrl}}/admin/categories/{{categoryId}}
+PATCH {{baseUrl}}/admins/categories/{{categoryId}}
 Authorization: Bearer {{accessToken}}
 Content-Type: application/json
 

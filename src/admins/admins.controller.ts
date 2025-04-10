@@ -1,13 +1,12 @@
-import { CreateCategoryDto } from '@/admin/dto/create-category.dto';
+import { CreateCategoryDto } from '@/admins/dto/create-category.dto';
 import { Roles } from '@/auth/decorators/role.decorator';
 import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Query, Req, Res} from '@nestjs/common';
 import { UserRole } from '@prisma/client';
-import { AdminService } from './admin.service';
+import { AdminsService } from './admins.service';
 import { AdminSignupDto } from './dto/create-admin.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { StudentQueryDto } from './dto/student-query.dto';
 import { GetUser } from '@/auth/decorators/get-user.decorator';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiParam, ApiQuery, ApiHeader } from '@nestjs/swagger';
 import {
     SwaggerAdminController,
     SwaggerCreateAdmin,
@@ -19,52 +18,52 @@ import {
     SwaggerUpdateCategory,
     SwaggerGetAllStudents
 } from './decorators/swagger.decorators';
-  
+
 @SwaggerAdminController()
-@Controller('admin')
-export class AdminController {
-    constructor (private readonly adminService: AdminService) {}
-    
+@Controller('admins')
+export class AdminsController {
+    constructor (private readonly AdminsService: AdminsService) {}
+
     @Post()
     @Roles(UserRole.SUPER_ADMIN)
     
     async createAdmin(@Body() dto: AdminSignupDto, @Res() res) {
-        return await this.adminService.createAdmin(dto, res);
+        return await this.AdminsService.createAdmin(dto, res);
     }
 
     @Delete(':id')
     @Roles(UserRole.SUPER_ADMIN, UserRole.ADMIN)
     @SwaggerCreateAdmin()
     async deleteAdmin(@GetUser() user, @Param('id', ParseIntPipe) adminId: number) {
-        return await this.adminService.deleteAdmin(adminId, user.id, user.role);
+        return await this.AdminsService.deleteAdmin(adminId, user.id, user.role);
     }
 
     @Patch('students/:id/approve')
     @Roles(UserRole.SUPER_ADMIN, UserRole.ADMIN)
     @SwaggerApproveStudent()
     async approveStudent(@GetUser('sub') userId, @Param('id', ParseIntPipe) studentId: number) {
-        return await this.adminService.approveStudent(studentId, userId);
+        return await this.AdminsService.approveStudent(studentId, userId);
     }
 
     @Patch('students/:id/reject')
     @Roles(UserRole.SUPER_ADMIN, UserRole.ADMIN)
     @SwaggerRejectStudent()
     async rejectStudent(@GetUser('sub') userId,@Param('id', ParseIntPipe) studentId: number) {
-        return await this.adminService.rejectStudent(studentId, userId);
+        return await this.AdminsService.rejectStudent(studentId, userId);
     }
 
     @Post('categories')
     @Roles(UserRole.SUPER_ADMIN, UserRole.ADMIN)
     @SwaggerCreateCategory()
     async createCategory(@GetUser('sub') userId: number,@Body() input: CreateCategoryDto) {
-        return await this.adminService.createCategory(input, userId);
+        return await this.AdminsService.createCategory(input, userId);
     }
 
     @Delete('categories/:id')
     @Roles(UserRole.SUPER_ADMIN, UserRole.ADMIN)
     @SwaggerDeleteCategory()
     async deleteCategory(@Param('id', ParseIntPipe) categoryId: number) {
-        return await this.adminService.deleteCategory(categoryId);
+        return await this.AdminsService.deleteCategory(categoryId);
     }
 
     @Patch('categories/:id')
@@ -74,13 +73,13 @@ export class AdminController {
     @Param('id') categoryId: number,
     @Body() input: UpdateCategoryDto
     ) {
-        return this.adminService.updateCategory(categoryId, input);
+        return this.AdminsService.updateCategory(categoryId, input);
     }
 
     @Get('users/students')
     @Roles(UserRole.SUPER_ADMIN, UserRole.ADMIN)
     @SwaggerGetAllStudents()
     async getAllStudents(@Query() query: StudentQueryDto) {
-        return await this.adminService.getAllStudents(query);
+        return await this.AdminsService.getAllStudents(query);
     }
 }
