@@ -1,4 +1,4 @@
-import { Controller, Get, NotFoundException, Req, UseGuards } from '@nestjs/common';
+import { Controller, Get, NotFoundException, Req, UseGuards, Query } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { ApprovedStudentGuard } from '@/auth/guards/approved-student.guard';
 import { GetUser } from '@/auth/decorators/get-user.decorator';
@@ -11,6 +11,7 @@ import {
   SwaggerGetUserBookmarks,
   SwaggerGetMe
 } from './decorators/swagger.decorators';
+import { BookmarksQueryDto } from './dto/bookmarks-query.dto';
 
 @SwaggerUsersController()
 @Controller('users')
@@ -25,8 +26,11 @@ export class UsersController {
 
   @Get('me/bookmarks')
   @SwaggerGetUserBookmarks()
-  getUserBookmarks(@GetUser('sub') userId) {
-    return this.usersService.getUserBookmarks(userId);
+  getUserBookmarks(
+    @GetUser('sub') userId: number,
+    @Query() query: BookmarksQueryDto
+  ) {
+    return this.usersService.getUserBookmarks(userId, query);
   }
 
   @Get('me')
