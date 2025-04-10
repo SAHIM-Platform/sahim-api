@@ -7,6 +7,9 @@ SAHIM API is the backend service that powers the SAHIM platform.
 - [Start Development Server](#start-development-server)
 - [**Accessing the Database**](#accessing-the-database)
   - [**5. Exit the Database Session**](#5-exit-the-database-session)
+- [API Documentation](#api-documentation)
+  - [Runtime Documentation](#runtime-documentation)
+  - [Static Documentation](#static-documentation)
 - [Troubleshooting](#troubleshooting)
   - [1. Database Connection Issues](#1-database-connection-issues)
 
@@ -183,6 +186,43 @@ When you're done, type:
 ```
 
 or press `Ctrl + D` to exit.
+
+---
+
+## API Documentation
+
+SAHIM API provides two ways to access the Swagger documentation:
+
+### Runtime Documentation
+
+When running the development server, you can access the interactive Swagger UI at:
+
+```
+http://localhost:5000/docs
+```
+
+> Replace `5000` with your PORT.
+
+This provides real-time documentation of all available API endpoints, request/response schemas, and authentication requirements.
+
+### Static Documentation
+
+For offline access or sharing with team members, you can generate static documentation:
+
+1. Generate the static documentation files:
+
+   ```bash
+   pnpm generate:docs
+   ```
+
+2. The documentation will be generated in the `docs/__GENERATED__/` directory:
+   - `swagger.json` - OpenAPI specification in JSON format _(git ignored)_
+   - `swagger.yaml` - OpenAPI specification in YAML format _(git ignored)_
+   - `index.html` - Interactive documentation viewer
+
+3. Open `docs/__GENERATED__/index.html` in your browser to view the static documentation.
+
+> **Note:** The static documentation is manually generated but does not require the server to be running.
 
 ---
 
