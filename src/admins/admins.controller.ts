@@ -22,47 +22,47 @@ import {
 @SwaggerAdminController()
 @Controller('admins')
 export class AdminsController {
-    constructor (private readonly AdminsService: AdminsService) {}
+    constructor (private readonly adminsService: AdminsService) {}
 
     @Post()
     @Roles(UserRole.SUPER_ADMIN)
     async createAdmin(@Body() dto: AdminSignupDto) {
-        return await this.AdminsService.createAdmin(dto);
+        return await this.adminsService.createAdmin(dto);
     }
 
     @Delete(':id')
     @Roles(UserRole.SUPER_ADMIN, UserRole.ADMIN)
     @SwaggerCreateAdmin()
     async deleteAdmin(@GetUser() user, @Param('id', ParseIntPipe) adminId: number) {
-        return await this.AdminsService.deleteAdmin(adminId, user.id, user.role);
+        return await this.adminsService.deleteAdmin(adminId, user.id, user.role);
     }
 
     @Patch('students/:id/approve')
     @Roles(UserRole.SUPER_ADMIN, UserRole.ADMIN)
     @SwaggerApproveStudent()
     async approveStudent(@GetUser('sub') userId, @Param('id', ParseIntPipe) studentId: number) {
-        return await this.AdminsService.approveStudent(studentId, userId);
+        return await this.adminsService.approveStudent(studentId, userId);
     }
 
     @Patch('students/:id/reject')
     @Roles(UserRole.SUPER_ADMIN, UserRole.ADMIN)
     @SwaggerRejectStudent()
     async rejectStudent(@GetUser('sub') userId,@Param('id', ParseIntPipe) studentId: number) {
-        return await this.AdminsService.rejectStudent(studentId, userId);
+        return await this.adminsService.rejectStudent(studentId, userId);
     }
 
     @Post('categories')
     @Roles(UserRole.SUPER_ADMIN, UserRole.ADMIN)
     @SwaggerCreateCategory()
     async createCategory(@GetUser('sub') userId: number,@Body() input: CreateCategoryDto) {
-        return await this.AdminsService.createCategory(input, userId);
+        return await this.adminsService.createCategory(input, userId);
     }
 
     @Delete('categories/:id')
     @Roles(UserRole.SUPER_ADMIN, UserRole.ADMIN)
     @SwaggerDeleteCategory()
     async deleteCategory(@Param('id', ParseIntPipe) categoryId: number) {
-        return await this.AdminsService.deleteCategory(categoryId);
+        return await this.adminsService.deleteCategory(categoryId);
     }
 
     @Patch('categories/:id')
@@ -72,13 +72,13 @@ export class AdminsController {
     @Param('id') categoryId: number,
     @Body() input: UpdateCategoryDto
     ) {
-        return this.AdminsService.updateCategory(categoryId, input);
+        return this.adminsService.updateCategory(categoryId, input);
     }
 
     @Get('users/students')
     @Roles(UserRole.SUPER_ADMIN, UserRole.ADMIN)
     @SwaggerGetAllStudents()
     async getAllStudents(@Query() query: StudentQueryDto) {
-        return await this.AdminsService.getAllStudents(query);
+        return await this.adminsService.getAllStudents(query);
     }
 }
