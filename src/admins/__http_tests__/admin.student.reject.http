@@ -4,6 +4,6 @@
 @accessToken = 
 
 ### Reject Student
-PATCH {{baseUrl}}/admin/students/{{studentId}}/reject
+PATCH {{baseUrl}}/admins/students/{{studentId}}/reject
 Authorization: Bearer {{accessToken}}
 Content-Type: application/json 

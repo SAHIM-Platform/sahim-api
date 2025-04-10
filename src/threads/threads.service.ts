@@ -15,7 +15,7 @@ import { CreateCommentDto } from './dto/create-comment.dto';
 import { UpdateCommentDto } from './dto/update-comment.dto';
 import { CommentQueryDto } from './dto/comment-query.dto';
 import { VoteDto } from './dto/vote.dto';
-import { CategoryNotFoundException } from '@/admin/exceptions/category-not-found.exception';
+import { CategoryNotFoundException } from '@/admins/exceptions/category-not-found.exception';
 
 @Injectable()
 export class ThreadsService {
