@@ -3,6 +3,7 @@ import { AppModule } from './app.module';
 import * as cookieParser from 'cookie-parser';
 import { setupCors } from './config/cors/cors.config';
 import { ValidationPipe } from '@nestjs/common';
+import { setupSwagger } from './config/swagger.config';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -20,7 +21,10 @@ async function bootstrap() {
     }),
   );
 
-
+  if (process.env.NODE_ENV === 'development') {
+    setupSwagger(app);
+    console.log(`Swagger docs available at: http://localhost:${port}/docs`);
+  }
 
   await app.listen(port);
   if (process.env.NODE_ENV === 'development') {

@@ -406,9 +406,9 @@
         ]
       }
     },
-    "/admin": {
+    "/admins": {
       "post": {
-        "operationId": "AdminController_createAdmin",
+        "operationId": "AdminsController_createAdmin",
         "parameters": [
           {
             "name": "Authorization",
@@ -445,9 +445,9 @@
         ]
       }
     },
-    "/admin/{id}": {
+    "/admins/{id}": {
       "delete": {
-        "operationId": "AdminController_deleteAdmin",
+        "operationId": "AdminsController_deleteAdmin",
         "parameters": [
           {
             "name": "Authorization",
@@ -505,9 +505,9 @@
         ]
       }
     },
-    "/admin/students/{id}/approve": {
+    "/admins/students/{id}/approve": {
       "patch": {
-        "operationId": "AdminController_approveStudent",
+        "operationId": "AdminsController_approveStudent",
         "parameters": [
           {
             "name": "Authorization",
@@ -550,9 +550,9 @@
         ]
       }
     },
-    "/admin/students/{id}/reject": {
+    "/admins/students/{id}/reject": {
       "patch": {
-        "operationId": "AdminController_rejectStudent",
+        "operationId": "AdminsController_rejectStudent",
         "parameters": [
           {
             "name": "Authorization",
@@ -595,9 +595,9 @@
         ]
       }
     },
-    "/admin/categories": {
+    "/admins/categories": {
       "post": {
-        "operationId": "AdminController_createCategory",
+        "operationId": "AdminsController_createCategory",
         "parameters": [
           {
             "name": "Authorization",
@@ -657,9 +657,9 @@
         ]
       }
     },
-    "/admin/categories/{id}": {
+    "/admins/categories/{id}": {
       "delete": {
-        "operationId": "AdminController_deleteCategory",
+        "operationId": "AdminsController_deleteCategory",
         "parameters": [
           {
             "name": "Authorization",
@@ -702,7 +702,7 @@
         ]
       },
       "patch": {
-        "operationId": "AdminController_updateCategory",
+        "operationId": "AdminsController_updateCategory",
         "parameters": [
           {
             "name": "Authorization",
@@ -770,9 +770,9 @@
         ]
       }
     },
-    "/admin/users/students": {
+    "/admins/users/students": {
       "get": {
-        "operationId": "AdminController_getAllStudents",
+        "operationId": "AdminsController_getAllStudents",
         "parameters": [
           {
             "name": "Authorization",
