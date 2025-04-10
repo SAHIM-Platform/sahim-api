@@ -8,7 +8,7 @@ import { RolesGuard } from './auth/guards/role-auth.guard';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { PrismaModule } from 'prisma/prisma.module';
 import { APP_GUARD } from '@nestjs/core';
-import { AdminModule } from './admin/admin.module';
+import { AdminsModule } from './admins/admins.module';
 import { ThreadsModule } from './threads/threads.module';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { ThrottlerConfigService } from './config/throttler-config.service';
@@ -23,7 +23,7 @@ import { ThrottlerConfigService } from './config/throttler-config.service';
     AuthModule,
     UsersModule,
     PrismaModule,
-    AdminModule,
+    AdminsModule,
     ThreadsModule
   ],
   controllers: [AppController],
