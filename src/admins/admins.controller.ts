@@ -26,9 +26,8 @@ export class AdminsController {
 
     @Post()
     @Roles(UserRole.SUPER_ADMIN)
-    
-    async createAdmin(@Body() dto: AdminSignupDto, @Res() res) {
-        return await this.AdminsService.createAdmin(dto, res);
+    async createAdmin(@Body() dto: AdminSignupDto) {
+        return await this.AdminsService.createAdmin(dto);
     }
 
     @Delete(':id')
