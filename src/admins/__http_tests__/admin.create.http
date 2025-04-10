@@ -1,0 +1,18 @@
+@port = {{$dotenv API_PORT}}
+@baseUrl = http://localhost:{{port}}
+@email = admin2@example.com
+@password = Admin$123
+@name = admin1
+@username = admin2
+
+### Create Admin
+POST {{baseUrl}}/admins
+Authorization: Bearer eyJhbGciOiJQUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjIsInRva2VuVHlwZSI6ImFjY2VzcyIsInJvbGUiOiJTVVBFUl9BRE1JTiIsImlhdCI6MTc0NDI2MjU2MywiZXhwIjoxNzQ0MjYzNDYzfQ.ET0-nmV43fUHBtkll1I1imsCet4eq84GyltzFpDkSRsntTeLBCu-H-gTZfTdAkspgJLLXIr5dp16Zp3RmOBUImLGS0oESx-C4oehCVx4YM7RorFGszrV-GIRdb2CyvsPQwbvZZXf8pzzBwS6aEWrrbscM-cfCH5WA6o_fLOBzwzuWKxnUX-cx4DJ9EXxsc0zm_f7JHBgLIKmlHQMG9W180qyajrzN4AW_RhcFTsrjEXTikpsD8zjvRClkky4F4aAbUjD6Z6KomMWHjzKS7oPerPkDUgGb6He58z5RtgqpPPyT7kMnpOn661aKVI7831HOfC_M_bM1HXTy0ZpIIsqwm7XwrCzvIBV9RJxVqrqgurkKJZ22LVhzA0YBDHFTup3v3AZ4RryFoqV7gwjoHBsGC6Jsk0yZMciUBJZ3e5XiPyJmFXrqR-rUb-RAW0Mdesjz8RJD_yZMYx0dGT9rePF3nYlsEoUAzKqXA22sTcUFe-1Ej5_y3To3uA-9LX1HPSXgXERotVhW4eTUfgwCPbD2w2N34OHIHTPTedhaXWr2gkWSuZFI0O9lguQH-pyJegEbQZUdtD2OlxXJRZKb7ebX95-grsclw5WgD8Jfx80cy4R_VN-BG9zz7C1qrLQ1TxSYmzlMFX60_VHK1rG4PK1X8zGFPFmEuPGGGfuD6KJXAo
+Content-Type: application/json
+
+{
+    "email": "{{email}}",
+    "password": "{{password}}",
+    "name": "{{name}}",
+    "username": "{{username}}"
+}

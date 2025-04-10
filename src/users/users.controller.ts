@@ -4,23 +4,33 @@ import { ApprovedStudentGuard } from '@/auth/guards/approved-student.guard';
 import { GetUser } from '@/auth/decorators/get-user.decorator';
 import { JwtAuthGuard } from '@/auth/guards/jwt-auth.guard';
 import { User } from '@prisma/client';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiHeader } from '@nestjs/swagger';
+import {
+  SwaggerUsersController,
+  SwaggerTestApprovedStudent,
+  SwaggerGetUserBookmarks,
+  SwaggerGetMe
+} from './decorators/swagger.decorators';
 
+@SwaggerUsersController()
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) { }
 
   @Get('test-approved-student')
-  @UseGuards(ApprovedStudentGuard)
+  @SwaggerTestApprovedStudent()
   testApprovedStudent(@Req() req) {
     return { message: `You are an approved student or an admin ${req.user.sub}!` };
   }
 
   @Get('me/bookmarks')
+  @SwaggerGetUserBookmarks()
   getUserBookmarks(@GetUser('sub') userId) {
     return this.usersService.getUserBookmarks(userId);
   }
 
   @Get('me')
+  @SwaggerGetMe()
   async getMe(@GetUser('sub') userId: number) {
     const userData = await this.usersService.findUserById(userId);
 
@@ -31,5 +41,4 @@ export class UsersController {
     const { id, name, username, email, role } = userData;
     return { id, name, username, email, role };
   }
-
 }

@@ -3,17 +3,17 @@
 @adminId = 3
 
 ### delete admin as super admin
-DELETE {{baseUrl}}/admin/{{adminId}}
+DELETE {{baseUrl}}/admins/{{adminId}}
 Authorization: Bearer accessToken
 
 ### self delete admin
-DELETE {{baseUrl}}/admin/{{adminId}}
+DELETE {{baseUrl}}/admins/{{adminId}}
 Authorization: Bearer accessToken
 
 ### delete super admin (will fail)
-DELETE {{baseUrl}}/admin/{{adminId}}
+DELETE {{baseUrl}}/admins/{{adminId}}
 Authorization: Bearer accessToken
 
 ### delete other admin as a regular admin (will fail)
-DELETE {{baseUrl}}/admin/{{adminId}}
+DELETE {{baseUrl}}/admins/{{adminId}}
 Authorization: Bearer accessToken
