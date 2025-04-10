@@ -77,7 +77,7 @@ If you want to **restrict an endpoint to specific roles**, use the `@Roles()` de
 import { Roles } from '../decorators/role.decorator';
 
 @Controller('admin')
-export class AdminController {
+export class AdminsController {
   @Roles('ADMIN')
   @Get('dashboard')
   getAdminDashboard() {

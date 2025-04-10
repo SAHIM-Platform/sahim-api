@@ -1,5 +1,5 @@
-import { CreateCategoryDto } from '@/admin/dto/create-category.dto';
-import { CategoryNotFoundException } from '@/admin/exceptions/category-not-found.exception';
+import { CreateCategoryDto } from '@/admins/dto/create-category.dto';
+import { CategoryNotFoundException } from '@/admins/exceptions/category-not-found.exception';
 import { AuthUtil } from '@/auth/utils/auth.util';
 import { UsersService } from '@/users/users.service';
 import { BadRequestException, ForbiddenException, Injectable, OnModuleInit, Res } from '@nestjs/common';
@@ -12,7 +12,7 @@ import { StudentQueryDto } from './dto/student-query.dto';
 import { SUPER_ADMIN_EMAIL, SUPER_ADMIN_PASSWORD, SUPER_ADMIN_USERNAME } from './utils/constans';
 
 @Injectable()
-export class AdminService implements OnModuleInit {
+export class AdminsService implements OnModuleInit {
 
     constructor(
         private readonly usersService: UsersService,
