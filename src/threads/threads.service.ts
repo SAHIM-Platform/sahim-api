@@ -16,49 +16,82 @@ import { UpdateCommentDto } from './dto/update-comment.dto';
 import { CommentQueryDto } from './dto/comment-query.dto';
 import { VoteDto } from './dto/vote.dto';
 import { CategoryNotFoundException } from '@/admins/exceptions/category-not-found.exception';
+import { Prisma } from '@prisma/client';
+import { SearchThreadsDto } from './dto/search-threads.dto';
 
 @Injectable()
 export class ThreadsService {
   constructor(private prisma: PrismaService) { }
 
   /**
-   * Searches for threads based on the provided query string.
-   * The search checks for matching titles and content of threads.
-   * The search is case-insensitive.
+   * Searches for threads with pagination and filtering options.
+   * Performs case-insensitive search across thread titles and content.
    * 
-   * @param {string} query - The search query string.
-   * @returns {Promise<Array>} - A list of threads that match the query.
-   * Each thread contains:
-   * - `thread_id`: Unique identifier for the thread.
-   * - `title`: The title of the thread.
-   * - `created_at`: The creation timestamp of the thread.
-   * - `author`: An object with the `id` and `name` of the thread's author.
-   * - `commentsCount`: The number of comments on the thread.
+   * @param {Object} params - Search and pagination parameters
+   * @param {string} params.query - The search query string
+   * @param {SortType} [params.sort=SortType.LATEST] - Sort order (LATEST/OLDEST)
+   * @param {number} [params.page=1] - Current page number (1-based)
+   * @param {number} [params.limit=10] - Number of results per page
+   * @param {number} [params.category_id] - Optional category ID to filter results
+   * @param {number} [userId] - Optional user ID for personalized results (votes/bookmarks)
+   * 
+   * @returns {Promise<{data: ThreadWithDetails[], meta: PaginationMeta}>} - Paginated results
    */
-  async searchThreads(query: string) {
-    return this.prisma.thread.findMany({
-      where: {
-        OR: [
-          { title: { contains: query, mode: 'insensitive' } },
-          { content: { contains: query, mode: 'insensitive' } },
-        ],
-      },
-      select: {
-        thread_id: true,
-        title: true,
-        created_at: true,
-        author: {
-          select: { id: true, name: true },
+  async searchThreads(
+    { query, sort = SortType.LATEST, page = 1, limit = 10, category_id }: SearchThreadsDto,
+    userId?: number
+  ) {
+    const orderBy = {
+      created_at: sort === SortType.LATEST ? 'desc' as const : 'asc' as const,
+    };
+  
+    const where: Prisma.ThreadWhereInput = {
+      AND: [
+        {
+          OR: [
+            { title: { contains: query, mode: 'insensitive' } },
+            { content: { contains: query, mode: 'insensitive' } },
+          ],
         },
-        _count: {
-          select: {
-            comments: true,
-          },
+        ...(category_id ? [{ category_id }] : []),
+      ],
+    };
+  
+    const [threads, total] = await Promise.all([
+      this.prisma.thread.findMany({
+        where,
+        skip: (page - 1) * limit,
+        take: limit,
+        orderBy,
+        include: {
+          author: { select: { id: true, username: true, name: true } },
+          category: true,
+          _count: { select: { comments: true, votes: true } },
+          votes: { select: { vote_type: true, voter_user_id: true } },
+          bookmarks: userId
+            ? { where: { user_id: userId }, select: { user_id: true } }
+            : false,
         },
+      }),
+      this.prisma.thread.count({ where }),
+    ]);
+  
+    return {
+      data: threads.map(({ bookmarks, ...thread }) => ({
+        ...thread,
+        votes: formatVotes(thread.votes, userId),
+        bookmarked: !!(bookmarks?.some(b => b.user_id === userId)),
+      })),
+      meta: { 
+        total, 
+        page, 
+        limit, 
+        totalPages: Math.ceil(total / limit),
+        query, 
       },
-    });
+    };
   }
-
+  
   /**
    * Creates a new thread
    * @param userId - ID of the user creating the thread

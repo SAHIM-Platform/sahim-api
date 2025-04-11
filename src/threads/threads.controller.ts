@@ -48,9 +48,8 @@ export class ThreadsController {
 
   @Get('search')
   @SwaggerSearchThreads()
-  searchThreads(@Query() queryDto: SearchThreadsDto) {
-    const { query } = queryDto;
-    return this.threadsService.searchThreads(query);
+  searchThreads(@GetUser('sub') userId: number,@Query() queryDto: SearchThreadsDto) {
+    return this.threadsService.searchThreads(queryDto, userId);
   }
 
   @Post()

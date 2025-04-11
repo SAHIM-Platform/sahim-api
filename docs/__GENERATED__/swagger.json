@@ -459,6 +459,7 @@
     },
     "/threads/search": {
       "get": {
+        "description": "Case-insensitive search with pagination and optional category filtering",
         "operationId": "ThreadsController_searchThreads",
         "parameters": [
           {
@@ -471,41 +472,121 @@
             }
           },
           {
+            "name": "sort",
+            "required": false,
+            "in": "query",
+            "description": "Sort order (LATEST/OLDEST)",
+            "schema": {
+              "enum": [
+                "latest",
+                "oldest",
+                "most_commented",
+                "most_voted"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "description": "Page number (default: 1)",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "example": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Results per page (default: 10)",
+            "schema": {
+              "minimum": 1,
+              "maximum": 50,
+              "default": 10,
+              "example": 10,
+              "type": "number"
+            }
+          },
+          {
+            "name": "category_id",
+            "required": false,
+            "in": "query",
+            "description": "Filter by category ID",
+            "schema": {
+              "minimum": 1,
+              "example": 5,
+              "type": "number"
+            }
+          },
+          {
             "name": "query",
             "required": true,
             "in": "query",
-            "description": "Search query to find threads by title or content",
+            "description": "Search query",
             "schema": {
               "maxLength": 100,
-              "example": "authentication",
+              "example": "nestjs",
               "type": "string"
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "Threads matching the search query",
+            "description": "Paginated search results",
             "content": {
               "application/json": {
                 "schema": {
-                  "example": [
-                    {
-                      "id": 1,
-                      "title": "Thread Title",
-                      "createdAt": "2025-04-08T03:10:41.929Z",
-                      "author": {
-                        "id": 1,
-                        "name": "User Name"
-                      },
-                      "commentsCount": 0
+                  "example": {
+                    "data": [
+                      {
+                        "thread_id": 1,
+                        "title": "NestJS Question",
+                        "created_at": "2025-04-08T03:10:41.929Z",
+                        "author": {
+                          "id": 1,
+                          "username": "user1",
+                          "name": "User One"
+                        },
+                        "category": {
+                          "category_id": 2,
+                          "name": "Technical Help"
+                        },
+                        "_count": {
+                          "comments": 5,
+                          "votes": 10
+                        },
+                        "votes": {
+                          "score": 7,
+                          "user_vote": "UP",
+                          "counts": {
+                            "up": 7,
+                            "down": 3
+                          }
+                        },
+                        "bookmarked": false
+                      }
+                    ],
+                    "meta": {
+                      "total": 25,
+                      "page": 1,
+                      "limit": 10,
+                      "totalPages": 3,
+                      "query": "nestjs"
                     }
-                  ]
+                  }
                 }
               }
             }
           },
           "400": {
-            "description": "Bad Request - Query parameter is missing or empty"
+            "description": "Bad Request - Invalid query parameters"
+          },
+          "401": {
+            "description": "Unauthorized - Missing/invalid token"
           }
         },
         "security": [
@@ -513,7 +594,7 @@
             "access-token": []
           }
         ],
-        "summary": "Search threads by title or content",
+        "summary": "Search threads",
         "tags": [
           "Threads"
         ]
@@ -1719,43 +1800,6 @@
         },
         "responses": {
           "201": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "access-token": []
-          }
-        ],
-        "tags": [
-          "Admin"
-        ]
-      }
-    },
-    "/admins/{id}": {
-      "delete": {
-        "operationId": "AdminsController_deleteAdmin",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "description": "Bearer token for authentication",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "number"
-            }
-          }
-        ],
-        "responses": {
-          "201": {
             "description": "Admin user created successfully",
             "content": {
               "application/json": {
@@ -1787,6 +1831,51 @@
           }
         ],
         "summary": "Create a new admin user",
+        "tags": [
+          "Admin"
+        ]
+      }
+    },
+    "/admins/{id}": {
+      "delete": {
+        "operationId": "AdminsController_deleteAdmin",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "Bearer token for authentication",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Admin user ID",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Admin user deleted successfully"
+          },
+          "400": {
+            "description": "Bad Request - Admin not found or attempting to delete a Super Admin"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient permissions or trying to delete another admin"
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ],
+        "summary": "Delete an admin user",
         "tags": [
           "Admin"
         ]
@@ -2146,6 +2235,118 @@
           }
         ],
         "summary": "Get all students with optional filtering",
+        "tags": [
+          "Admin"
+        ]
+      }
+    },
+    "/admins/users/students/search": {
+      "get": {
+        "description": "Search by name or academic number",
+        "operationId": "AdminsController_searchStudents",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "Bearer token for authentication",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "query",
+            "required": true,
+            "in": "query",
+            "description": "Search term",
+            "schema": {
+              "example": "123",
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "description": "Page number",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "example": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Items per page",
+            "schema": {
+              "minimum": 1,
+              "maximum": 50,
+              "default": 10,
+              "example": 10,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Student search results",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": [
+                    {
+                      "id": 4,
+                      "name": "Name",
+                      "email": "example@gmail.com",
+                      "student": {
+                        "id": 3,
+                        "userId": 4,
+                        "academicNumber": "1112345678910",
+                        "department": "IT",
+                        "studyLevel": 1,
+                        "approvalStatus": "PENDING",
+                        "approvalUpdatedByUserId": null
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "statusCode": 400,
+                    "message": [
+                      "query must be a string",
+                      "page must not be less than 1",
+                      "limit must not be greater than 50"
+                    ],
+                    "error": "Bad Request"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Admin access required"
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ],
+        "summary": "Search students",
         "tags": [
           "Admin"
         ]

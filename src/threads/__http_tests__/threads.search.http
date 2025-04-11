@@ -1,9 +1,9 @@
 @port = {{$dotenv API_PORT}}
 @baseUrl = http://localhost:{{port}}
-@authToken = 
-@query = 
+@authToken = eyJhbGciOiJQUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsInRva2VuVHlwZSI6ImFjY2VzcyIsInJvbGUiOiJTVVBFUl9BRE1JTiIsImlhdCI6MTc0NDMyODM0NCwiZXhwIjoxNzQ0MzI5MjQ0fQ.FZ22_6RhJqhcNql9K_B_MFPhaj3_NV7hQ2ohF4CzfYIQxp5JuruYUJdnqK_ZShYrOwqLabQxQ4arSjjJ67R2ArObBgCBnoG8tAZNMVe81qibuKDvru7hnNC70uJsV6CGMyPxH_6CK1asj2OGqBN4v5FgD5mTfBLMT77m4_MXHEBkJWE4P1PyGMDmXLWUaNOmnIQfWTHaQ1XEDMP2qVeSJgxyS443XUmoiFC-wbCs5djyfkztIaqeye1FwbReGVNHIcVFgW-PPop4BPiFXY-rM4Tmnkp6XYrwfD-eWP5CCSCO4zCTSXrr-wGfQyswDfUcZ-KtDpmzeQNGlf-A8ry9xBjn-m1six6f1XJoJeZy7uoKJlj8cFKxPm4qc61BUoELCugpftZ6hVsKSZZCfw_wvK5Ru4JAkLnAAAeIQw8mfVTwe73NA5mcdLENw5TjnznulDGVoS-O_GbBLgI-RSKymFrXdp7-jsheCbcPIqxYWBNtT2TJPgdQFBWycgqjJFDFhEziu-Wy09_RN3ItfFO-WqTzyeX-KvawVoPNdE2WBX3XXQYTmCAWICkpExG1-hRsojo5Y9WVnnDzKtszdIMcWPmBFArINvY5xj8Pvf-iyMj_ytUZTm7bJlx6kEN0d9qhJHLAihNLwj8MkOdnbmcr5pzosYZCDNZYYRIXWD1lEIA
+@query = thread
 
 
-GET {{baseUrl}}/threads/search?query="  "
+GET {{baseUrl}}/threads/search?query={{query}}&limit=2&page=2&sort=latest&category_id=1
 Authorization: Bearer {{authToken}}
 Accept: application/json
