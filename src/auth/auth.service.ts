@@ -98,7 +98,8 @@ export class AuthService {
       user: {
         id: createdUser.id,
         name: createdUser.name,
-        username: createdUser.username
+        username: createdUser.username,
+        role: createdUser.role,
       }
     };
   }
@@ -139,7 +140,8 @@ export class AuthService {
       user: {
         id: user.id,
         name: user.name,
-        username: user.username
+        username: user.username,
+        role: user.role
       }
     };
   }
