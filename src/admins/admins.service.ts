@@ -10,6 +10,7 @@ import { UpdateCategoryDto } from './dto/update-category.dto';
 import { CategoryAlreadyExistsException } from './exceptions/category-already-exists.exception';
 import { StudentQueryDto } from './dto/student-query.dto';
 import { SUPER_ADMIN_EMAIL, SUPER_ADMIN_PASSWORD, SUPER_ADMIN_USERNAME } from './utils/constans';
+import { StudentSearchQueryDto } from './dto/search-student-query.dto';
 
 @Injectable()
 export class AdminsService implements OnModuleInit {
@@ -293,4 +294,31 @@ export class AdminsService implements OnModuleInit {
       },
     });
   }
+
+
+    async searchStudents(query: StudentSearchQueryDto) {
+        const { query: searchTerm, page = 1, limit = 10 } = query;
+        const skip = (page - 1) * limit;
+    
+        return this.prisma.user.findMany({
+        where: {
+            role: UserRole.STUDENT,
+            OR: [ 
+                {name: {contains: searchTerm, mode: 'insensitive'} },
+                { student: {academicNumber: {contains: searchTerm, mode: 'insensitive'}} }  
+            ]
+        },
+        skip,
+        take: limit,
+        select: {
+            id: true,
+            name: true,
+            email: true,
+            student: true,
+        },
+        orderBy: {
+            name: 'asc'
+        }
+        });
+    }
 }
