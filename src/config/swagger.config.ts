@@ -16,9 +16,9 @@ export const setupSwagger = (app: INestApplication) => {
   });
   
   // Generate static documentation files in development
-  if (process.env.NODE_ENV === 'development') {
-    generateStaticDocs(document);
-  }
+  // if (process.env.NODE_ENV === 'development') {
+  //   generateStaticDocs(document);
+  // }
 };
 
 /**
@@ -27,7 +27,7 @@ export const setupSwagger = (app: INestApplication) => {
  */
 const generateStaticDocs = (document: any) => {
   // Create docs directory if it doesn't exist
-  const docsDir = path.join(process.cwd(), 'docs');
+  const docsDir = path.join(process.cwd(), 'docs', '__GENERATED__');
   if (!fs.existsSync(docsDir)) {
     fs.mkdirSync(docsDir, { recursive: true });
   }
