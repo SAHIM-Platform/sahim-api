@@ -16,9 +16,9 @@ export const setupSwagger = (app: INestApplication) => {
   });
   
   // Generate static documentation files in development
-  if (process.env.NODE_ENV === 'development') {
-    generateStaticDocs(document);
-  }
+  // if (process.env.NODE_ENV === 'development') {
+  //   generateStaticDocs(document);
+  // }
 };
 
 /**
