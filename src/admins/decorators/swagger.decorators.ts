@@ -183,3 +183,21 @@ export function SwaggerGetAllStudents() {
     ApiResponse({ status: 403, description: 'Forbidden - Insufficient permissions' })
   );
 }
+
+export function SwaggerSearchStudents() {
+  return applyDecorators(
+    ApiOperation({ summary: 'Search students', description: 'Search by name or academic number' }),
+    ApiQuery({ name: 'query', required: true, example: '123', description: 'Search term' }),
+    ApiQuery({ name: 'page', required: false, example: 1, description: 'Page number' }),
+    ApiQuery({ name: 'limit', required: false, example: 10, description: 'Items per page' }),
+    ApiResponse({ status: 200, description: 'Student search results', schema: { example: [{
+      id: 4, name: "Name", email: "example@gmail.com", student: {
+        id: 3, userId: 4, academicNumber: "1112345678910", department: "IT", studyLevel: 1,
+        approvalStatus: "PENDING", approvalUpdatedByUserId: null
+      }
+    }]}}),
+    ApiResponse({ status: 400, description: 'Bad Request', schema: { example: { statusCode: 400, message: ['query must be a string', 'page must not be less than 1', 'limit must not be greater than 50'], error: 'Bad Request' } }}),
+    ApiResponse({ status: 401, description: 'Unauthorized' }),
+    ApiResponse({ status: 403, description: 'Admin access required' })
+  );
+}
