@@ -16,8 +16,10 @@ import {
     SwaggerCreateCategory,
     SwaggerDeleteCategory,
     SwaggerUpdateCategory,
-    SwaggerGetAllStudents
+    SwaggerGetAllStudents,
+    SwaggerSearchStudents
 } from './decorators/swagger.decorators';
+import { StudentSearchQueryDto } from './dto/search-student-query.dto';
 
 @SwaggerAdminController()
 @Controller('admins')
@@ -25,6 +27,7 @@ export class AdminsController {
     constructor (private readonly adminsService: AdminsService) {}
 
     @Post()
+    @SwaggerCreateAdmin()
     @Roles(UserRole.SUPER_ADMIN)
     async createAdmin(@Body() dto: AdminSignupDto) {
         return await this.adminsService.createAdmin(dto);
@@ -32,7 +35,7 @@ export class AdminsController {
 
     @Delete(':id')
     @Roles(UserRole.SUPER_ADMIN, UserRole.ADMIN)
-    @SwaggerCreateAdmin()
+    @SwaggerDeleteAdmin()
     async deleteAdmin(@GetUser() user, @Param('id', ParseIntPipe) adminId: number) {
         return await this.adminsService.deleteAdmin(adminId, user.id, user.role);
     }
@@ -80,5 +83,12 @@ export class AdminsController {
     @SwaggerGetAllStudents()
     async getAllStudents(@Query() query: StudentQueryDto) {
         return await this.adminsService.getAllStudents(query);
+    }
+
+    @Get('users/students/search')
+    @SwaggerSearchStudents()
+    @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
+    async searchStudents(@Query() query: StudentSearchQueryDto) {
+        return this.adminsService.searchStudents(query);
     }
 }
