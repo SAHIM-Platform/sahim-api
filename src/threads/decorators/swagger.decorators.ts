@@ -9,6 +9,7 @@ import {
   ApiQuery, 
   ApiBody 
 } from '@nestjs/swagger';
+import { SortType } from '../enum/sort-type.enum';
 
 /**
  * Base API documentation decorator for threads controller
@@ -240,24 +241,28 @@ export function SwaggerUnbookmarkThread() {
 
 export function SwaggerSearchThreads() {
   return applyDecorators(
-    ApiOperation({ summary: 'Search threads by title or content' }),
-    ApiResponse({ 
-      status: 200, 
-      description: 'Threads matching the search query',
-      schema: {
-        example: [{
-          id: 1,
-          title: 'Thread Title',
-          createdAt: '2025-04-08T03:10:41.929Z',
-          author: {
-            id: 1,
-            name: 'User Name'
-          },
-          commentsCount: 0
-        }]
-      }
+    ApiOperation({ summary: 'Search threads', description: 'Case-insensitive search with pagination and optional category filtering' }),
+    ApiQuery({ name: 'query', type: String, required: true, description: 'Search query', example: 'nestjs' }),
+    ApiQuery({ name: 'page', type: Number, required: false, description: 'Page number (default: 1)', example: 1 }),
+    ApiQuery({ name: 'limit', type: Number, required: false, description: 'Results per page (default: 10)', example: 10 }),
+    ApiQuery({ name: 'category_id', type: Number, required: false, description: 'Filter by category ID', example: 5 }),
+    ApiQuery({ name: 'sort', enum: SortType, required: false, description: 'Sort order (LATEST/OLDEST)', example: SortType.LATEST }),
+    ApiResponse({
+      status: 200, description: 'Paginated search results',
+      schema: { example: {
+        data: [{
+          thread_id: 1, title: 'NestJS Question', created_at: '2025-04-08T03:10:41.929Z',
+          author: { id: 1, username: 'user1', name: 'User One' },
+          category: { category_id: 2, name: 'Technical Help' },
+          _count: { comments: 5, votes: 10 },
+          votes: { score: 7, user_vote: 'UP', counts: { up: 7, down: 3 } },
+          bookmarked: false
+        }],
+        meta: { total: 25, page: 1, limit: 10, totalPages: 3, query: 'nestjs' }
+      }}
     }),
-    ApiResponse({ status: 400, description: 'Bad Request - Query parameter is missing or empty' })
+    ApiResponse({ status: 400, description: 'Bad Request - Invalid query parameters' }),
+    ApiResponse({ status: 401, description: 'Unauthorized - Missing/invalid token' }),
   );
 }
 
