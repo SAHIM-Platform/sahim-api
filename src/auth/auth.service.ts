@@ -176,12 +176,12 @@ export class AuthService {
    * @param res - The response object used to set the new refresh token in a cookie.
    *
    * @throws {UnauthorizedException} If the refresh token is invalid, expired, or mismatched.
-   * @returns {Promise<{ accessToken: string }>} The new access token.
+   * @returns {Promise<AuthResponse>} Authentication response containing the new access token and user details.
    */
   async refreshToken(
     oldRefreshToken: string,
     @Res() res: Response,
-  ): Promise<{ accessToken: string }> {
+  ): Promise<AuthResponse> {
     const encryptedToken = this.authUtil.hashToken(oldRefreshToken);
 
     const storedToken = await this.prisma.refreshToken.findUnique({
@@ -222,7 +222,15 @@ export class AuthService {
 
     this.authUtil.cleanupExpiredTokens().catch(console.error);
 
-    return { accessToken: tokens.accessToken };
+    return { 
+      accessToken: tokens.accessToken,
+      user: {
+        id: storedToken.user.id,
+        name: storedToken.user.name,
+        username: storedToken.user.username,
+        role: storedToken.user.role,
+      }, 
+    };
   }
 
   /**

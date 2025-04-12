@@ -76,7 +76,13 @@ export function SwaggerRefresh() {
       schema: {
         example: {
           message: 'Access token refreshed successfully',
-          accessToken: 'eyJhbGciOi...'
+          accessToken: 'eyJhbGciOi...', 
+          user: {
+            id: 1,
+            name: 'John Doe',
+            username: 'john_doe',
+            role: 'admin'
+          }
         }
       }
     }),
