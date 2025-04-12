@@ -62,11 +62,11 @@ export class AuthController {
     if (!refreshToken) {
       throw new UnauthorizedException('Refresh token not found in cookies');
     }
-    const { accessToken } = await this.authService.refreshToken(
+    const { accessToken, user } = await this.authService.refreshToken(
       refreshToken,
       res,
     );
-    res.json({ message: 'Access token refreshed successfully', accessToken });
+    res.json({ message: 'Access token refreshed successfully', accessToken, user });
   }
 
   @Post('signout')
