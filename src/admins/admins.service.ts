@@ -234,7 +234,17 @@ export class AdminsService implements OnModuleInit {
           if (!category) {
               throw new CategoryNotFoundException(categoryId);
           }
-  
+
+          // Check if there's at least one thread using this category
+          const threadInUse = await this.prisma.thread.findFirst({
+               where: { category_id: categoryId },
+           });
+
+           if (threadInUse) {
+                // Prevent deletion if there's at least one thread using the category
+               throw new BadRequestException('Cannot delete category that is still in use by threads');
+           }
+
           // Delete the category
           await this.prisma.category.delete({
               where: { category_id: categoryId },

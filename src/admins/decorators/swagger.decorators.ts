@@ -120,6 +120,7 @@ export function SwaggerDeleteCategory() {
     ApiOperation({ summary: 'Delete a category' }),
     ApiParam({ name: 'id', description: 'Category ID', type: 'number' }),
     ApiResponse({ status: 200, description: 'Category deleted successfully' }),
+    ApiResponse({ status: 400, description: 'Bad Request - Cannot delete category that is still in use by threads' }),
     ApiResponse({ status: 404, description: 'Not Found - Category not found' }),
     ApiResponse({ status: 403, description: 'Forbidden - Insufficient permissions' })
   );
