@@ -125,7 +125,10 @@ export function SwaggerGetMe() {
           name: 'User Name',
           username: 'username',
           email: 'user@example.com',
-          role: 'STUDENT'
+          role: 'STUDENT',
+          academicNumber: '123456789',   
+          department: 'Computer Science', 
+          level: 2                        
         }
       }
     }),
@@ -133,3 +136,4 @@ export function SwaggerGetMe() {
     ApiResponse({ status: 404, description: 'User not found' })
   );
 }
+
