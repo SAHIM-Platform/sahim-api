@@ -305,19 +305,38 @@ export class AdminsService implements OnModuleInit {
     });
   }
 
-
+    /**
+     * Searches for students by name or academic number, with an optional filter for approval status.
+     * 
+     * @param {StudentSearchQueryDto} query - The query parameters for the student search.
+     * @param {string} query.query - The search term (name or academic number) to filter students.
+     * @param {number} [query.page=1] - The page number for pagination (defaults to 1).
+     * @param {number} [query.limit=10] - The number of students per page (defaults to 10).
+     * @param {ApprovalStatus} [query.status] - The approval status to filter students by (optional).
+     * 
+     * @returns {Promise<any[]>} A promise that resolves to an array of students matching the search criteria.
+     * 
+     * @throws {BadRequestException} If any invalid parameter is provided.
+     * 
+     */
     async searchStudents(query: StudentSearchQueryDto) {
-        const { query: searchTerm, page = 1, limit = 10 } = query;
+        const { query: searchTerm, page = 1, limit = 10, status } = query;
         const skip = (page - 1) * limit;
+        
+        const where: any = {
+            role: UserRole.STUDENT,
+            OR: [
+                { name: { contains: searchTerm, mode: 'insensitive' } },
+                { student: { academicNumber: { contains: searchTerm, mode: 'insensitive' } } },
+            ],
+        };
+    
+        if (status) {
+            where.student = { approvalStatus: status };
+        }
     
         return this.prisma.user.findMany({
-        where: {
-            role: UserRole.STUDENT,
-            OR: [ 
-                {name: {contains: searchTerm, mode: 'insensitive'} },
-                { student: {academicNumber: {contains: searchTerm, mode: 'insensitive'}} }  
-            ]
-        },
+        where,
         skip,
         take: limit,
         select: {
