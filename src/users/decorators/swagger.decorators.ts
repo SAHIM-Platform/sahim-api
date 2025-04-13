@@ -11,6 +11,18 @@ import {
 import { SortType } from '@/threads/enum/sort-type.enum';
 import { UpdateMeDto } from '../dto/update-me.dto';
 
+
+import { ApiOperation, ApiResponse } from '@nestjs/swagger';
+
+export const SwaggerGetAllAdmins = () => {
+  return applyDecorators(
+    ApiOperation({ summary: 'Get all admins (ADMIN + SUPER_ADMIN)' }),
+    ApiResponse({ status: 200, description: 'List of admin users retrieved successfully' }),
+    ApiResponse({ status: 403, description: 'Forbidden. Only SUPER_ADMINs are allowed.' }),
+  );
+};
+
+
 export function SwaggerUsersController() {
   return applyDecorators(
     ApiTags('Users'),
@@ -22,6 +34,10 @@ export function SwaggerUsersController() {
     })
   );
 }
+
+
+
+
 
 export function SwaggerTestApprovedStudent() {
   return applyDecorators(
@@ -128,9 +144,9 @@ export function SwaggerGetMe() {
           username: 'username',
           email: 'user@example.com',
           role: 'STUDENT',
-          academicNumber: '123456789',   
-          department: 'Computer Science', 
-          level: 2                        
+          academicNumber: '123456789',
+          department: 'Computer Science',
+          level: 2
         }
       }
     }),
