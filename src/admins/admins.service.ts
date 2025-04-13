@@ -269,32 +269,53 @@ export class AdminsService implements OnModuleInit {
     });
 
   }
-
+ /**
+  * Retrieves a paginated list of students with optional approval status filter.
+  * 
+  * @param {StudentQueryDto} query - Pagination and filter parameters.
+  * @param {number} [query.page=1] - Page number.
+  * @param {number} [query.limit=10] - Students per page.
+  * @param {ApprovalStatus} [query.status] - Optional approval status filter.
+  * 
+  * @returns {Promise<{ data: Array<Object>, meta: Object }>} - Paginated list of students and metadata.
+  */
   async getAllStudents(query: StudentQueryDto) {
     const { page = 1, limit = 10, status } = query;
-
-    let orderBy: any = { createdAt: 'desc' }; 
-
+    const skip = (page - 1) * limit;
+  
     const where: any = { role: UserRole.STUDENT };
-
+  
     if (status) {
-        where.student = { approvalStatus: status };
+      where.student = { approvalStatus: status };
     }
-
-    return this.prisma.user.findMany({
-      where,
-      skip: (page - 1) * limit,
-      take: limit,
-      orderBy,
-      select: {
-        id: true,
-      name: true,
-      email: true, 
-      student: true,
+  
+    const [students, total] = await Promise.all([
+      this.prisma.user.findMany({
+        where,
+        skip,
+        take: limit,
+        orderBy: { createdAt: 'desc' },
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          student: true,
+        },
+      }),
+      this.prisma.user.count({ where }),
+    ]);
+  
+    return {
+      data: students,
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
       },
-    });
+    };
   }
-
+  
 
     async searchStudents(query: StudentSearchQueryDto) {
         const { query: searchTerm, page = 1, limit = 10 } = query;
