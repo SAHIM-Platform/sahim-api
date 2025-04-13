@@ -1,4 +1,4 @@
-import { Controller, Get, NotFoundException, Req, UseGuards, Query } from '@nestjs/common';
+import { Controller, Get, NotFoundException, Req, UseGuards, Query, Body, Delete } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { ApprovedStudentGuard } from '@/auth/guards/approved-student.guard';
 import { GetUser } from '@/auth/decorators/get-user.decorator';
@@ -9,9 +9,11 @@ import {
   SwaggerUsersController,
   SwaggerTestApprovedStudent,
   SwaggerGetUserBookmarks,
-  SwaggerGetMe
+  SwaggerGetMe,
+  SwaggerDeleteMe
 } from './decorators/swagger.decorators';
 import { BookmarksQueryDto } from './dto/bookmarks-query.dto';
+import { DeleteMeDto } from './dto/delete-me.dto';
 
 @SwaggerUsersController()
 @Controller('users')
@@ -44,5 +46,12 @@ export class UsersController {
 
     const { id, name, username, email, role } = userData;
     return { id, name, username, email, role };
+  }
+
+  @Delete('me')
+  @SwaggerDeleteMe()
+  async deleteMe(@GetUser('sub') userId: number, @Body() dto: DeleteMeDto) {
+    await this.usersService.deleteUserAccount(userId, dto.password);
+    return { message: 'Account deleted successfully' };
   }
 }

@@ -5,7 +5,8 @@ import {
   ApiHeader,
   ApiOperation,
   ApiResponse,
-  ApiQuery
+  ApiQuery,
+  ApiBody
 } from '@nestjs/swagger';
 import { SortType } from '@/threads/enum/sort-type.enum';
 
@@ -131,5 +132,15 @@ export function SwaggerGetMe() {
     }),
     ApiResponse({ status: 401, description: 'Unauthorized' }),
     ApiResponse({ status: 404, description: 'User not found' })
+  );
+}
+
+export function SwaggerDeleteMe() {
+  return applyDecorators(
+    ApiOperation({ summary: 'Delete current user account' }),
+    ApiBody({ schema: { example: { password: 'currentPassword123' } } }),
+    ApiResponse({ status: 200, description: 'User deleted successfully' }),
+    ApiResponse({ status: 400, description: 'Bad request' }),
+    ApiResponse({ status: 401, description: 'Unauthorized' }),
   );
 }

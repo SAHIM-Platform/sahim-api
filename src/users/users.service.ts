@@ -1,10 +1,11 @@
 import { SignupAuthDto } from '@/auth/dto/signup-auth.dto';
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PrismaService } from 'prisma/prisma.service';
 import { ThreadsService } from '@/threads/threads.service';
 import { formatVotes } from '@/threads/utils/threads.utils';
 import { BookmarksQueryDto } from './dto/bookmarks-query.dto';
 import { SortType } from '@/threads/enum/sort-type.enum';
+import * as bcrypt from 'bcryptjs';
 
 @Injectable()
 export class UsersService {
@@ -127,5 +128,27 @@ export class UsersService {
         totalPages: Math.ceil(total / limit) 
       },
     };
+  }
+
+  async deleteUserAccount(userId: number, password: string) {
+    // Validate the password first
+    const validPassword = await this.validatePassword(userId, password);
+    if (!validPassword) {
+      throw new UnauthorizedException('Incorrect password');
+    }
+
+    // If password matches, delete the user
+    return await this.prisma.user.delete({
+      where: { id: userId },
+    });
+  }
+
+  async validatePassword(userId: number, password: string): Promise<boolean> {
+    const user = await this.findUserById(userId);
+    if (!user) {
+      return false;
+    }
+
+    return bcrypt.compare(password, user.password); 
   }
 }
