@@ -1,0 +1,15 @@
+@port = {{$dotenv API_PORT}}
+@baseUrl = http://localhost:{{port}}
+@accessToken = eyJhbGciOiJQUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsInRva2VuVHlwZSI6ImFjY2VzcyIsInJvbGUiOiJTVVBFUl9BRE1JTiIsImlhdCI6MTc0NDUxMDg1NywiZXhwIjoxNzQ0NTExNzU3fQ.klT3JcFJcdDwTgMfeZd7u4xKwt4zLXYiq2ti21mjDz7Gd0o3UOZub4sk0lGto8orNecGw3PdoH_tI24RK5HYT4pB7S8kmcItUYeG0Uzpg9dhy2IcCFTDV1Z62XDnYdGUR2HEc_0J4HtFqFT5ExSPuDcCM47FoQNVSf5KklRw8m-Hmc5VUDepvSeO7pepBt6jFH7Hoc2WxMroLoAIt0sAmL3SNoUQWUPV3RfAVna1Loyh8jNkR0wc99LA12QrJVJ5uETZQCSPTg6n9NlodSpwUIJzYrzrOruRxMT4ACk2tURBb5Sps1mm22h-RbNZzXxaxoXB-mSlAAV3hrRNMi3OcvOmaWKv6Mk6FR9Iio3NAwCKZMYOO2qp_wzQo8xJbcl6_eA7ck4f9dgqIfhD2j-nZDAljtDj4q5sLG8mgATRg1jSbzjsBhh8YNGXI0ngvbo0SUNPe3lZdNGoMnZOuCyQIycBfFtOxJdYH6mzv5MyS1C1C8OAVbaDaRPaCqjoqXGSvFCM33SLFieodO5WBRcwSKuAm_pLfBASOmW0flmNRidwVuOZwfroEPbIeb42Iig8YLkm9LVvzTxwJuJVvM1mQ9IHmGfQcocsy0DmVVIlIOrpQmd_81i6MqUt9ou79jSeRu6i6axnlWruO4VroI6qknHwZRytntK9Cji-BVq_wCY
+
+@newName = Super Admin
+
+
+### Test Approved Student Access
+PATCH  {{baseUrl}}/users/me
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+    "name": "{{newName}}"
+}

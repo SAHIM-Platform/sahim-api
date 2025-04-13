@@ -5,9 +5,11 @@ import {
   ApiHeader,
   ApiOperation,
   ApiResponse,
-  ApiQuery
+  ApiQuery,
+  ApiBody
 } from '@nestjs/swagger';
 import { SortType } from '@/threads/enum/sort-type.enum';
+import { UpdateMeDto } from '../dto/update-me.dto';
 
 export function SwaggerUsersController() {
   return applyDecorators(
@@ -131,5 +133,27 @@ export function SwaggerGetMe() {
     }),
     ApiResponse({ status: 401, description: 'Unauthorized' }),
     ApiResponse({ status: 404, description: 'User not found' })
+  );
+}
+
+export function SwaggerUpdateMe() {
+  return applyDecorators(
+    ApiOperation({ summary: 'Update current user profile (name and username only)' }),
+    ApiBody({ type: UpdateMeDto }),
+    ApiResponse({
+      status: 200,
+      description: 'User updated successfully',
+      schema: {
+        example: {
+          id: 1,
+          name: 'Updated Name',
+          username: 'updatedUsername',
+          email: 'user@example.com',
+          role: 'STUDENT',
+        },
+      },
+    }),
+    ApiResponse({ status: 400, description: 'Username is already taken' }),
+    ApiResponse({ status: 401, description: 'Unauthorized' }),
   );
 }
