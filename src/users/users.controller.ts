@@ -1,4 +1,4 @@
-import { Controller, Get, NotFoundException, Req, UseGuards, Query } from '@nestjs/common';
+import { Controller, Get, NotFoundException, Req, UseGuards, Query, Body, Patch } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { ApprovedStudentGuard } from '@/auth/guards/approved-student.guard';
 import { GetUser } from '@/auth/decorators/get-user.decorator';
@@ -9,9 +9,11 @@ import {
   SwaggerUsersController,
   SwaggerTestApprovedStudent,
   SwaggerGetUserBookmarks,
-  SwaggerGetMe
+  SwaggerGetMe,
+  SwaggerUpdateMe
 } from './decorators/swagger.decorators';
 import { BookmarksQueryDto } from './dto/bookmarks-query.dto';
+import { UpdateMeDto } from './dto/update-me.dto';
 
 @SwaggerUsersController()
 @Controller('users')
@@ -37,5 +39,11 @@ export class UsersController {
   @SwaggerGetMe()
   async getMe(@GetUser('sub') userId: number) {
     return this.usersService.getUserDetails(userId);
+  }
+
+  @Patch('me')
+  @SwaggerUpdateMe()
+  async updateMe(@GetUser('sub') userId: number, @Body() dto: UpdateMeDto) {
+    return this.usersService.updateMe(userId, dto);
   }
 }

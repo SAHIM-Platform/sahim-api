@@ -1,10 +1,11 @@
 import { SignupAuthDto } from '@/auth/dto/signup-auth.dto';
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'prisma/prisma.service';
 import { ThreadsService } from '@/threads/threads.service';
 import { formatVotes } from '@/threads/utils/threads.utils';
 import { BookmarksQueryDto } from './dto/bookmarks-query.dto';
 import { SortType } from '@/threads/enum/sort-type.enum';
+import { UpdateMeDto } from './dto/update-me.dto';
 import { UserRole } from '@prisma/client';
 
 @Injectable()
@@ -157,5 +158,27 @@ export class UsersService {
         totalPages: Math.ceil(total / limit) 
       },
     };
+  }
+
+  async updateMe(userId: number, dto: UpdateMeDto) {
+    const { name, username } = dto;
+  
+    // Check if username is taken (if provided)
+    if (username) {
+      const existing = await this.findUserByUsername(username);
+      if (existing) {
+        throw new BadRequestException('Username is already taken');
+      }
+    }
+  
+    const updatedUser = await this.prisma.user.update({
+      where: { id: userId },
+      data: {
+        name,
+        username,
+      },
+    });
+  
+    return this.sanitizeUser(updatedUser);
   }
 }
