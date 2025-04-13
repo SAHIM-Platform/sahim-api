@@ -1,6 +1,6 @@
 import { CreateCategoryDto } from '@/admins/dto/create-category.dto';
 import { Roles } from '@/auth/decorators/role.decorator';
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Query, Req, Res} from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Query, Req, Res } from '@nestjs/common';
 import { UserRole } from '@prisma/client';
 import { AdminsService } from './admins.service';
 import { AdminSignupDto } from './dto/create-admin.dto';
@@ -24,7 +24,17 @@ import { StudentSearchQueryDto } from './dto/search-student-query.dto';
 @SwaggerAdminController()
 @Controller('admins')
 export class AdminsController {
-    constructor (private readonly adminsService: AdminsService) {}
+
+
+    constructor(private readonly adminsService: AdminsService) { }
+
+
+    @Get()
+    @Roles(UserRole.SUPER_ADMIN)
+    async getAllAdmins() {
+        return this.adminsService.getAllAdmins();
+    }
+
 
     @Post()
     @SwaggerCreateAdmin()
@@ -50,14 +60,14 @@ export class AdminsController {
     @Patch('students/:id/reject')
     @Roles(UserRole.SUPER_ADMIN, UserRole.ADMIN)
     @SwaggerRejectStudent()
-    async rejectStudent(@GetUser('sub') userId,@Param('id', ParseIntPipe) studentId: number) {
+    async rejectStudent(@GetUser('sub') userId, @Param('id', ParseIntPipe) studentId: number) {
         return await this.adminsService.rejectStudent(studentId, userId);
     }
 
     @Post('categories')
     @Roles(UserRole.SUPER_ADMIN, UserRole.ADMIN)
     @SwaggerCreateCategory()
-    async createCategory(@GetUser('sub') userId: number,@Body() input: CreateCategoryDto) {
+    async createCategory(@GetUser('sub') userId: number, @Body() input: CreateCategoryDto) {
         return await this.adminsService.createCategory(input, userId);
     }
 
@@ -72,8 +82,8 @@ export class AdminsController {
     @Roles(UserRole.SUPER_ADMIN, UserRole.ADMIN)
     @SwaggerUpdateCategory()
     async updateCategory(
-    @Param('id') categoryId: number,
-    @Body() input: UpdateCategoryDto
+        @Param('id') categoryId: number,
+        @Body() input: UpdateCategoryDto
     ) {
         return this.adminsService.updateCategory(categoryId, input);
     }
