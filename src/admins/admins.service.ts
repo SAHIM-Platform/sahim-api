@@ -19,7 +19,46 @@ export class AdminsService implements OnModuleInit {
         private readonly usersService: UsersService,
         private readonly prisma: PrismaService,
         private readonly authUtil: AuthUtil
-    ) {}
+    ) { }
+
+
+    async getAllAdmins() {
+        const admins = await this.prisma.user.findMany({
+            where: {
+                role: UserRole.ADMIN,
+            },
+            select: {
+                id: true,
+                name: true,
+                email: true,
+                username: true,
+                createdAt: true,
+            },
+            orderBy: {
+                createdAt: 'desc',
+            },
+        });
+
+        const superAdmins = await this.prisma.user.findMany({
+            where: {
+                role: UserRole.SUPER_ADMIN,
+            },
+            select: {
+                id: true,
+                name: true,
+                email: true,
+                username: true,
+                createdAt: true,
+            },
+            orderBy: {
+                createdAt: 'desc',
+            },
+        });
+
+        return [...superAdmins, ...admins];
+    }
+
+
 
     /**
      * Lifecycle hook that runs when the module initializes.
@@ -41,7 +80,7 @@ export class AdminsService implements OnModuleInit {
         }
 
         const existingSuperAdmin = await this.usersService.findUserByEmailOrUsername(
-            SUPER_ADMIN_EMAIL, 
+            SUPER_ADMIN_EMAIL,
             SUPER_ADMIN_USERNAME
         );
 
@@ -54,7 +93,7 @@ export class AdminsService implements OnModuleInit {
                     username: SUPER_ADMIN_USERNAME,
                     name: 'Super Admin',
                     password: hashedPassword,
-                    role: UserRole.SUPER_ADMIN, 
+                    role: UserRole.SUPER_ADMIN,
                 },
             });
 
@@ -125,10 +164,10 @@ export class AdminsService implements OnModuleInit {
      * @returns {Promise<{ message: string }>} Success message.
      * @throws {BadRequestException} If the student does not exist, is not a student, or is already approved.
      */
-    async approveStudent(studentId: number , adminUserId: number) {
+    async approveStudent(studentId: number, adminUserId: number) {
         const student = await this.prisma.student.findUnique({
             where: { id: studentId },
-            include: { user: true }  
+            include: { user: true }
         });
 
         if (!student) {
@@ -145,8 +184,8 @@ export class AdminsService implements OnModuleInit {
 
         await this.prisma.student.update({
             where: { id: studentId },
-            data: { approvalStatus: ApprovalStatus.APPROVED , approvalUpdatedByUserId: adminUserId},
-            
+            data: { approvalStatus: ApprovalStatus.APPROVED, approvalUpdatedByUserId: adminUserId },
+
         });
 
         return { message: "Student approved successfully" };
@@ -161,7 +200,7 @@ export class AdminsService implements OnModuleInit {
     async rejectStudent(studentId: number, adminUserId: number) {
         const student = await this.prisma.student.findUnique({
             where: { id: studentId },
-            include: { user: true }  
+            include: { user: true }
         });
 
         if (!student) {
@@ -182,76 +221,77 @@ export class AdminsService implements OnModuleInit {
 
         await this.prisma.student.update({
             where: { id: studentId },
-            data: { approvalStatus: ApprovalStatus.REJECTED,
-            approvalUpdatedByUserId: adminUserId ,
-            }, 
+            data: {
+                approvalStatus: ApprovalStatus.REJECTED,
+                approvalUpdatedByUserId: adminUserId,
+            },
         });
 
         return { message: "Student rejected successfully" };
     }
 
-        /**
-     * Creates a new category.
-     * @param {CreateCategoryDto} input - The category details.
-     * @returns {Promise<{ id: number, name: string }>} The created category.
-     * @throws {BadRequestException} If a category with the same name already exists.
+    /**
+ * Creates a new category.
+ * @param {CreateCategoryDto} input - The category details.
+ * @returns {Promise<{ id: number, name: string }>} The created category.
+ * @throws {BadRequestException} If a category with the same name already exists.
+ */
+    async createCategory(input: CreateCategoryDto, userId: number) {
+        const { name } = input;
+
+        // Check if category already exists
+        const existingCategory = await this.prisma.category.findUnique({
+            where: { name },
+        });
+
+        if (existingCategory) {
+            throw new CategoryAlreadyExistsException(name);
+        }
+
+        // Create the new category
+        const createdCategory = await this.prisma.category.create({
+            data: {
+                name,
+                author_user_id: userId,
+            },
+        });
+
+        return createdCategory;
+    }
+
+    /**
+     * Deletes a category by its ID.
+     * @param {number} categoryId - The ID of the category to delete.
+     * @returns {Promise<{ message: string }>} Success message.
+     * @throws {CategoryNotFoundException} If the category does not exist.
      */
-        async createCategory(input: CreateCategoryDto, userId: number) {
-          const { name } = input;
-  
-          // Check if category already exists
-          const existingCategory = await this.prisma.category.findUnique({
-              where: { name },
-          });
-  
-          if (existingCategory) {
-              throw new CategoryAlreadyExistsException(name);
-          }
-  
-          // Create the new category
-          const createdCategory = await this.prisma.category.create({
-              data: {
-                  name,
-                  author_user_id: userId,
-              },
-          });
-  
-          return createdCategory;
-      }
-  
-      /**
-       * Deletes a category by its ID.
-       * @param {number} categoryId - The ID of the category to delete.
-       * @returns {Promise<{ message: string }>} Success message.
-       * @throws {CategoryNotFoundException} If the category does not exist.
-       */
-      async deleteCategory(categoryId: number) {
-          // Check if category exists
-          const category = await this.prisma.category.findUnique({
-              where: { category_id: categoryId },
-          });
-  
-          if (!category) {
-              throw new CategoryNotFoundException(categoryId);
-          }
+    async deleteCategory(categoryId: number) {
+        // Check if category exists
+        const category = await this.prisma.category.findUnique({
+            where: { category_id: categoryId },
+        });
 
-          // Check if there's at least one thread using this category
-          const threadInUse = await this.prisma.thread.findFirst({
-               where: { category_id: categoryId },
-           });
+        if (!category) {
+            throw new CategoryNotFoundException(categoryId);
+        }
 
-           if (threadInUse) {
-                // Prevent deletion if there's at least one thread using the category
-               throw new BadRequestException('Cannot delete category that is still in use by threads');
-           }
+        // Check if there's at least one thread using this category
+        const threadInUse = await this.prisma.thread.findFirst({
+            where: { category_id: categoryId },
+        });
 
-          // Delete the category
-          await this.prisma.category.delete({
-              where: { category_id: categoryId },
-          });
-  
-          return { message: 'Category deleted successfully' };
-      }
+        if (threadInUse) {
+            // Prevent deletion if there's at least one thread using the category
+            throw new BadRequestException('Cannot delete category that is still in use by threads');
+        }
+
+        // Delete the category
+        await this.prisma.category.delete({
+            where: { category_id: categoryId },
+        });
+
+        return { message: 'Category deleted successfully' };
+    }
 
     /**
    * Updates an existing category.
@@ -260,71 +300,71 @@ export class AdminsService implements OnModuleInit {
    * @returns {Promise<any>} - The updated category.
    * @throws {CategoryNotFoundException} If category not found.
    */
-  async updateCategory(categoryId: number, input: UpdateCategoryDto) {
-    const { name } = input;
+    async updateCategory(categoryId: number, input: UpdateCategoryDto) {
+        const { name } = input;
 
-    const existingCategory = await this.prisma.category.findUnique({
-      where: { category_id: categoryId },
-    });
+        const existingCategory = await this.prisma.category.findUnique({
+            where: { category_id: categoryId },
+        });
 
-    if (!existingCategory) {
-        throw new CategoryNotFoundException(categoryId);
+        if (!existingCategory) {
+            throw new CategoryNotFoundException(categoryId);
+        }
+
+        return await this.prisma.category.update({
+            where: { category_id: categoryId },
+            data: {
+                name,
+            },
+        });
+
     }
+    /**
+     * Retrieves a paginated list of students with optional approval status filter.
+     * 
+     * @param {StudentQueryDto} query - Pagination and filter parameters.
+     * @param {number} [query.page=1] - Page number.
+     * @param {number} [query.limit=10] - Students per page.
+     * @param {ApprovalStatus} [query.status] - Optional approval status filter.
+     * 
+     * @returns {Promise<{ data: Array<Object>, meta: Object }>} - Paginated list of students and metadata.
+     */
+    async getAllStudents(query: StudentQueryDto) {
+        const { page = 1, limit = 10, status } = query;
+        const skip = (page - 1) * limit;
 
-    return await this.prisma.category.update({
-      where: { category_id: categoryId },
-      data: {
-        name,
-      },
-    });
+        const where: any = { role: UserRole.STUDENT };
 
-  }
- /**
-  * Retrieves a paginated list of students with optional approval status filter.
-  * 
-  * @param {StudentQueryDto} query - Pagination and filter parameters.
-  * @param {number} [query.page=1] - Page number.
-  * @param {number} [query.limit=10] - Students per page.
-  * @param {ApprovalStatus} [query.status] - Optional approval status filter.
-  * 
-  * @returns {Promise<{ data: Array<Object>, meta: Object }>} - Paginated list of students and metadata.
-  */
-  async getAllStudents(query: StudentQueryDto) {
-    const { page = 1, limit = 10, status } = query;
-    const skip = (page - 1) * limit;
-  
-    const where: any = { role: UserRole.STUDENT };
-  
-    if (status) {
-      where.student = { approvalStatus: status };
+        if (status) {
+            where.student = { approvalStatus: status };
+        }
+
+        const [students, total] = await Promise.all([
+            this.prisma.user.findMany({
+                where,
+                skip,
+                take: limit,
+                orderBy: { createdAt: 'desc' },
+                select: {
+                    id: true,
+                    name: true,
+                    email: true,
+                    student: true,
+                },
+            }),
+            this.prisma.user.count({ where }),
+        ]);
+
+        return {
+            data: students,
+            meta: {
+                total,
+                page,
+                limit,
+                totalPages: Math.ceil(total / limit),
+            },
+        };
     }
-  
-    const [students, total] = await Promise.all([
-      this.prisma.user.findMany({
-        where,
-        skip,
-        take: limit,
-        orderBy: { createdAt: 'desc' },
-        select: {
-          id: true,
-          name: true,
-          email: true,
-          student: true,
-        },
-      }),
-      this.prisma.user.count({ where }),
-    ]);
-  
-    return {
-      data: students,
-      meta: {
-        total,
-        page,
-        limit,
-        totalPages: Math.ceil(total / limit),
-      },
-    };
-  }
 
     /**
      * Searches for students by name or academic number, with an optional filter for approval status.
@@ -343,7 +383,7 @@ export class AdminsService implements OnModuleInit {
     async searchStudents(query: StudentSearchQueryDto) {
         const { query: searchTerm, page = 1, limit = 10, status } = query;
         const skip = (page - 1) * limit;
-        
+
         const where: any = {
             role: UserRole.STUDENT,
             OR: [
@@ -351,24 +391,24 @@ export class AdminsService implements OnModuleInit {
                 { student: { academicNumber: { contains: searchTerm, mode: 'insensitive' } } },
             ],
         };
-    
+
         if (status) {
             where.student = { approvalStatus: status };
         }
-    
+
         return this.prisma.user.findMany({
-        where,
-        skip,
-        take: limit,
-        select: {
-            id: true,
-            name: true,
-            email: true,
-            student: true,
-        },
-        orderBy: {
-            name: 'asc'
-        }
+            where,
+            skip,
+            take: limit,
+            select: {
+                id: true,
+                name: true,
+                email: true,
+                student: true,
+            },
+            orderBy: {
+                name: 'asc'
+            }
         });
     }
 }
