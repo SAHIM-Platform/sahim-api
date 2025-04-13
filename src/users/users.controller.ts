@@ -38,14 +38,7 @@ export class UsersController {
   @Get('me')
   @SwaggerGetMe()
   async getMe(@GetUser('sub') userId: number) {
-    const userData = await this.usersService.findUserById(userId);
-
-    if (!userData) {
-      throw new NotFoundException('User not found');
-    }
-
-    const { id, name, username, email, role } = userData;
-    return { id, name, username, email, role };
+    return this.usersService.getUserDetails(userId);
   }
 
   @Patch('me')
