@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { ApprovalStatus } from '@prisma/client';
 import { Type } from 'class-transformer';
-import { IsInt, IsOptional, IsString, Max, Min } from 'class-validator';
+import { IsEnum, IsInt, IsOptional, IsString, Max, Min } from 'class-validator';
 
 export class StudentSearchQueryDto {
   @ApiProperty({
@@ -9,6 +10,15 @@ export class StudentSearchQueryDto {
   })
   @IsString()
   query: string;
+
+   @ApiProperty({
+      description: 'Filter students by approval status',
+      enum: ApprovalStatus,
+      required: false
+    })
+    @IsOptional()
+    @IsEnum(ApprovalStatus)
+    status?: ApprovalStatus;
 
   @ApiProperty({
       description: 'Page number for pagination',
