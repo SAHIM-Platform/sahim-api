@@ -1,10 +1,12 @@
-import { Controller, Get, NotFoundException, Req, UseGuards, Query } from '@nestjs/common';
+import { Controller, Get, NotFoundException, Req, UseGuards, Query, Patch, Body } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { ApprovedStudentGuard } from '@/auth/guards/approved-student.guard';
 import { GetUser } from '@/auth/decorators/get-user.decorator';
 import { JwtAuthGuard } from '@/auth/guards/jwt-auth.guard';
 import { User } from '@prisma/client';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiHeader } from '@nestjs/swagger';
+
+import { UpdateUserDto } from './dto/update-user.dto';
 import {
   SwaggerUsersController,
   SwaggerTestApprovedStudent,
@@ -17,6 +19,19 @@ import { BookmarksQueryDto } from './dto/bookmarks-query.dto';
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) { }
+
+
+  @Patch('me')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Update current user profile' })
+  @ApiResponse({ status: 200, description: 'User updated successfully' })
+  @UseGuards(JwtAuthGuard)
+  async updateMe(
+    @GetUser('sub') userId: number,
+    @Body() updateUserDto: UpdateUserDto,
+  ) {
+    return this.usersService.updateUserProfile(userId, updateUserDto);
+  }
 
   @Get('test-approved-student')
   @SwaggerTestApprovedStudent()
