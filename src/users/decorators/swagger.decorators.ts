@@ -11,9 +11,6 @@ import {
 import { SortType } from '@/threads/enum/sort-type.enum';
 import { UpdateMeDto } from '../dto/update-me.dto';
 
-
-import { ApiOperation, ApiResponse } from '@nestjs/swagger';
-
 export const SwaggerGetAllAdmins = () => {
   return applyDecorators(
     ApiOperation({ summary: 'Get all admins (ADMIN + SUPER_ADMIN)' }),
