@@ -11,7 +11,21 @@ export class UsersService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly threadsService: ThreadsService,
-  ) {}
+  ) { }
+
+  
+  async updateUserProfile(userId: number, updateData: { photo_path?: string; name?: string }) {
+    const updatedUser = await this.prisma.user.update({
+      where: { id: userId },
+      data: updateData,
+    });
+
+    return this.sanitizeUser(updatedUser);
+  }
+
+
+
+
 
   /**
    * Finds a user by their email address.
@@ -74,7 +88,7 @@ export class UsersService {
    */
   async getUserBookmarks(userId: number, query: BookmarksQueryDto = {}) {
     const { sort = SortType.LATEST, page = 1, limit = 10 } = query;
-    
+
     const orderBy = {
       created_at: sort === SortType.LATEST ? 'desc' as const : 'asc' as const,
     };
@@ -120,11 +134,11 @@ export class UsersService {
         votes: formatVotes(thread.votes, userId),
         bookmarked: true, // All threads in this response are bookmarked
       })),
-      meta: { 
-        total, 
-        page, 
-        limit, 
-        totalPages: Math.ceil(total / limit) 
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit)
       },
     };
   }
