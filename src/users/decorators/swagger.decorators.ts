@@ -5,9 +5,20 @@ import {
   ApiHeader,
   ApiOperation,
   ApiResponse,
-  ApiQuery
+  ApiQuery,
+  ApiBody
 } from '@nestjs/swagger';
 import { SortType } from '@/threads/enum/sort-type.enum';
+import { UpdateMeDto } from '../dto/update-me.dto';
+
+export const SwaggerGetAllAdmins = () => {
+  return applyDecorators(
+    ApiOperation({ summary: 'Get all admins (ADMIN + SUPER_ADMIN)' }),
+    ApiResponse({ status: 200, description: 'List of admin users retrieved successfully' }),
+    ApiResponse({ status: 403, description: 'Forbidden. Only SUPER_ADMINs are allowed.' }),
+  );
+};
+
 
 export function SwaggerUsersController() {
   return applyDecorators(
@@ -20,6 +31,10 @@ export function SwaggerUsersController() {
     })
   );
 }
+
+
+
+
 
 export function SwaggerTestApprovedStudent() {
   return applyDecorators(
@@ -125,11 +140,36 @@ export function SwaggerGetMe() {
           name: 'User Name',
           username: 'username',
           email: 'user@example.com',
-          role: 'STUDENT'
+          role: 'STUDENT',
+          academicNumber: '123456789',
+          department: 'Computer Science',
+          level: 2
         }
       }
     }),
     ApiResponse({ status: 401, description: 'Unauthorized' }),
     ApiResponse({ status: 404, description: 'User not found' })
+  );
+}
+
+export function SwaggerUpdateMe() {
+  return applyDecorators(
+    ApiOperation({ summary: 'Update current user profile (name and username only)' }),
+    ApiBody({ type: UpdateMeDto }),
+    ApiResponse({
+      status: 200,
+      description: 'User updated successfully',
+      schema: {
+        example: {
+          id: 1,
+          name: 'Updated Name',
+          username: 'updatedUsername',
+          email: 'user@example.com',
+          role: 'STUDENT',
+        },
+      },
+    }),
+    ApiResponse({ status: 400, description: 'Username is already taken' }),
+    ApiResponse({ status: 401, description: 'Unauthorized' }),
   );
 }

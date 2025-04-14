@@ -1,10 +1,12 @@
 import { SignupAuthDto } from '@/auth/dto/signup-auth.dto';
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'prisma/prisma.service';
 import { ThreadsService } from '@/threads/threads.service';
 import { formatVotes } from '@/threads/utils/threads.utils';
 import { BookmarksQueryDto } from './dto/bookmarks-query.dto';
 import { SortType } from '@/threads/enum/sort-type.enum';
+import { UpdateMeDto } from './dto/update-me.dto';
+import { UserRole } from '@prisma/client';
 
 @Injectable()
 export class UsersService {
@@ -63,6 +65,35 @@ export class UsersService {
   sanitizeUser(user: any): Omit<any, 'password'> {
     const { password, ...sanitizedUser } = user;
     return sanitizedUser;
+  }
+
+  /**
+   * Retrieves the details of the currently authenticated user,
+   * including student-specific fields if the user is a student.
+   * 
+   * @param userId - The ID of the user to fetch details for.
+   * @returns The user details, including role-specific fields.
+   */
+  async getUserDetails(userId: number) {
+    const userData = await this.prisma.user.findUnique({
+      where: { id: userId },
+      include: {
+        student: true, 
+      },
+    });
+
+    if (!userData) {
+      throw new NotFoundException('User not found');
+    }
+
+    const { id, name, username, email, role, student } = userData;
+
+    if (role === UserRole.STUDENT && student) {
+      return { id, name, username, email, role, academicNumber: student.academicNumber, department: student.department, level: student.studyLevel };
+    }
+
+    // Return only general user info for non-students
+    return { id, name, username, email, role };
   }
 
   /**
@@ -127,5 +158,27 @@ export class UsersService {
         totalPages: Math.ceil(total / limit) 
       },
     };
+  }
+
+  async updateMe(userId: number, dto: UpdateMeDto) {
+    const { name, username } = dto;
+  
+    // Check if username is taken (if provided)
+    if (username) {
+      const existing = await this.findUserByUsername(username);
+      if (existing) {
+        throw new BadRequestException('Username is already taken');
+      }
+    }
+  
+    const updatedUser = await this.prisma.user.update({
+      where: { id: userId },
+      data: {
+        name,
+        username,
+      },
+    });
+  
+    return this.sanitizeUser(updatedUser);
   }
 }
