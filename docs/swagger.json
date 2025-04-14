@@ -245,6 +245,96 @@
         ]
       }
     },
+    "/users/me": {
+      "patch": {
+        "operationId": "UsersController_updateMe",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "Bearer token for authentication",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateUserDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User updated successfully"
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Update current user profile",
+        "tags": [
+          "Users"
+        ]
+      },
+      "get": {
+        "operationId": "UsersController_getMe",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "Bearer token for authentication",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User profile information retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "id": 1,
+                    "name": "User Name",
+                    "username": "username",
+                    "email": "user@example.com",
+                    "role": "STUDENT"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "404": {
+            "description": "User not found"
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ],
+        "summary": "Get current user profile",
+        "tags": [
+          "Users"
+        ]
+      }
+    },
     "/users/test-approved-student": {
       "get": {
         "operationId": "UsersController_testApprovedStudent",
@@ -302,6 +392,44 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "sort",
+            "required": false,
+            "in": "query",
+            "description": "Sort order for bookmarked threads",
+            "schema": {
+              "enum": [
+                "latest",
+                "oldest",
+                "most_commented",
+                "most_voted"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "description": "Page number for pagination",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Number of items per page",
+            "schema": {
+              "minimum": 1,
+              "maximum": 50,
+              "default": 10,
+              "type": "number"
+            }
           }
         ],
         "responses": {
@@ -310,11 +438,9 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "example": [
-                    {
-                      "user_id": 1,
-                      "thread_id": 1,
-                      "thread": {
+                  "example": {
+                    "data": [
+                      {
                         "thread_id": 1,
                         "category_id": 1,
                         "author_user_id": 1,
@@ -332,12 +458,27 @@
                           "name": "Category Name"
                         },
                         "_count": {
-                          "comments": 0,
-                          "votes": 0
-                        }
+                          "comments": 5,
+                          "votes": 10
+                        },
+                        "votes": {
+                          "score": 8,
+                          "user_vote": "UP",
+                          "counts": {
+                            "up": 9,
+                            "down": 1
+                          }
+                        },
+                        "bookmarked": true
                       }
+                    ],
+                    "meta": {
+                      "total": 15,
+                      "page": 1,
+                      "limit": 10,
+                      "totalPages": 2
                     }
-                  ]
+                  }
                 }
               }
             }
@@ -354,513 +495,6 @@
         "summary": "Get current user bookmarks",
         "tags": [
           "Users"
-        ]
-      }
-    },
-    "/users/me": {
-      "get": {
-        "operationId": "UsersController_getMe",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "description": "Bearer token for authentication",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "User profile information retrieved successfully",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "example": {
-                    "id": 1,
-                    "name": "User Name",
-                    "username": "username",
-                    "email": "user@example.com",
-                    "role": "STUDENT"
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "404": {
-            "description": "User not found"
-          }
-        },
-        "security": [
-          {
-            "access-token": []
-          }
-        ],
-        "summary": "Get current user profile",
-        "tags": [
-          "Users"
-        ]
-      }
-    },
-    "/admins": {
-      "post": {
-        "operationId": "AdminsController_createAdmin",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "description": "Bearer token for authentication",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/AdminSignupDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "access-token": []
-          }
-        ],
-        "tags": [
-          "Admin"
-        ]
-      }
-    },
-    "/admins/{id}": {
-      "delete": {
-        "operationId": "AdminsController_deleteAdmin",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "description": "Bearer token for authentication",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "number"
-            }
-          }
-        ],
-        "responses": {
-          "201": {
-            "description": "Admin user created successfully",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "example": {
-                    "message": "Admin user created successfully",
-                    "user": {
-                      "id": 1,
-                      "email": "admin@example.com",
-                      "username": "admin1",
-                      "name": "Admin Name",
-                      "role": "ADMIN"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad Request - Admin with this email or username already exists"
-          },
-          "403": {
-            "description": "Forbidden - Insufficient permissions (must be SUPER_ADMIN)"
-          }
-        },
-        "security": [
-          {
-            "access-token": []
-          }
-        ],
-        "summary": "Create a new admin user",
-        "tags": [
-          "Admin"
-        ]
-      }
-    },
-    "/admins/students/{id}/approve": {
-      "patch": {
-        "operationId": "AdminsController_approveStudent",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "description": "Bearer token for authentication",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "description": "Student ID",
-            "schema": {
-              "type": "number"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Student approved successfully"
-          },
-          "400": {
-            "description": "Bad Request - Student not found, not a student, or already approved"
-          },
-          "403": {
-            "description": "Forbidden - Insufficient permissions"
-          }
-        },
-        "security": [
-          {
-            "access-token": []
-          }
-        ],
-        "summary": "Approve a student account",
-        "tags": [
-          "Admin"
-        ]
-      }
-    },
-    "/admins/students/{id}/reject": {
-      "patch": {
-        "operationId": "AdminsController_rejectStudent",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "description": "Bearer token for authentication",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "description": "Student ID",
-            "schema": {
-              "type": "number"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Student rejected successfully"
-          },
-          "400": {
-            "description": "Bad Request - Student not found, not a student, already rejected, or already approved"
-          },
-          "403": {
-            "description": "Forbidden - Insufficient permissions"
-          }
-        },
-        "security": [
-          {
-            "access-token": []
-          }
-        ],
-        "summary": "Reject a student account",
-        "tags": [
-          "Admin"
-        ]
-      }
-    },
-    "/admins/categories": {
-      "post": {
-        "operationId": "AdminsController_createCategory",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "description": "Bearer token for authentication",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateCategoryDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "Category created successfully",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "example": {
-                    "id": 1,
-                    "name": "Category Name",
-                    "description": "Category Description",
-                    "createdAt": "2024-04-09T12:00:00Z",
-                    "updatedAt": "2024-04-09T12:00:00Z"
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad Request - Invalid input data"
-          },
-          "403": {
-            "description": "Forbidden - Insufficient permissions"
-          },
-          "409": {
-            "description": "Conflict - Category with this name already exists"
-          }
-        },
-        "security": [
-          {
-            "access-token": []
-          }
-        ],
-        "summary": "Create a new category",
-        "tags": [
-          "Admin"
-        ]
-      }
-    },
-    "/admins/categories/{id}": {
-      "delete": {
-        "operationId": "AdminsController_deleteCategory",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "description": "Bearer token for authentication",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "description": "Category ID",
-            "schema": {
-              "type": "number"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Category deleted successfully"
-          },
-          "403": {
-            "description": "Forbidden - Insufficient permissions"
-          },
-          "404": {
-            "description": "Not Found - Category not found"
-          }
-        },
-        "security": [
-          {
-            "access-token": []
-          }
-        ],
-        "summary": "Delete a category",
-        "tags": [
-          "Admin"
-        ]
-      },
-      "patch": {
-        "operationId": "AdminsController_updateCategory",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "description": "Bearer token for authentication",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "description": "Category ID",
-            "schema": {
-              "type": "number"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateCategoryDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Category updated successfully",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "example": {
-                    "id": 1,
-                    "name": "Updated Category Name",
-                    "description": "Updated Category Description",
-                    "updatedAt": "2024-04-09T12:00:00Z"
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad Request - Invalid input data"
-          },
-          "403": {
-            "description": "Forbidden - Insufficient permissions"
-          },
-          "404": {
-            "description": "Not Found - Category not found"
-          }
-        },
-        "security": [
-          {
-            "access-token": []
-          }
-        ],
-        "summary": "Update a category",
-        "tags": [
-          "Admin"
-        ]
-      }
-    },
-    "/admins/users/students": {
-      "get": {
-        "operationId": "AdminsController_getAllStudents",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "description": "Bearer token for authentication",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "status",
-            "required": false,
-            "in": "query",
-            "description": "Filter by approval status",
-            "schema": {
-              "enum": [
-                "PENDING",
-                "APPROVED",
-                "REJECTED"
-              ],
-              "type": "string"
-            }
-          },
-          {
-            "name": "page",
-            "required": false,
-            "in": "query",
-            "description": "Page number for pagination",
-            "schema": {
-              "minimum": 1,
-              "default": 1,
-              "example": 1,
-              "type": "number"
-            }
-          },
-          {
-            "name": "limit",
-            "required": false,
-            "in": "query",
-            "description": "Number of items per page",
-            "schema": {
-              "minimum": 1,
-              "maximum": 50,
-              "default": 10,
-              "example": 10,
-              "type": "number"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "List of students retrieved successfully",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "example": {
-                    "data": [
-                      {
-                        "id": 1,
-                        "email": "student@example.com",
-                        "username": "student1",
-                        "name": "Student Name",
-                        "approvalStatus": "PENDING"
-                      }
-                    ],
-                    "meta": {
-                      "total": 1,
-                      "page": 1,
-                      "limit": 10
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Forbidden - Insufficient permissions"
-          }
-        },
-        "security": [
-          {
-            "access-token": []
-          }
-        ],
-        "summary": "Get all students with optional filtering",
-        "tags": [
-          "Admin"
         ]
       }
     },
@@ -2099,6 +1733,464 @@
           "Threads"
         ]
       }
+    },
+    "/admins": {
+      "post": {
+        "operationId": "AdminsController_createAdmin",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "Bearer token for authentication",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminSignupDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ],
+        "tags": [
+          "Admin"
+        ]
+      }
+    },
+    "/admins/{id}": {
+      "delete": {
+        "operationId": "AdminsController_deleteAdmin",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "Bearer token for authentication",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Admin user created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "message": "Admin user created successfully",
+                    "user": {
+                      "id": 1,
+                      "email": "admin@example.com",
+                      "username": "admin1",
+                      "name": "Admin Name",
+                      "role": "ADMIN"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request - Admin with this email or username already exists"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient permissions (must be SUPER_ADMIN)"
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ],
+        "summary": "Create a new admin user",
+        "tags": [
+          "Admin"
+        ]
+      }
+    },
+    "/admins/students/{id}/approve": {
+      "patch": {
+        "operationId": "AdminsController_approveStudent",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "Bearer token for authentication",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Student ID",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Student approved successfully"
+          },
+          "400": {
+            "description": "Bad Request - Student not found, not a student, or already approved"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient permissions"
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ],
+        "summary": "Approve a student account",
+        "tags": [
+          "Admin"
+        ]
+      }
+    },
+    "/admins/students/{id}/reject": {
+      "patch": {
+        "operationId": "AdminsController_rejectStudent",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "Bearer token for authentication",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Student ID",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Student rejected successfully"
+          },
+          "400": {
+            "description": "Bad Request - Student not found, not a student, already rejected, or already approved"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient permissions"
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ],
+        "summary": "Reject a student account",
+        "tags": [
+          "Admin"
+        ]
+      }
+    },
+    "/admins/categories": {
+      "post": {
+        "operationId": "AdminsController_createCategory",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "Bearer token for authentication",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateCategoryDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Category created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "id": 1,
+                    "name": "Category Name",
+                    "description": "Category Description",
+                    "createdAt": "2024-04-09T12:00:00Z",
+                    "updatedAt": "2024-04-09T12:00:00Z"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request - Invalid input data"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient permissions"
+          },
+          "409": {
+            "description": "Conflict - Category with this name already exists"
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ],
+        "summary": "Create a new category",
+        "tags": [
+          "Admin"
+        ]
+      }
+    },
+    "/admins/categories/{id}": {
+      "delete": {
+        "operationId": "AdminsController_deleteCategory",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "Bearer token for authentication",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Category ID",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Category deleted successfully"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient permissions"
+          },
+          "404": {
+            "description": "Not Found - Category not found"
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ],
+        "summary": "Delete a category",
+        "tags": [
+          "Admin"
+        ]
+      },
+      "patch": {
+        "operationId": "AdminsController_updateCategory",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "Bearer token for authentication",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Category ID",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateCategoryDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Category updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "id": 1,
+                    "name": "Updated Category Name",
+                    "description": "Updated Category Description",
+                    "updatedAt": "2024-04-09T12:00:00Z"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request - Invalid input data"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient permissions"
+          },
+          "404": {
+            "description": "Not Found - Category not found"
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ],
+        "summary": "Update a category",
+        "tags": [
+          "Admin"
+        ]
+      }
+    },
+    "/admins/users/students": {
+      "get": {
+        "operationId": "AdminsController_getAllStudents",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "Bearer token for authentication",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "description": "Filter by approval status",
+            "schema": {
+              "enum": [
+                "PENDING",
+                "APPROVED",
+                "REJECTED"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "description": "Page number for pagination",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "example": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Number of items per page",
+            "schema": {
+              "minimum": 1,
+              "maximum": 50,
+              "default": 10,
+              "example": 10,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of students retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "data": [
+                      {
+                        "id": 1,
+                        "email": "student@example.com",
+                        "username": "student1",
+                        "name": "Student Name",
+                        "approvalStatus": "PENDING"
+                      }
+                    ],
+                    "meta": {
+                      "total": 1,
+                      "page": 1,
+                      "limit": 10
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden - Insufficient permissions"
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ],
+        "summary": "Get all students with optional filtering",
+        "tags": [
+          "Admin"
+        ]
+      }
     }
   },
   "info": {
@@ -2214,83 +2306,9 @@
           "password"
         ]
       },
-      "AdminSignupDto": {
+      "UpdateUserDto": {
         "type": "object",
-        "properties": {
-          "email": {
-            "type": "string",
-            "description": "User email address",
-            "example": "user@example.com",
-            "maxLength": 255
-          },
-          "username": {
-            "type": "string",
-            "description": "Username (letters, numbers, underscores and hyphens only)",
-            "example": "johndoe",
-            "minLength": 3,
-            "maxLength": 50
-          },
-          "name": {
-            "type": "string",
-            "description": "User full name",
-            "example": "John Doe",
-            "minLength": 3,
-            "maxLength": 100
-          },
-          "password": {
-            "type": "string",
-            "description": "Password (must contain uppercase, lowercase, number and special character)",
-            "example": "Password123!",
-            "minLength": 8,
-            "maxLength": 72
-          },
-          "role": {
-            "type": "string",
-            "description": "Admin role (defaults to ADMIN)",
-            "enum": [
-              "ADMIN",
-              "STUDENT",
-              "SUPER_ADMIN"
-            ],
-            "default": "ADMIN"
-          }
-        },
-        "required": [
-          "email",
-          "username",
-          "name",
-          "password"
-        ]
-      },
-      "CreateCategoryDto": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string",
-            "description": "Category name",
-            "example": "Programming",
-            "minLength": 2,
-            "maxLength": 50
-          }
-        },
-        "required": [
-          "name"
-        ]
-      },
-      "UpdateCategoryDto": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string",
-            "description": "Updated category name",
-            "example": "Web Development",
-            "minLength": 2,
-            "maxLength": 50
-          }
-        },
-        "required": [
-          "name"
-        ]
+        "properties": {}
       },
       "CreateThreadDto": {
         "type": "object",
@@ -2401,6 +2419,84 @@
         },
         "required": [
           "vote_type"
+        ]
+      },
+      "AdminSignupDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "description": "User email address",
+            "example": "user@example.com",
+            "maxLength": 255
+          },
+          "username": {
+            "type": "string",
+            "description": "Username (letters, numbers, underscores and hyphens only)",
+            "example": "johndoe",
+            "minLength": 3,
+            "maxLength": 50
+          },
+          "name": {
+            "type": "string",
+            "description": "User full name",
+            "example": "John Doe",
+            "minLength": 3,
+            "maxLength": 100
+          },
+          "password": {
+            "type": "string",
+            "description": "Password (must contain uppercase, lowercase, number and special character)",
+            "example": "Password123!",
+            "minLength": 8,
+            "maxLength": 72
+          },
+          "role": {
+            "type": "string",
+            "description": "Admin role (defaults to ADMIN)",
+            "enum": [
+              "ADMIN",
+              "STUDENT",
+              "SUPER_ADMIN"
+            ],
+            "default": "ADMIN"
+          }
+        },
+        "required": [
+          "email",
+          "username",
+          "name",
+          "password"
+        ]
+      },
+      "CreateCategoryDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Category name",
+            "example": "Programming",
+            "minLength": 2,
+            "maxLength": 50
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "UpdateCategoryDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Updated category name",
+            "example": "Web Development",
+            "minLength": 2,
+            "maxLength": 50
+          }
+        },
+        "required": [
+          "name"
         ]
       }
     }
