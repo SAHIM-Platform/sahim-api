@@ -136,7 +136,10 @@ export function SwaggerGetThreads() {
  */
 export function SwaggerVoteThread() {
   return applyDecorators(
-    ApiOperation({ summary: 'Vote on a thread' }),
+    ApiOperation({ 
+      summary: 'Vote on a thread',
+      description: 'Vote on a thread. If the same vote type is sent again, it will be removed (toggle). If a different vote type is sent, it will replace the existing vote.'
+    }),
     ApiParam({ name: 'id', description: 'Thread ID', type: 'number' }),
     ApiResponse({ 
       status: 200, 
@@ -166,7 +169,10 @@ export function SwaggerVoteThread() {
  */
 export function SwaggerVoteComment() {
   return applyDecorators(
-    ApiOperation({ summary: 'Vote on a comment' }),
+    ApiOperation({ 
+      summary: 'Vote on a comment',
+      description: 'Vote on a comment. If the same vote type is sent again, it will be removed (toggle). If a different vote type is sent, it will replace the existing vote.'
+    }),
     ApiParam({ name: 'id', description: 'Thread ID', type: 'number' }),
     ApiParam({ name: 'commentId', description: 'Comment ID', type: 'number' }),
     ApiResponse({ 

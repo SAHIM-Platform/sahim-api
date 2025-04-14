@@ -428,22 +428,51 @@ export class ThreadsService {
   async voteThread(userId: number, threadId: number, voteDto: VoteDto) {
     await this.ensureThreadExists(threadId);
 
-    await this.prisma.threadVote.upsert({
+    // First, check if the user has already voted on this thread
+    const existingVote = await this.prisma.threadVote.findUnique({
       where: {
         thread_id_voter_user_id: {
           thread_id: threadId,
           voter_user_id: userId,
         },
       },
-      update: {
-        vote_type: voteDto.vote_type,
-      },
-      create: {
-        thread_id: threadId,
-        voter_user_id: userId,
-        vote_type: voteDto.vote_type,
-      },
     });
+
+    if (existingVote) {
+      // If the same vote type is sent again, remove the vote (toggle)
+      if (existingVote.vote_type === voteDto.vote_type) {
+        await this.prisma.threadVote.delete({
+          where: {
+            thread_id_voter_user_id: {
+              thread_id: threadId,
+              voter_user_id: userId,
+            },
+          },
+        });
+      } else {
+        // If a different vote type is sent, update the vote
+        await this.prisma.threadVote.update({
+          where: {
+            thread_id_voter_user_id: {
+              thread_id: threadId,
+              voter_user_id: userId,
+            },
+          },
+          data: {
+            vote_type: voteDto.vote_type,
+          },
+        });
+      }
+    } else {
+      // If no vote exists, create a new one
+      await this.prisma.threadVote.create({
+        data: {
+          thread_id: threadId,
+          voter_user_id: userId,
+          vote_type: voteDto.vote_type,
+        },
+      });
+    }
 
     const updatedVotes = await this.prisma.threadVote.findMany({
       where: { thread_id: threadId },
@@ -479,22 +508,51 @@ export class ThreadsService {
       throw new NotFoundException(`Comment with ID ${commentId} not found`);
     }
 
-    await this.prisma.commentVote.upsert({
+    // First, check if the user has already voted on this comment
+    const existingVote = await this.prisma.commentVote.findUnique({
       where: {
         comment_id_voter_user_id: {
           comment_id: commentId,
           voter_user_id: userId,
         },
       },
-      update: {
-        vote_type: voteDto.vote_type,
-      },
-      create: {
-        comment_id: commentId,
-        voter_user_id: userId,
-        vote_type: voteDto.vote_type,
-      },
     });
+
+    if (existingVote) {
+      // If the same vote type is sent again, remove the vote (toggle)
+      if (existingVote.vote_type === voteDto.vote_type) {
+        await this.prisma.commentVote.delete({
+          where: {
+            comment_id_voter_user_id: {
+              comment_id: commentId,
+              voter_user_id: userId,
+            },
+          },
+        });
+      } else {
+        // If a different vote type is sent, update the vote
+        await this.prisma.commentVote.update({
+          where: {
+            comment_id_voter_user_id: {
+              comment_id: commentId,
+              voter_user_id: userId,
+            },
+          },
+          data: {
+            vote_type: voteDto.vote_type,
+          },
+        });
+      }
+    } else {
+      // If no vote exists, create a new one
+      await this.prisma.commentVote.create({
+        data: {
+          comment_id: commentId,
+          voter_user_id: userId,
+          vote_type: voteDto.vote_type,
+        },
+      });
+    }
 
     const updatedVotes = await this.prisma.commentVote.findMany({
       where: { comment_id: commentId },
