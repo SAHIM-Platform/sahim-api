@@ -29,6 +29,7 @@ model User {
   commentVotes  CommentVote[]
   bookmarks     BookmarkedThread[]
   categories      Category[]        @relation("CategoryAuthor")
+   photo_path   String?             @default("")
 }
 
 model RefreshToken {
