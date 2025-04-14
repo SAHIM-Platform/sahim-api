@@ -19,7 +19,30 @@ export class AdminsService implements OnModuleInit {
         private readonly usersService: UsersService,
         private readonly prisma: PrismaService,
         private readonly authUtil: AuthUtil
-    ) {}
+    ) { }
+
+
+    async getAllAdmins() {
+        const admins = await this.prisma.user.findMany({
+            where: {
+                role: UserRole.ADMIN,
+            },
+            select: {
+                id: true,
+                name: true,
+                email: true,
+                username: true,
+                createdAt: true,
+            },
+            orderBy: {
+                createdAt: 'desc',
+            },
+        });
+
+        return [...admins];
+    }
+
+
 
     /**
      * Lifecycle hook that runs when the module initializes.
