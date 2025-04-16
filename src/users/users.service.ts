@@ -2,10 +2,11 @@ import { SignupAuthDto } from '@/auth/dto/signup-auth.dto';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PrismaService } from 'prisma/prisma.service';
 import { ThreadsService } from '@/threads/threads.service';
-import { formatVotes } from '@/threads/utils/threads.utils';
+import { formatVotes, isUserDeleted } from '@/threads/utils/threads.utils';
 import { BookmarksQueryDto } from './dto/bookmarks-query.dto';
 import { SortType } from '@/threads/enum/sort-type.enum';
 import * as bcrypt from 'bcryptjs';
+import { UserRole } from '@prisma/client';
 
 @Injectable()
 export class UsersService {
@@ -40,7 +41,13 @@ export class UsersService {
   async findUserByEmailOrUsername(email: string, username: string) {
     return await this.prisma.user.findFirst({
       where: {
-        OR: [{ email }, { username }],
+        OR: [
+          { email },
+          { username }
+        ],
+        AND: {
+          isDeleted: false
+        }
       },
     });
   }
@@ -52,7 +59,10 @@ export class UsersService {
    */
   async findUserById(userId: number) {
     return await this.prisma.user.findFirst({
-      where: { id: userId },
+      where: { 
+        id: userId,
+        isDeleted: false 
+      },
     });
   }
 
@@ -130,6 +140,18 @@ export class UsersService {
     };
   }
 
+  /**
+   * Soft deletes a user account after password validation.
+   * This will:
+   * 1. Permanently delete all user's bookmarks
+   * 2. Set user as deleted and remove sensitive information
+   * 3. Update username to a deleted user format
+   * 4. If user is a student, also delete their student record
+   * 
+   * @param userId - The ID of the user to delete
+   * @param password - Current password for verification
+   * @throws UnauthorizedException if password is incorrect
+   */
   async deleteUserAccount(userId: number, password: string) {
     // Validate the password first
     const validPassword = await this.validatePassword(userId, password);
@@ -137,18 +159,41 @@ export class UsersService {
       throw new UnauthorizedException('Incorrect password');
     }
 
-    // If password matches, delete the user
-    return await this.prisma.user.delete({
-      where: { id: userId },
+    // First permanently delete all bookmarks
+    await this.prisma.bookmarkedThread.deleteMany({
+      where: { user_id: userId }
     });
+
+    // Then soft delete the user
+    const user = await this.prisma.user.update({
+      where: { id: userId },
+      data: {
+        isDeleted: true,
+        deletedAt: new Date(),
+        email: { set: '' },
+        password: { set: '' },
+        name: { set: '' },
+        username: `deleted_user_${userId}`,
+        isActive: false
+      }
+    });
+
+    // If user is a student, delete their student record
+    if (user.role === UserRole.STUDENT) {
+      await this.prisma.student.delete({
+        where: { userId }
+      });
+    }
+
+    return user;
   }
 
   async validatePassword(userId: number, password: string): Promise<boolean> {
     const user = await this.findUserById(userId);
-    if (!user) {
+    if (!user || isUserDeleted(user)) {
       return false;
     }
 
-    return bcrypt.compare(password, user.password); 
+    return bcrypt.compare(password, user.password!); 
   }
 }

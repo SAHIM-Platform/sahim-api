@@ -12,13 +12,15 @@ datasource db {
 
 model User {
   id            Int               @id @default(autoincrement())
-  email         String            @unique
+  email         String?           @unique
   username      String            @unique
-  password      String
-  name          String
+  password      String?
+  name          String?
   createdAt     DateTime          @default(now())
   lastLoginAt   DateTime?
   isActive      Boolean           @default(true)
+  isDeleted    Boolean           @default(false)
+  deletedAt    DateTime?
   role          UserRole          @default(STUDENT)
   refreshTokens RefreshToken[]
   student       Student?          @relation("StudentUser")
