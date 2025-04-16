@@ -1,0 +1,12 @@
+@port = {{$dotenv API_PORT}}
+@baseUrl = http://localhost:{{port}}
+@accessToken = eyJhbGciOiJQUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjQsInRva2VuVHlwZSI6ImFjY2VzcyIsInJvbGUiOiJTVFVERU5UIiwiaWF0IjoxNzQ0ODE0ODE4LCJleHAiOjE3NDQ4MTU3MTh9.fm8OYbC4Y_vfmUwp7FKWaK8nH-AVn7KkcLxQ1MhyTKQWDaIjSdHifpnq_OgW0opF98Dv_q1qp71CKGE-p6_s1MeuLSo8GY25kbzYo6gSPbE06ZQLwwjbG5HmnF5EzwFU6ipKtFj0h6lCezh6RS3_sDhaZV_wXKPAqmTymdsHaK8AizXWzeocYsmpcnoM7g3FAHRkLI3ZsgjIsmmwyunHwb8vTuEajDX-kloyOMyC02y8eKfzQuinfX_ZJxHYFBiShGYOhIKa65YzWeSHj81GBQN1zV4OhNzsxah8m-rBZK_5OWil1oTfRhi9rJ1ULFG7a7xG7OHSU-b5XcLRmHJVxS3XTJ3fU5XxQWfDrWCVQNxJgZe7R_u-Mr6LVqWfjYC352kRkp1RJ6dvN4dw1trYveGz2rwY_sWsj7Rl_ln84iU41SsTlpXMbL0BOsP7ZbVg2FwKKIv8ybc3GvKjrZoYynjtkktIhRL0TSLXsNg56xN88E21Jupvv9TBXQ9J7uuFb-BtlLfpleyefnr1qpVZeUZsXnVh-5oJfJtK7WcGsN0F2ZkcrJJHXaz0LTlUcO1jBXQE4B7IP6TF5KUbqARD6Eu6s-8ShndxZIgsjLdpMGjXMJqPbRGaEEotcvCPGjvX_TnvpNY_qqKkDvVxEOI6u7yBlHeK26ucFjT4dUn_QX8
+
+### Test Approved Student Access
+DELETE  {{baseUrl}}/users/me
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+    "password": "Test123!@$"
+}

@@ -1,12 +1,14 @@
 import { SignupAuthDto } from '@/auth/dto/signup-auth.dto';
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { PrismaService } from 'prisma/prisma.service';
 import { ThreadsService } from '@/threads/threads.service';
-import { formatVotes } from '@/threads/utils/threads.utils';
+import { formatVotes, isUserDeleted } from '@/threads/utils/threads.utils';
 import { BookmarksQueryDto } from './dto/bookmarks-query.dto';
 import { SortType } from '@/threads/enum/sort-type.enum';
+import * as bcrypt from 'bcryptjs';
 import { UpdateMeDto } from './dto/update-me.dto';
 import { UserRole } from '@prisma/client';
+import { DeletedUserException } from './exceptions/deleted-user.exception';
 
 @Injectable()
 export class UsersService {
@@ -41,7 +43,13 @@ export class UsersService {
   async findUserByEmailOrUsername(email: string, username: string) {
     return await this.prisma.user.findFirst({
       where: {
-        OR: [{ email }, { username }],
+        OR: [
+          { email },
+          { username }
+        ],
+        AND: {
+          isDeleted: false
+        }
       },
     });
   }
@@ -53,7 +61,10 @@ export class UsersService {
    */
   async findUserById(userId: number) {
     return await this.prisma.user.findFirst({
-      where: { id: userId },
+      where: { 
+        id: userId,
+        isDeleted: false 
+      },
     });
   }
 
@@ -160,9 +171,84 @@ export class UsersService {
     };
   }
 
+  /**
+   * Soft deletes a user account after password validation.
+   * This will:
+   * 1. Permanently delete all user's bookmarks
+   * 2. Set user as deleted and remove sensitive information
+   * 3. Update username to a deleted user format
+   * 4. If user is a student, also delete their student record
+   * 
+   * @param userId - The ID of the user to delete
+   * @param password - Current password for verification
+   * @throws UnauthorizedException if password is incorrect
+   */
+  async deleteUserAccount(userId: number, password: string) {
+    // First check if user exists and get their role
+    const user = await this.findUserById(userId);
+    if (!user) {
+      throw new UnauthorizedException('User not found');
+    }
+
+    // Prevent deletion of super admin accounts
+    if (user.role === UserRole.SUPER_ADMIN) {
+      throw new ForbiddenException('Super admin accounts cannot be deleted');
+    }
+
+    // Validate the password
+    const validPassword = await this.validatePassword(userId, password);
+    if (!validPassword) {
+      throw new UnauthorizedException('Incorrect password');
+    }
+
+    // First permanently delete all bookmarks
+    await this.prisma.bookmarkedThread.deleteMany({
+      where: { user_id: userId }
+    });
+
+    // Then soft delete the user
+    const updatedUser = await this.prisma.user.update({
+      where: { id: userId },
+      data: {
+        isDeleted: true,
+        deletedAt: new Date(),
+        email: { set: null },
+        password: { set: null },
+        name: { set: null },
+        username: `deleted_user_${userId}`,
+        isActive: false
+      }
+    });
+
+    // If user is a student, delete their student record
+    if (updatedUser.role === UserRole.STUDENT) {
+      await this.prisma.student.delete({
+        where: { userId }
+      });
+    }
+
+    return updatedUser;
+  }
+
+  async validatePassword(userId: number, password: string): Promise<boolean> {
+    const user = await this.findUserById(userId);
+    if (!user || isUserDeleted(user)) {
+      return false;
+    }
+
+    return bcrypt.compare(password, user.password!); 
+  }
+
   async updateMe(userId: number, dto: UpdateMeDto) {
     const { name, username, photo_path } = dto;
-  
+
+    const user = await this.findUserById(userId);
+
+    // Check if user is deleted
+    if (!user || isUserDeleted(user)) {
+      throw new DeletedUserException();
+    }
+
     // Check if username is taken (if provided)
     if (username) {
       const existing = await this.findUserByUsername(username);
