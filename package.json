@@ -25,7 +25,7 @@
     "docs:generate": "ts-node -r tsconfig-paths/register scripts/generate-swagger.ts"
   },
   "dependencies": {
-    "@nestjs/common": "^11.0.1",
+    "@nestjs/common": "^11.0.16",
     "@nestjs/config": "^4.0.0",
     "@nestjs/core": "^11.0.1",
     "@nestjs/jwt": "^11.0.0",
