@@ -1,5 +1,5 @@
 import { SignupAuthDto } from '@/auth/dto/signup-auth.dto';
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { ForbiddenException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { PrismaService } from 'prisma/prisma.service';
 import { ThreadsService } from '@/threads/threads.service';
 import { formatVotes, isUserDeleted } from '@/threads/utils/threads.utils';
@@ -153,7 +153,18 @@ export class UsersService {
    * @throws UnauthorizedException if password is incorrect
    */
   async deleteUserAccount(userId: number, password: string) {
-    // Validate the password first
+    // First check if user exists and get their role
+    const user = await this.findUserById(userId);
+    if (!user) {
+      throw new UnauthorizedException('User not found');
+    }
+
+    // Prevent deletion of super admin accounts
+    if (user.role === UserRole.SUPER_ADMIN) {
+      throw new ForbiddenException('Super admin accounts cannot be deleted');
+    }
+
+    // Validate the password
     const validPassword = await this.validatePassword(userId, password);
     if (!validPassword) {
       throw new UnauthorizedException('Incorrect password');
@@ -165,7 +176,7 @@ export class UsersService {
     });
 
     // Then soft delete the user
-    const user = await this.prisma.user.update({
+    const updatedUser = await this.prisma.user.update({
       where: { id: userId },
       data: {
         isDeleted: true,
@@ -179,13 +190,13 @@ export class UsersService {
     });
 
     // If user is a student, delete their student record
-    if (user.role === UserRole.STUDENT) {
+    if (updatedUser.role === UserRole.STUDENT) {
       await this.prisma.student.delete({
         where: { userId }
       });
     }
 
-    return user;
+    return updatedUser;
   }
 
   async validatePassword(userId: number, password: string): Promise<boolean> {
