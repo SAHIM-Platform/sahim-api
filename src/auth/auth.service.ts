@@ -97,7 +97,7 @@ export class AuthService {
       accessToken: tokens.accessToken,
       user: {
         id: createdUser.id,
-        name: createdUser.name,
+        name: createdUser.name!,
         username: createdUser.username,
         role: createdUser.role,
       }
@@ -125,7 +125,7 @@ export class AuthService {
       );
     }
 
-    const passwordMatch = await bCompare(password, user.password);
+    const passwordMatch = await bCompare(password, user.password!);
     if (!passwordMatch) {
       throw new UnauthorizedException('Incorrect password. Please try again.');
     }
@@ -139,7 +139,7 @@ export class AuthService {
       accessToken: tokens.accessToken,
       user: {
         id: user.id,
-        name: user.name,
+        name: user.name!,
         username: user.username,
         role: user.role
       }
@@ -226,7 +226,7 @@ export class AuthService {
       accessToken: tokens.accessToken,
       user: {
         id: storedToken.user.id,
-        name: storedToken.user.name,
+        name: storedToken.user.name!,
         username: storedToken.user.username,
         role: storedToken.user.role,
       }, 
@@ -241,7 +241,7 @@ export class AuthService {
    */
   async validateUser(email: string, password: string): Promise<any> {
     const user = await this.usersService.findUserByEmail(email);
-    if (!user) return null;
+    if (!user || !user.password || user.isDeleted) return null;
 
     const passwordMatch = await bCompare(password, user.password);
     if (!passwordMatch) return null;
@@ -277,7 +277,6 @@ export class AuthService {
         },
         HttpStatus.PRECONDITION_REQUIRED // 428: Means additional steps are required
       );
-
     }
 
     return user;

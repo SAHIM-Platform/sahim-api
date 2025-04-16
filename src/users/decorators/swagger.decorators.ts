@@ -152,6 +152,16 @@ export function SwaggerGetMe() {
   );
 }
 
+export function SwaggerDeleteMe() {
+  return applyDecorators(
+    ApiOperation({ summary: 'Delete current user account' }),
+    ApiBody({ schema: { example: { password: 'currentPassword123' } } }),
+    ApiResponse({ status: 200, description: 'User deleted successfully' }),
+    ApiResponse({ status: 400, description: 'Bad request' }),
+    ApiResponse({ status: 401, description: 'Unauthorized' }),
+  );
+}
+
 export function SwaggerUpdateMe() {
   return applyDecorators(
     ApiOperation({ summary: 'Update current user profile (name and username only)' }),

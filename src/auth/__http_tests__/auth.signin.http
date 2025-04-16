@@ -20,7 +20,7 @@ Content-Type: application/json
 
 {
     "email": "{{email}}",
-    "password": "wrongpassword"
+    "password": "Test123!@#"
 }
 
 ### Sign In - Non-existent User
