@@ -43,5 +43,5 @@ export class UpdateMeDto {
   @Matches(/\.(jpg|jpeg|png|webp)$/i, {
     message: 'URL must end with .jpg, .jpeg, .png, or .webp',
   })
-  photo_path?: string;
+  photoPath?: string;
 }

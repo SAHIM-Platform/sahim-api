@@ -12,5 +12,5 @@ Content-Type: application/json
 
 {
     "name": "{{newName}}",
-    "photo_path": "invalid path"
+    "photoPath": "invalid path"
 }

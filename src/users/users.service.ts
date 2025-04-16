@@ -97,14 +97,14 @@ export class UsersService {
       throw new NotFoundException('User not found');
     }
 
-    const { id, name, username, email, role, student, photo_path } = userData;
+    const { id, name, username, email, role, student, photoPath } = userData;
 
     if (role === UserRole.STUDENT && student) {
-      return { id, name, username, email, role, photo_path, academicNumber: student.academicNumber, department: student.department, level: student.studyLevel };
+      return { id, name, username, email, role, photoPath, academicNumber: student.academicNumber, department: student.department, level: student.studyLevel };
     }
 
     // Return only general user info for non-students
-    return { id, name, username, email, role, photo_path };
+    return { id, name, username, email, role, photoPath };
   }
 
   /**
@@ -240,7 +240,7 @@ export class UsersService {
   }
 
   async updateMe(userId: number, dto: UpdateMeDto) {
-    const { name, username, photo_path } = dto;
+    const { name, username, photoPath } = dto;
 
     const user = await this.findUserById(userId);
 
@@ -262,7 +262,7 @@ export class UsersService {
       data: {
         name,
         username,
-        photo_path,
+        photoPath,
       },
     });
   
