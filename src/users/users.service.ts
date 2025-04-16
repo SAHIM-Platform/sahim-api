@@ -86,14 +86,14 @@ export class UsersService {
       throw new NotFoundException('User not found');
     }
 
-    const { id, name, username, email, role, student } = userData;
+    const { id, name, username, email, role, student, photo_path } = userData;
 
     if (role === UserRole.STUDENT && student) {
-      return { id, name, username, email, role, academicNumber: student.academicNumber, department: student.department, level: student.studyLevel };
+      return { id, name, username, email, role, photo_path, academicNumber: student.academicNumber, department: student.department, level: student.studyLevel };
     }
 
     // Return only general user info for non-students
-    return { id, name, username, email, role };
+    return { id, name, username, email, role, photo_path };
   }
 
   /**
@@ -161,7 +161,7 @@ export class UsersService {
   }
 
   async updateMe(userId: number, dto: UpdateMeDto) {
-    const { name, username } = dto;
+    const { name, username, photo_path } = dto;
   
     // Check if username is taken (if provided)
     if (username) {
@@ -176,9 +176,27 @@ export class UsersService {
       data: {
         name,
         username,
+        photo_path,
       },
     });
   
     return this.sanitizeUser(updatedUser);
+  }
+  
+  /**
+   * Gets the default photo path based on user role
+   * @param role - The user's role
+   * @returns {string} The default photo path for the role
+   */
+  public getDefaultPhotoPath(role: UserRole): string {
+    switch (role) {
+      case UserRole.SUPER_ADMIN:
+        return '/assets/avatars/defaults/super-admin.webp';
+      case UserRole.ADMIN:
+        return '/assets/avatars/defaults/admin.webp';
+      case UserRole.STUDENT:
+      default:
+        return '/assets/avatars/defaults/user.webp';
+    }
   }
 }

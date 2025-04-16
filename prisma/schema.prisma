@@ -16,6 +16,7 @@ model User {
   username      String            @unique
   password      String
   name          String
+  photo_path    String?           @default("")
   createdAt     DateTime          @default(now())
   lastLoginAt   DateTime?
   isActive      Boolean           @default(true)

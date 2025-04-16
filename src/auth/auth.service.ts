@@ -100,6 +100,7 @@ export class AuthService {
         name: createdUser.name,
         username: createdUser.username,
         role: createdUser.role,
+        photo_path: createdUser.photo_path || this.usersService.getDefaultPhotoPath(createdUser.role)
       }
     };
   }
@@ -141,7 +142,8 @@ export class AuthService {
         id: user.id,
         name: user.name,
         username: user.username,
-        role: user.role
+        role: user.role,
+        photo_path: user.photo_path || this.usersService.getDefaultPhotoPath(user.role)
       }
     };
   }
@@ -229,6 +231,7 @@ export class AuthService {
         name: storedToken.user.name,
         username: storedToken.user.username,
         role: storedToken.user.role,
+        photo_path: storedToken.user.photo_path || this.usersService.getDefaultPhotoPath(storedToken.user.role)
       }, 
     };
   }
@@ -307,5 +310,4 @@ export class AuthService {
 
     return { defaultUsername, defaultPassword };
   }
-
 }
