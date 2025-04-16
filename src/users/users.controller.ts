@@ -1,4 +1,4 @@
-import { Controller, Get, NotFoundException, Req, UseGuards, Query, Body, Delete } from '@nestjs/common';
+import { Controller, Get, NotFoundException, Req, UseGuards, Query, Body, Delete, Patch } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { ApprovedStudentGuard } from '@/auth/guards/approved-student.guard';
 import { GetUser } from '@/auth/decorators/get-user.decorator';
@@ -10,10 +10,12 @@ import {
   SwaggerTestApprovedStudent,
   SwaggerGetUserBookmarks,
   SwaggerGetMe,
-  SwaggerDeleteMe
+  SwaggerDeleteMe,
+  SwaggerUpdateMe
 } from './decorators/swagger.decorators';
 import { BookmarksQueryDto } from './dto/bookmarks-query.dto';
 import { DeleteMeDto } from './dto/delete-me.dto';
+import { UpdateMeDto } from './dto/update-me.dto';
 
 @SwaggerUsersController()
 @Controller('users')
@@ -38,14 +40,13 @@ export class UsersController {
   @Get('me')
   @SwaggerGetMe()
   async getMe(@GetUser('sub') userId: number) {
-    const userData = await this.usersService.findUserById(userId);
+    return this.usersService.getUserDetails(userId);
+  }
 
-    if (!userData) {
-      throw new NotFoundException('User not found');
-    }
-
-    const { id, name, username, email, role } = userData;
-    return { id, name, username, email, role };
+  @Patch('me')
+  @SwaggerUpdateMe()
+  async updateMe(@GetUser('sub') userId: number, @Body() dto: UpdateMeDto) {
+    return this.usersService.updateMe(userId, dto);
   }
 
   @Delete('me')

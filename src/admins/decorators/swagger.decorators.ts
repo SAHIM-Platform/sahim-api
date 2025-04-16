@@ -120,6 +120,7 @@ export function SwaggerDeleteCategory() {
     ApiOperation({ summary: 'Delete a category' }),
     ApiParam({ name: 'id', description: 'Category ID', type: 'number' }),
     ApiResponse({ status: 200, description: 'Category deleted successfully' }),
+    ApiResponse({ status: 400, description: 'Bad Request - Cannot delete category that is still in use by threads' }),
     ApiResponse({ status: 404, description: 'Not Found - Category not found' }),
     ApiResponse({ status: 403, description: 'Forbidden - Insufficient permissions' })
   );
@@ -186,17 +187,13 @@ export function SwaggerGetAllStudents() {
 
 export function SwaggerSearchStudents() {
   return applyDecorators(
-    ApiOperation({ summary: 'Search students', description: 'Search by name or academic number' }),
-    ApiQuery({ name: 'query', required: true, example: '123', description: 'Search term' }),
-    ApiQuery({ name: 'page', required: false, example: 1, description: 'Page number' }),
-    ApiQuery({ name: 'limit', required: false, example: 10, description: 'Items per page' }),
-    ApiResponse({ status: 200, description: 'Student search results', schema: { example: [{
-      id: 4, name: "Name", email: "example@gmail.com", student: {
-        id: 3, userId: 4, academicNumber: "1112345678910", department: "IT", studyLevel: 1,
-        approvalStatus: "PENDING", approvalUpdatedByUserId: null
-      }
-    }]}}),
-    ApiResponse({ status: 400, description: 'Bad Request', schema: { example: { statusCode: 400, message: ['query must be a string', 'page must not be less than 1', 'limit must not be greater than 50'], error: 'Bad Request' } }}),
+    ApiOperation({ summary: 'Search students', description: 'Search students by name or academic number, with optional filtering by approval status.' }),
+    ApiQuery({ name: 'query', required: true, example: '123', description: 'Search term (can be student name or academic number)' }),
+    ApiQuery({ name: 'status', required: false, example: 'approved', description: 'Filter students by approval status (optional)' }),
+    ApiQuery({ name: 'page', required: false, example: 1, description: 'Page number (default is 1)' }),
+    ApiQuery({ name: 'limit', required: false, example: 10, description: 'Number of items per page (default is 10)' }),
+    ApiResponse({ status: 200, description: 'Student search results', schema: { example: [{ id: 4, name: 'Name', email: 'example@gmail.com', student: { id: 3, userId: 4, academicNumber: '1112345678910', department: 'IT', studyLevel: 1, approvalStatus: 'PENDING', approvalUpdatedByUserId: null } }] } }),
+    ApiResponse({ status: 400, description: 'Bad Request', schema: { example: { statusCode: 400, message: ['query must be a string', 'page must not be less than 1', 'limit must not be greater than 50'], error: 'Bad Request' } } }),
     ApiResponse({ status: 401, description: 'Unauthorized' }),
     ApiResponse({ status: 403, description: 'Admin access required' })
   );
