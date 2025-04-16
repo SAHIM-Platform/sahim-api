@@ -21,5 +21,6 @@ export interface AuthResponse {
     name: string;
     username?: string;
     role: string;
+    photoPath?: string;
   };
 }
