@@ -693,12 +693,17 @@ export class ThreadsService {
     };
 
     if (includeComments) {
-      baseResponse.comments = thread.comments.map((comment: any) => ({
+      baseResponse.comments = thread.comments
+      .sort((a: any, b: any) => b.created_at.getTime() - a.created_at.getTime())
+      .map((comment: any) => ({
         ...comment,
         ...(includeVotes && {
           votes: formatVotes(comment.votes, userId)
         }),
       }));
+
+
+
     }
 
     return baseResponse;
