@@ -36,7 +36,7 @@ export class UpdateMeDto {
   @IsOptional()
   @IsString()
   @Matches(
-    /^(https?:\/\/.*\.(jpg|jpeg|png|webp)|public\/avatars\/defaults\/.*\.(jpg|jpeg|png|webp))$/i,
+    /^(https?:\/\/.*\.(jpg|jpeg|png|webp)|(\/)?public\/avatars\/defaults\/.*\.(jpg|jpeg|png|webp))$/i,
     {
       message:
         'URL must be a valid image URL (http/https) or start with "public/avatars/defaults/" and end with .jpg, .jpeg, .png, or .webp',
