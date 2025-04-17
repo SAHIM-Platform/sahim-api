@@ -15,7 +15,7 @@ export class UsersService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly threadsService: ThreadsService,
-  ) {}
+  ) { }
 
   /**
    * Finds a user by their email address.
@@ -61,9 +61,9 @@ export class UsersService {
    */
   async findUserById(userId: number) {
     return await this.prisma.user.findFirst({
-      where: { 
+      where: {
         id: userId,
-        isDeleted: false 
+        isDeleted: false
       },
     });
   }
@@ -89,7 +89,7 @@ export class UsersService {
     const userData = await this.prisma.user.findUnique({
       where: { id: userId },
       include: {
-        student: true, 
+        student: true,
       },
     });
 
@@ -116,7 +116,7 @@ export class UsersService {
    */
   async getUserBookmarks(userId: number, query: BookmarksQueryDto = {}) {
     const { sort = SortType.LATEST, page = 1, limit = 10 } = query;
-    
+
     const orderBy = {
       created_at: sort === SortType.LATEST ? 'desc' as const : 'asc' as const,
     };
@@ -162,11 +162,11 @@ export class UsersService {
         votes: formatVotes(thread.votes, userId),
         bookmarked: true, // All threads in this response are bookmarked
       })),
-      meta: { 
-        total, 
-        page, 
-        limit, 
-        totalPages: Math.ceil(total / limit) 
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit)
       },
     };
   }
@@ -236,7 +236,7 @@ export class UsersService {
       return false;
     }
 
-    return bcrypt.compare(password, user.password!); 
+    return bcrypt.compare(password, user.password!);
   }
 
   async updateMe(userId: number, dto: UpdateMeDto) {
@@ -256,7 +256,7 @@ export class UsersService {
         throw new BadRequestException('Username is already taken');
       }
     }
-  
+
     const updatedUser = await this.prisma.user.update({
       where: { id: userId },
       data: {
@@ -265,10 +265,10 @@ export class UsersService {
         photoPath,
       },
     });
-  
+
     return this.sanitizeUser(updatedUser);
   }
-  
+
   /**
    * Gets the default photo path based on user role
    * @param role - The user's role
@@ -277,12 +277,12 @@ export class UsersService {
   public getDefaultPhotoPath(role: UserRole): string {
     switch (role) {
       case UserRole.SUPER_ADMIN:
-        return '/assets/avatars/defaults/super-admin.webp';
+        return '/public/avatars/defaults/super-admin.webp';
       case UserRole.ADMIN:
-        return '/assets/avatars/defaults/admin.webp';
+        return '/public/avatars/defaults/admin.webp';
       case UserRole.STUDENT:
       default:
-        return '/assets/avatars/defaults/user.webp';
+        return '/public/avatars/defaults/user.webp';
     }
   }
 }
