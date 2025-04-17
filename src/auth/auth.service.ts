@@ -76,6 +76,7 @@ export class AuthService {
         name: name,
         password: hashedPassword,
         role: UserRole.STUDENT,
+        photoPath: this.usersService.getDefaultPhotoPath(UserRole.STUDENT),
         student: {
           create: {
             academicNumber,
