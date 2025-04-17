@@ -78,6 +78,7 @@ export class AdminsService implements OnModuleInit {
                     name: 'Super Admin',
                     password: hashedPassword,
                     role: UserRole.SUPER_ADMIN, 
+                    photoPath: this.usersService.getDefaultPhotoPath(UserRole.SUPER_ADMIN),
                 },
             });
 
