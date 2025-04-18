@@ -1,3 +1,5 @@
+import { SigninAuthDto } from '@/auth/dto/signin-auth.dto';
+import { UsersService } from '@/users/users.service';
 import {
   BadRequestException,
   HttpException,
@@ -8,18 +10,15 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { UsersService } from '@/users/users.service';
-import { compare as bCompare } from 'bcryptjs';
-import { SigninAuthDto } from '@/auth/dto/signin-auth.dto';
-import { SignupAuthDto } from './dto/signup-auth.dto';
-import { PrismaService } from 'prisma/prisma.service';
-import { JwtPayload, AuthResponse } from './interfaces/jwt-payload.interface';
-import { AuthUtil } from './utils/auth.util';
-import { Response } from 'express';
 import { ApprovalStatus, UserRole } from '@prisma/client';
+import { compare as bCompare } from 'bcryptjs';
+import * as crypto from 'crypto';
+import { Response } from 'express';
+import { PrismaService } from 'prisma/prisma.service';
 import { StudentSignUpDto } from './dto/student-signup.dto';
 import { GoogleUser } from './interfaces/google-user.interface';
-import * as crypto from 'crypto';
+import { AuthResponse, JwtPayload } from './interfaces/jwt-payload.interface';
+import { AuthUtil } from './utils/auth.util';
 
 @Injectable()
 export class AuthService {
@@ -76,6 +75,7 @@ export class AuthService {
         name: name,
         password: hashedPassword,
         role: UserRole.STUDENT,
+        photoPath: this.usersService.getDefaultPhotoPath(UserRole.STUDENT),
         student: {
           create: {
             academicNumber,
@@ -93,6 +93,17 @@ export class AuthService {
     );
     this.authUtil.setRefreshTokenCookie(tokens.refreshToken, res);
 
+    // After creating the user, fetch the user again including student data to return approvalStatus if the user is a student
+    const userWithStudent = await this.prisma.user.findUnique({
+      where: { id: createdUser.id },
+      include: { student: true },
+    });
+
+    // if user is not null
+    if (!userWithStudent) {
+      throw new UnauthorizedException('User not found');
+    }
+
     return {
       accessToken: tokens.accessToken,
       user: {
@@ -100,6 +111,9 @@ export class AuthService {
         name: createdUser.name!,
         username: createdUser.username,
         role: createdUser.role,
+        ...(userWithStudent.role === UserRole.STUDENT && userWithStudent.student && {
+          approvalStatus: userWithStudent.student.approvalStatus
+        }),
         photoPath: createdUser.photoPath || this.usersService.getDefaultPhotoPath(createdUser.role)
       }
     };
@@ -143,6 +157,9 @@ export class AuthService {
         name: user.name!,
         username: user.username,
         role: user.role,
+        ...(user.role === UserRole.STUDENT && user.student && {
+          approvalStatus: user.student.approvalStatus
+        }),
         photoPath: user.photoPath || this.usersService.getDefaultPhotoPath(user.role)
       }
     };
@@ -224,15 +241,28 @@ export class AuthService {
 
     this.authUtil.cleanupExpiredTokens().catch(console.error);
 
-    return { 
+    // Fetch the user from the datebase incluading student data to return approvalStatus if the user is a student
+    const user = await this.prisma.user.findUnique({
+      where: { id: storedToken.userId },
+      include: { student: true },
+    });
+    // if user is not null
+    if (!user) {
+      throw new UnauthorizedException('User not found');
+    }
+
+    return {
       accessToken: tokens.accessToken,
       user: {
         id: storedToken.user.id,
         name: storedToken.user.name!,
         username: storedToken.user.username,
         role: storedToken.user.role,
+        ...(user.role === UserRole.STUDENT && user.student && {
+          approvalStatus: user.student.approvalStatus
+        }),
         photoPath: storedToken.user.photoPath || this.usersService.getDefaultPhotoPath(storedToken.user.role)
-      }, 
+      },
     };
   }
 

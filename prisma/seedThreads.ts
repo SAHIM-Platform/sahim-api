@@ -18,6 +18,7 @@ async function seed() {
                 password: await bcrypt.hash('password123', 10),
                 name: 'Test User',
                 role: UserRole.STUDENT,
+                photoPath: '/public/avatars/defaults/user.webp',
                 student: {
                     create: {
 

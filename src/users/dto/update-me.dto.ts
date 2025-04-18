@@ -29,19 +29,18 @@ export class UpdateMeDto {
   @MinLength(3)
   @MaxLength(100)
   name?: string;
-
   @ApiPropertyOptional({
-    description: 'Profile photo URL (must be a valid image URL)',
+    description: 'Profile photo URL (must be a valid image URL or start with "public/avatars/defaults/")',
     example: 'https://example.com/photo.jpg',
   })
   @IsOptional()
   @IsString()
-  @IsUrl({
-    protocols: ['http', 'https'],
-    require_protocol: true,
-  })
-  @Matches(/\.(jpg|jpeg|png|webp)$/i, {
-    message: 'URL must end with .jpg, .jpeg, .png, or .webp',
-  })
+  @Matches(
+    /^(https?:\/\/.*\.(jpg|jpeg|png|webp)|(\/)?public\/avatars\/defaults\/.*\.(jpg|jpeg|png|webp))$/i,
+    {
+      message:
+        'URL must be a valid image URL (http/https) or start with "public/avatars/defaults/" and end with .jpg, .jpeg, .png, or .webp',
+    },
+  )
   photoPath?: string;
 }

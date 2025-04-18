@@ -64,7 +64,7 @@ export class ThreadsService {
         take: limit,
         orderBy,
         include: {
-          author: { select: { id: true, username: true, name: true } },
+          author: { select: { id: true, username: true, name: true, photoPath: true } },
           category: true,
           _count: { select: { comments: true, votes: true } },
           votes: { select: { vote_type: true, voter_user_id: true } },
@@ -115,7 +115,7 @@ export class ThreadsService {
         author_user_id: userId,
       },
       include: {
-        author: { select: { id: true, username: true, name: true } },
+        author: { select: { id: true, username: true, name: true, photoPath: true } },
         category: true,
         _count: { select: { comments: true, votes: true } },
         votes: { select: { vote_type: true, voter_user_id: true } },
@@ -148,7 +148,7 @@ export class ThreadsService {
         take: limit,
         orderBy,
         include: {
-          author: { select: { id: true, username: true, name: true } },
+          author: { select: { id: true, username: true, name: true, photoPath: true } },
           category: true,
           _count: { select: { comments: true, votes: true } },
           votes: { select: { vote_type: true, voter_user_id: true } },
@@ -225,7 +225,7 @@ export class ThreadsService {
       where: { thread_id: id },
       data: updateThreadDto,
       include: {
-        author: { select: { id: true, username: true, name: true } },
+        author: { select: { id: true, username: true, name: true, photoPath: true } },
         category: true,
         votes: { select: { vote_type: true, voter_user_id: true } },
       },
@@ -276,7 +276,7 @@ export class ThreadsService {
         author_user_id: userId,
       },
       include: {
-        author: { select: { id: true, username: true, name: true } },
+        author: { select: { id: true, username: true, name: true, photoPath: true } },
         votes: { select: { vote_type: true, voter_user_id: true } },
       },
     });
@@ -320,7 +320,7 @@ export class ThreadsService {
       where: { comment_id: commentId },
       data: updateCommentDto,
       include: {
-        author: { select: { id: true, username: true, name: true } },
+        author: { select: { id: true, username: true, name: true, photoPath: true } },
         votes: { select: { vote_type: true, voter_user_id: true } },
       },
     });
@@ -392,7 +392,7 @@ export class ThreadsService {
         take: limit,
         orderBy,
         include: {
-          author: { select: { id: true, username: true, name: true } },
+          author: { select: { id: true, username: true, name: true, photoPath: true } },
           votes: { select: { vote_type: true, voter_user_id: true } },
         },
       }),
@@ -693,12 +693,17 @@ export class ThreadsService {
     };
 
     if (includeComments) {
-      baseResponse.comments = thread.comments.map((comment: any) => ({
+      baseResponse.comments = thread.comments
+      .sort((a: any, b: any) => b.created_at.getTime() - a.created_at.getTime())
+      .map((comment: any) => ({
         ...comment,
         ...(includeVotes && {
           votes: formatVotes(comment.votes, userId)
         }),
       }));
+
+
+
     }
 
     return baseResponse;
