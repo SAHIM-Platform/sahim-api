@@ -1,12 +1,12 @@
 import { applyDecorators } from '@nestjs/common';
 import {
-  ApiTags,
-  ApiOperation,
-  ApiResponse,
   ApiBearerAuth,
   ApiHeader,
+  ApiOperation,
   ApiParam,
-  ApiQuery
+  ApiQuery,
+  ApiResponse,
+  ApiTags
 } from '@nestjs/swagger';
 
 export function SwaggerAdminController() {
@@ -69,8 +69,8 @@ export function SwaggerDeleteAdmin() {
 
 export function SwaggerApproveStudent() {
   return applyDecorators(
-    ApiOperation({ summary: 'Approve a student account' }),
-    ApiParam({ name: 'id', description: 'Student ID', type: 'number' }),
+    ApiOperation({ summary: 'Approve a student account by userId' }),
+    ApiParam({ name: 'id', description: 'User ID of the student acount', type: 'number' }),
     ApiResponse({ status: 200, description: 'Student approved successfully' }),
     ApiResponse({
       status: 400,
@@ -82,8 +82,8 @@ export function SwaggerApproveStudent() {
 
 export function SwaggerRejectStudent() {
   return applyDecorators(
-    ApiOperation({ summary: 'Reject a student account' }),
-    ApiParam({ name: 'id', description: 'Student ID', type: 'number' }),
+    ApiOperation({ summary: 'Reject a student account by userId' }),
+    ApiParam({ name: 'id', description: 'User ID of the Student account', type: 'number' }),
     ApiResponse({ status: 200, description: 'Student rejected successfully' }),
     ApiResponse({
       status: 400,
