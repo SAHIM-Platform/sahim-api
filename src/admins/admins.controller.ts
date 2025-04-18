@@ -1,25 +1,25 @@
 import { CreateCategoryDto } from '@/admins/dto/create-category.dto';
+import { GetUser } from '@/auth/decorators/get-user.decorator';
 import { Roles } from '@/auth/decorators/role.decorator';
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Query, Req, Res } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Query } from '@nestjs/common';
 import { UserRole } from '@prisma/client';
 import { AdminsService } from './admins.service';
-import { AdminSignupDto } from './dto/create-admin.dto';
-import { UpdateCategoryDto } from './dto/update-category.dto';
-import { StudentQueryDto } from './dto/student-query.dto';
-import { GetUser } from '@/auth/decorators/get-user.decorator';
 import {
     SwaggerAdminController,
-    SwaggerCreateAdmin,
-    SwaggerDeleteAdmin,
     SwaggerApproveStudent,
-    SwaggerRejectStudent,
+    SwaggerCreateAdmin,
     SwaggerCreateCategory,
+    SwaggerDeleteAdmin,
     SwaggerDeleteCategory,
-    SwaggerUpdateCategory,
     SwaggerGetAllStudents,
-    SwaggerSearchStudents
+    SwaggerRejectStudent,
+    SwaggerSearchStudents,
+    SwaggerUpdateCategory
 } from './decorators/swagger.decorators';
+import { AdminSignupDto } from './dto/create-admin.dto';
 import { StudentSearchQueryDto } from './dto/search-student-query.dto';
+import { StudentQueryDto } from './dto/student-query.dto';
+import { UpdateCategoryDto } from './dto/update-category.dto';
 
 @SwaggerAdminController()
 @Controller('admins')
@@ -55,15 +55,15 @@ export class AdminsController {
     @Patch('students/:id/approve')
     @Roles(UserRole.SUPER_ADMIN, UserRole.ADMIN)
     @SwaggerApproveStudent()
-    async approveStudent(@GetUser('sub') userId, @Param('id', ParseIntPipe) studentId: number) {
-        return await this.adminsService.approveStudent(studentId, userId);
+    async approveStudent(@GetUser('sub') adminId, @Param('id', ParseIntPipe) userId: number) {
+        return await this.adminsService.approveStudent(userId, adminId);
     }
 
     @Patch('students/:id/reject')
     @Roles(UserRole.SUPER_ADMIN, UserRole.ADMIN)
     @SwaggerRejectStudent()
-    async rejectStudent(@GetUser('sub') userId, @Param('id', ParseIntPipe) studentId: number) {
-        return await this.adminsService.rejectStudent(studentId, userId);
+    async rejectStudent(@GetUser('sub') adminId, @Param('id', ParseIntPipe) userId: number) {
+        return await this.adminsService.rejectStudent(userId, adminId);
     }
 
     @Post('categories')

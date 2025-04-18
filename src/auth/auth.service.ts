@@ -75,6 +75,7 @@ export class AuthService {
         name: name,
         password: hashedPassword,
         role: UserRole.STUDENT,
+        photoPath: this.usersService.getDefaultPhotoPath(UserRole.STUDENT),
         student: {
           create: {
             academicNumber,
@@ -98,8 +99,8 @@ export class AuthService {
       include: { student: true },
     });
 
-     // if user is not null
-     if (!userWithStudent) {
+    // if user is not null
+    if (!userWithStudent) {
       throw new UnauthorizedException('User not found');
     }
 
@@ -112,7 +113,8 @@ export class AuthService {
         role: createdUser.role,
         ...(userWithStudent.role === UserRole.STUDENT && userWithStudent.student && {
           approvalStatus: userWithStudent.student.approvalStatus
-        })
+        }),
+        photoPath: createdUser.photoPath || this.usersService.getDefaultPhotoPath(createdUser.role)
       }
     };
   }
@@ -157,7 +159,8 @@ export class AuthService {
         role: user.role,
         ...(user.role === UserRole.STUDENT && user.student && {
           approvalStatus: user.student.approvalStatus
-        })
+        }),
+        photoPath: user.photoPath || this.usersService.getDefaultPhotoPath(user.role)
       }
     };
   }
@@ -257,7 +260,8 @@ export class AuthService {
         role: storedToken.user.role,
         ...(user.role === UserRole.STUDENT && user.student && {
           approvalStatus: user.student.approvalStatus
-        })
+        }),
+        photoPath: storedToken.user.photoPath || this.usersService.getDefaultPhotoPath(storedToken.user.role)
       },
     };
   }
@@ -335,5 +339,4 @@ export class AuthService {
 
     return { defaultUsername, defaultPassword };
   }
-
 }
