@@ -12,6 +12,8 @@ import { AdminsModule } from './admins/admins.module';
 import { ThreadsModule } from './threads/threads.module';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { ThrottlerConfigService } from './config/throttler-config.service';
+import { join } from 'path';
+import { ServeStaticModule } from '@nestjs/serve-static';
 
 @Module({
   imports: [
@@ -19,6 +21,10 @@ import { ThrottlerConfigService } from './config/throttler-config.service';
     ThrottlerModule.forRootAsync({
       imports: [ConfigModule],
       useClass: ThrottlerConfigService,
+    }),
+    ServeStaticModule.forRoot({
+      rootPath: join(process.cwd(), 'public'),
+      serveRoot: '/public'
     }),
     AuthModule,
     UsersModule,
@@ -31,7 +37,7 @@ import { ThrottlerConfigService } from './config/throttler-config.service';
     AppService,
     {
       provide: APP_GUARD,
-      useClass: ThrottlerGuard, 
+      useClass: ThrottlerGuard,
     },
     {
       provide: APP_GUARD,
@@ -43,4 +49,4 @@ import { ThrottlerConfigService } from './config/throttler-config.service';
     },
   ],
 })
-export class AppModule {}
+export class AppModule { }
