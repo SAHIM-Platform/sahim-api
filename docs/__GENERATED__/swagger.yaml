@@ -296,6 +296,84 @@
         ]
       }
     },
+    "/users/me/threads": {
+      "get": {
+        "operationId": "UsersController_getMyThreads",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "Bearer token for authentication",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "required": false,
+            "in": "query",
+            "description": "Sort order for threads",
+            "schema": {
+              "default": "latest",
+              "type": "string",
+              "enum": [
+                "latest",
+                "oldest",
+                "most_commented",
+                "most_voted"
+              ]
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "description": "Page number for pagination",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Number of items per page",
+            "schema": {
+              "minimum": 1,
+              "maximum": 50,
+              "default": 10,
+              "type": "number"
+            }
+          },
+          {
+            "name": "category_id",
+            "required": false,
+            "in": "query",
+            "description": "Filter threads by category ID",
+            "schema": {
+              "minimum": 1,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ],
+        "tags": [
+          "Users"
+        ]
+      }
+    },
     "/users/me/bookmarks": {
       "get": {
         "operationId": "UsersController_getUserBookmarks",
@@ -518,6 +596,52 @@
           }
         ],
         "summary": "Update current user profile (name and username only)",
+        "tags": [
+          "Users"
+        ]
+      },
+      "delete": {
+        "operationId": "UsersController_deleteMe",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "Bearer token for authentication",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "example": {
+                  "password": "currentPassword123"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User deleted successfully"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ],
+        "summary": "Delete current user account",
         "tags": [
           "Users"
         ]
@@ -1567,6 +1691,7 @@
     },
     "/threads/{id}/vote": {
       "post": {
+        "description": "Vote on a thread. If the same vote type is sent again, it will be removed (toggle). If a different vote type is sent, it will replace the existing vote.",
         "operationId": "ThreadsController_voteThread",
         "parameters": [
           {
@@ -1643,6 +1768,7 @@
     },
     "/threads/{id}/comments/{commentId}/vote": {
       "post": {
+        "description": "Vote on a comment. If the same vote type is sent again, it will be removed (toggle). If a different vote type is sent, it will replace the existing vote.",
         "operationId": "ThreadsController_voteComment",
         "parameters": [
           {
@@ -1991,7 +2117,7 @@
             "name": "id",
             "required": true,
             "in": "path",
-            "description": "Student ID",
+            "description": "User ID of the student acount",
             "schema": {
               "type": "number"
             }
@@ -2013,7 +2139,7 @@
             "access-token": []
           }
         ],
-        "summary": "Approve a student account",
+        "summary": "Approve a student account by userId",
         "tags": [
           "Admin"
         ]
@@ -2036,7 +2162,7 @@
             "name": "id",
             "required": true,
             "in": "path",
-            "description": "Student ID",
+            "description": "User ID of the Student account",
             "schema": {
               "type": "number"
             }
@@ -2058,7 +2184,7 @@
             "access-token": []
           }
         ],
-        "summary": "Reject a student account",
+        "summary": "Reject a student account by userId",
         "tags": [
           "Admin"
         ]
@@ -2593,6 +2719,11 @@
             "example": "Jane Doe",
             "minLength": 3,
             "maxLength": 100
+          },
+          "photoPath": {
+            "type": "string",
+            "description": "Profile photo URL (must be a valid image URL or start with \"public/avatars/defaults/\")",
+            "example": "https://example.com/photo.jpg"
           }
         }
       },
