@@ -6,6 +6,7 @@ import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { RolesGuard } from './auth/guards/role-auth.guard';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
+import { ApprovedStudentGuard } from './auth/guards/approved-student.guard';
 import { PrismaModule } from 'prisma/prisma.module';
 import { APP_GUARD } from '@nestjs/core';
 import { AdminsModule } from './admins/admins.module';
@@ -46,6 +47,10 @@ import { ServeStaticModule } from '@nestjs/serve-static';
     {
       provide: APP_GUARD,
       useClass: RolesGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: ApprovedStudentGuard,
     },
   ],
 })
