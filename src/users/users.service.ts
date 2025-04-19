@@ -26,7 +26,7 @@ export class UsersService {
   async findUserByEmail(email: string) {
     return await this.prisma.user.findUnique({
       where: { email },
-      include : {student : true}
+      include: { student: true }
     });
   }
 
@@ -254,7 +254,7 @@ export class UsersService {
     // Check if username is taken (if provided)
     if (username) {
       const existing = await this.findUserByUsername(username);
-      if (existing) {
+      if (existing && existing.id !== userId) {
         throw new BadRequestException('Username is already taken');
       }
     }
@@ -295,7 +295,7 @@ export class UsersService {
    * @returns Paginated list of threads with the a similar structure to GET /threads
    */
   async getUserThreads(userId: number, query: MyThreadsQueryDto) {
-    const { sort = SortType.LATEST, page = 1, limit = 10, search, category_id} = query;
+    const { sort = SortType.LATEST, page = 1, limit = 10, search, category_id } = query;
 
     const orderBy = {
       created_at: sort === SortType.LATEST ? 'desc' as const : 'asc' as const,
@@ -337,13 +337,13 @@ export class UsersService {
         votes: formatVotes(thread.votes, userId),
         bookmarked: !!(bookmarks?.some(b => b.user_id === userId)),
       })),
-      meta: { 
-        total, 
-        page, 
-        limit, 
+      meta: {
+        total,
+        page,
+        limit,
         totalPages: Math.ceil(total / limit),
         ...(search && { search }),
-        ...(category_id && { category_id }), 
+        ...(category_id && { category_id }),
       },
     };
   }
