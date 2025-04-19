@@ -183,3 +183,33 @@ export function SwaggerUpdateMe() {
     ApiResponse({ status: 401, description: 'Unauthorized' }),
   );
 }
+
+export function SwaggerGetUserThreads() {
+  return applyDecorators(
+    ApiOperation({ summary: 'Get current user threads', description: 'Retrieves paginated list of threads created by the current user with optional search and filtering' }),
+    ApiQuery({ name: 'sort', required: false, enum: SortType, description: 'Sort order for threads (LATEST or OLDEST)', example: SortType.LATEST }),
+    ApiQuery({ name: 'page', required: false, type: Number, description: 'Page number for pagination', example: 1, minimum: 1 }),
+    ApiQuery({ name: 'limit', required: false, type: Number, description: 'Number of items per page (max 100)', example: 10, minimum: 1, maximum: 100 }),
+    ApiQuery({ name: 'search', required: false, type: String, description: 'Search query to filter threads by title or content' }),
+    ApiQuery({ name: 'category_id', required: false, type: Number, description: 'Category ID to filter threads' }),
+    ApiResponse({ status: 200, description: 'List of user threads retrieved successfully', schema: { example: {
+      data: [{
+        thread_id: 1,
+        category_id: 1,
+        author_user_id: 1,
+        title: 'My Thread Title',
+        content: 'This is my thread content',
+        thumbnail_url: null,
+        created_at: '2023-01-01T00:00:00.000Z',
+        author: { id: 1, username: 'myusername', name: 'My Name', photoPath: '/path/to/photo.jpg' },
+        category: { category_id: 1, name: 'General' },
+        _count: { comments: 5, votes: 10 },
+        votes: { score: 8, user_vote: 'UP', counts: { up: 9, down: 1 } },
+        bookmarked: false
+      }],
+      meta: { total: 15, page: 1, limit: 10, totalPages: 2, search: 'thread', category_id: 1 }
+    }}}),
+    ApiResponse({ status: 401, description: 'Unauthorized - valid access token required' }),
+    ApiResponse({ status: 403, description: 'Forbidden - user must be approved student' })
+  );
+}
