@@ -4,9 +4,6 @@ import * as cookieParser from 'cookie-parser';
 import { setupCors } from './config/cors/cors.config';
 import { ValidationPipe } from '@nestjs/common';
 import { setupSwagger } from './config/swagger.config';
-import { Reflector } from '@nestjs/core';
-import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
-import { ApprovedStudentGuard } from './auth/guards/approved-student.guard';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -28,12 +25,6 @@ async function bootstrap() {
     setupSwagger(app);
     console.log(`Swagger docs available at: http://localhost:${port}/docs`);
   }
-
-  const reflector = app.get(Reflector);
-  app.useGlobalGuards(
-    new JwtAuthGuard(reflector),
-    app.get(ApprovedStudentGuard),
-  );
 
   await app.listen(port);
   if (process.env.NODE_ENV === 'development') {

@@ -17,7 +17,8 @@ export class ApprovedStudentGuard implements CanActivate {
     const isPublic = this.reflector.get<boolean>(IS_PUBLIC_KEY, handler);
     if (isPublic) return true;
     // allow to /auth/signout
-    if (request.baseUrl === '/auth' && request.route?.path === '/signout') {
+    const url = request.url;
+    if (url === '/auth/signout' || url.startsWith('/auth/signout?')) {
       return true;
     }
 
@@ -36,17 +37,29 @@ export class ApprovedStudentGuard implements CanActivate {
       });
 
       if (!student) {
-        throw new ForbiddenException('Student not found');
+        throw new ForbiddenException({
+          error: 'Student profile not found',
+          message: 'Student profile does not exist for this account',
+          statusCode: 403
+        });
       }
 
       if (student.approvalStatus === ApprovalStatus.APPROVED) {
         return true;
       }
 
-      throw new ForbiddenException('Student not approved');
+      throw new ForbiddenException({
+        error: 'Student not approved',
+        message: 'Student account requires administrator approval',
+        statusCode: 403
+      });
     }
 
     // If not admin and not student, block access
-    throw new ForbiddenException('Access denied');
+    throw new ForbiddenException({
+      error: 'Unauthorized access',
+      message: 'Insufficient permissions for this resource',
+      statusCode: 403
+    });
   }
 }

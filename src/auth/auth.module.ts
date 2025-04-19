@@ -10,7 +10,6 @@ import { JwtStrategy } from './strategies/jwt.strategy';
 import googleOauthConfig from './config/google.oauth.config';
 import { GoogleStrategy } from './strategies/google.strategy';
 import { ConfigModule } from '@nestjs/config';
-import { ApprovedStudentGuard } from './guards/approved-student.guard';
 
 @Module({
   imports: [
@@ -29,7 +28,7 @@ import { ApprovedStudentGuard } from './guards/approved-student.guard';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, AuthUtil, JwtStrategy,GoogleStrategy,ApprovedStudentGuard],
+  providers: [AuthService, AuthUtil, JwtStrategy, GoogleStrategy],
   exports: [AuthUtil]
 })
 export class AuthModule {}
