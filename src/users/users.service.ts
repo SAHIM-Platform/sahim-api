@@ -7,8 +7,9 @@ import { BookmarksQueryDto } from './dto/bookmarks-query.dto';
 import { SortType } from '@/threads/enum/sort-type.enum';
 import * as bcrypt from 'bcryptjs';
 import { UpdateMeDto } from './dto/update-me.dto';
-import { UserRole } from '@prisma/client';
+import { Prisma, UserRole } from '@prisma/client';
 import { DeletedUserException } from './exceptions/deleted-user.exception';
+import { MyThreadsQueryDto } from './dto/my-threads-query.dto';
 
 @Injectable()
 export class UsersService {
@@ -284,5 +285,66 @@ export class UsersService {
       default:
         return '/public/avatars/defaults/user.webp';
     }
+  }
+
+  /**
+   * Retrieves all threads created by the specified user with pagination and optional search.
+   * 
+   * @param userId - ID of the user whose threads to retrieve
+   * @param query - Query parameters for pagination, sorting, and searching
+   * @returns Paginated list of threads with the a similar structure to GET /threads
+   */
+  async getUserThreads(userId: number, query: MyThreadsQueryDto) {
+    const { sort = SortType.LATEST, page = 1, limit = 10, search, category_id} = query;
+
+    const orderBy = {
+      created_at: sort === SortType.LATEST ? 'desc' as const : 'asc' as const,
+    };
+
+    const where: Prisma.ThreadWhereInput = {
+      author_user_id: userId,
+      AND: [
+        ...(search ? [{
+          OR: [
+            { title: { contains: search, mode: Prisma.QueryMode.insensitive } },
+            { content: { contains: search, mode: Prisma.QueryMode.insensitive } },
+          ],
+        }] : []),
+        ...(category_id ? [{ category_id }] : []),
+      ],
+    };
+
+    const [threads, total] = await Promise.all([
+      this.prisma.thread.findMany({
+        where,
+        skip: (page - 1) * limit,
+        take: limit,
+        orderBy,
+        include: {
+          author: { select: { id: true, username: true, name: true, photoPath: true } },
+          category: true,
+          _count: { select: { comments: true, votes: true } },
+          votes: { select: { vote_type: true, voter_user_id: true } },
+          bookmarks: { where: { user_id: userId }, select: { user_id: true } },
+        },
+      }),
+      this.prisma.thread.count({ where }),
+    ]);
+
+    return {
+      data: threads.map(({ bookmarks, ...thread }) => ({
+        ...thread,
+        votes: formatVotes(thread.votes, userId),
+        bookmarked: !!(bookmarks?.some(b => b.user_id === userId)),
+      })),
+      meta: { 
+        total, 
+        page, 
+        limit, 
+        totalPages: Math.ceil(total / limit),
+        ...(search && { search }),
+        ...(category_id && { category_id }), 
+      },
+    };
   }
 }
