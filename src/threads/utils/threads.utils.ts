@@ -1,4 +1,4 @@
-import { Prisma, VoteType } from '@prisma/client';
+import { Prisma, User, VoteType } from '@prisma/client';
 import { FormattedVote } from '../types/threads.types';
 
 export function formatVotes(
@@ -51,4 +51,8 @@ export function buildThreadIncludeOptions(
           }
     },
   };
+}
+
+export function isUserDeleted(user: User): boolean {
+  return user.isDeleted || user.name == null || user.password == null || user.name.trim() === '' || user.password.trim() === '';
 }

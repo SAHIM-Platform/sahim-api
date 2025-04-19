@@ -11,5 +11,6 @@ Authorization: Bearer {{accessToken}}
 Content-Type: application/json
 
 {
-    "name": "{{newName}}"
+    "name": "{{newName}}",
+    "photoPath": "invalid path"
 }

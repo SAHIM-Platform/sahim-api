@@ -1,19 +1,22 @@
 import { SignupAuthDto } from '@/auth/dto/signup-auth.dto';
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { PrismaService } from 'prisma/prisma.service';
 import { ThreadsService } from '@/threads/threads.service';
-import { formatVotes } from '@/threads/utils/threads.utils';
+import { formatVotes, isUserDeleted } from '@/threads/utils/threads.utils';
 import { BookmarksQueryDto } from './dto/bookmarks-query.dto';
 import { SortType } from '@/threads/enum/sort-type.enum';
+import * as bcrypt from 'bcryptjs';
 import { UpdateMeDto } from './dto/update-me.dto';
-import { UserRole } from '@prisma/client';
+import { Prisma, UserRole } from '@prisma/client';
+import { DeletedUserException } from './exceptions/deleted-user.exception';
+import { MyThreadsQueryDto } from './dto/my-threads-query.dto';
 
 @Injectable()
 export class UsersService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly threadsService: ThreadsService,
-  ) {}
+  ) { }
 
   /**
    * Finds a user by their email address.
@@ -23,6 +26,7 @@ export class UsersService {
   async findUserByEmail(email: string) {
     return await this.prisma.user.findUnique({
       where: { email },
+      include : {student : true}
     });
   }
 
@@ -41,7 +45,13 @@ export class UsersService {
   async findUserByEmailOrUsername(email: string, username: string) {
     return await this.prisma.user.findFirst({
       where: {
-        OR: [{ email }, { username }],
+        OR: [
+          { email },
+          { username }
+        ],
+        AND: {
+          isDeleted: false
+        }
       },
     });
   }
@@ -53,7 +63,10 @@ export class UsersService {
    */
   async findUserById(userId: number) {
     return await this.prisma.user.findFirst({
-      where: { id: userId },
+      where: {
+        id: userId,
+        isDeleted: false
+      },
     });
   }
 
@@ -78,7 +91,7 @@ export class UsersService {
     const userData = await this.prisma.user.findUnique({
       where: { id: userId },
       include: {
-        student: true, 
+        student: true,
       },
     });
 
@@ -86,14 +99,14 @@ export class UsersService {
       throw new NotFoundException('User not found');
     }
 
-    const { id, name, username, email, role, student } = userData;
+    const { id, name, username, email, role, student, photoPath } = userData;
 
     if (role === UserRole.STUDENT && student) {
-      return { id, name, username, email, role, academicNumber: student.academicNumber, department: student.department, level: student.studyLevel };
+      return { id, name, username, email, role, photoPath, academicNumber: student.academicNumber, department: student.department, level: student.studyLevel };
     }
 
     // Return only general user info for non-students
-    return { id, name, username, email, role };
+    return { id, name, username, email, role, photoPath };
   }
 
   /**
@@ -105,7 +118,7 @@ export class UsersService {
    */
   async getUserBookmarks(userId: number, query: BookmarksQueryDto = {}) {
     const { sort = SortType.LATEST, page = 1, limit = 10 } = query;
-    
+
     const orderBy = {
       created_at: sort === SortType.LATEST ? 'desc' as const : 'asc' as const,
     };
@@ -151,18 +164,93 @@ export class UsersService {
         votes: formatVotes(thread.votes, userId),
         bookmarked: true, // All threads in this response are bookmarked
       })),
-      meta: { 
-        total, 
-        page, 
-        limit, 
-        totalPages: Math.ceil(total / limit) 
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit)
       },
     };
   }
 
+  /**
+   * Soft deletes a user account after password validation.
+   * This will:
+   * 1. Permanently delete all user's bookmarks
+   * 2. Set user as deleted and remove sensitive information
+   * 3. Update username to a deleted user format
+   * 4. If user is a student, also delete their student record
+   * 
+   * @param userId - The ID of the user to delete
+   * @param password - Current password for verification
+   * @throws UnauthorizedException if password is incorrect
+   */
+  async deleteUserAccount(userId: number, password: string) {
+    // First check if user exists and get their role
+    const user = await this.findUserById(userId);
+    if (!user) {
+      throw new UnauthorizedException('User not found');
+    }
+
+    // Prevent deletion of super admin accounts
+    if (user.role === UserRole.SUPER_ADMIN) {
+      throw new ForbiddenException('Super admin accounts cannot be deleted');
+    }
+
+    // Validate the password
+    const validPassword = await this.validatePassword(userId, password);
+    if (!validPassword) {
+      throw new UnauthorizedException('Incorrect password');
+    }
+
+    // First permanently delete all bookmarks
+    await this.prisma.bookmarkedThread.deleteMany({
+      where: { user_id: userId }
+    });
+
+    // Then soft delete the user
+    const updatedUser = await this.prisma.user.update({
+      where: { id: userId },
+      data: {
+        isDeleted: true,
+        deletedAt: new Date(),
+        email: { set: null },
+        password: { set: null },
+        name: { set: null },
+        username: `deleted_user_${userId}`,
+        isActive: false
+      }
+    });
+
+    // If user is a student, delete their student record
+    if (updatedUser.role === UserRole.STUDENT) {
+      await this.prisma.student.delete({
+        where: { userId }
+      });
+    }
+
+    return updatedUser;
+  }
+
+  async validatePassword(userId: number, password: string): Promise<boolean> {
+    const user = await this.findUserById(userId);
+    if (!user || isUserDeleted(user)) {
+      return false;
+    }
+
+    return bcrypt.compare(password, user.password!);
+  }
+
   async updateMe(userId: number, dto: UpdateMeDto) {
-    const { name, username } = dto;
-  
+    const { name, username, photoPath } = dto;
+
+    const user = await this.findUserById(userId);
+
+    // Check if user is deleted
+    if (!user || isUserDeleted(user)) {
+      throw new DeletedUserException();
+    }
+
     // Check if username is taken (if provided)
     if (username) {
       const existing = await this.findUserByUsername(username);
@@ -170,15 +258,94 @@ export class UsersService {
         throw new BadRequestException('Username is already taken');
       }
     }
-  
+
     const updatedUser = await this.prisma.user.update({
       where: { id: userId },
       data: {
         name,
         username,
+        photoPath,
       },
     });
-  
+
     return this.sanitizeUser(updatedUser);
+  }
+
+  /**
+   * Gets the default photo path based on user role
+   * @param role - The user's role
+   * @returns {string} The default photo path for the role
+   */
+  public getDefaultPhotoPath(role: UserRole): string {
+    switch (role) {
+      case UserRole.SUPER_ADMIN:
+        return '/public/avatars/defaults/super-admin.webp';
+      case UserRole.ADMIN:
+        return '/public/avatars/defaults/admin.webp';
+      case UserRole.STUDENT:
+      default:
+        return '/public/avatars/defaults/user.webp';
+    }
+  }
+
+  /**
+   * Retrieves all threads created by the specified user with pagination and optional search.
+   * 
+   * @param userId - ID of the user whose threads to retrieve
+   * @param query - Query parameters for pagination, sorting, and searching
+   * @returns Paginated list of threads with the a similar structure to GET /threads
+   */
+  async getUserThreads(userId: number, query: MyThreadsQueryDto) {
+    const { sort = SortType.LATEST, page = 1, limit = 10, search, category_id} = query;
+
+    const orderBy = {
+      created_at: sort === SortType.LATEST ? 'desc' as const : 'asc' as const,
+    };
+
+    const where: Prisma.ThreadWhereInput = {
+      author_user_id: userId,
+      AND: [
+        ...(search ? [{
+          OR: [
+            { title: { contains: search, mode: Prisma.QueryMode.insensitive } },
+            { content: { contains: search, mode: Prisma.QueryMode.insensitive } },
+          ],
+        }] : []),
+        ...(category_id ? [{ category_id }] : []),
+      ],
+    };
+
+    const [threads, total] = await Promise.all([
+      this.prisma.thread.findMany({
+        where,
+        skip: (page - 1) * limit,
+        take: limit,
+        orderBy,
+        include: {
+          author: { select: { id: true, username: true, name: true, photoPath: true } },
+          category: true,
+          _count: { select: { comments: true, votes: true } },
+          votes: { select: { vote_type: true, voter_user_id: true } },
+          bookmarks: { where: { user_id: userId }, select: { user_id: true } },
+        },
+      }),
+      this.prisma.thread.count({ where }),
+    ]);
+
+    return {
+      data: threads.map(({ bookmarks, ...thread }) => ({
+        ...thread,
+        votes: formatVotes(thread.votes, userId),
+        bookmarked: !!(bookmarks?.some(b => b.user_id === userId)),
+      })),
+      meta: { 
+        total, 
+        page, 
+        limit, 
+        totalPages: Math.ceil(total / limit),
+        ...(search && { search }),
+        ...(category_id && { category_id }), 
+      },
+    };
   }
 }

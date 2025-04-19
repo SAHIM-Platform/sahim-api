@@ -2,15 +2,15 @@ import { CreateCategoryDto } from '@/admins/dto/create-category.dto';
 import { CategoryNotFoundException } from '@/admins/exceptions/category-not-found.exception';
 import { AuthUtil } from '@/auth/utils/auth.util';
 import { UsersService } from '@/users/users.service';
-import { BadRequestException, ForbiddenException, Injectable, OnModuleInit, Res } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, OnModuleInit } from '@nestjs/common';
 import { ApprovalStatus, UserRole } from '@prisma/client';
 import { PrismaService } from 'prisma/prisma.service';
 import { AdminSignupDto } from './dto/create-admin.dto';
+import { StudentSearchQueryDto } from './dto/search-student-query.dto';
+import { StudentQueryDto } from './dto/student-query.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { CategoryAlreadyExistsException } from './exceptions/category-already-exists.exception';
-import { StudentQueryDto } from './dto/student-query.dto';
 import { SUPER_ADMIN_EMAIL, SUPER_ADMIN_PASSWORD, SUPER_ADMIN_USERNAME } from './utils/constans';
-import { StudentSearchQueryDto } from './dto/search-student-query.dto';
 
 @Injectable()
 export class AdminsService implements OnModuleInit {
@@ -78,6 +78,7 @@ export class AdminsService implements OnModuleInit {
                     name: 'Super Admin',
                     password: hashedPassword,
                     role: UserRole.SUPER_ADMIN, 
+                    photoPath: this.usersService.getDefaultPhotoPath(UserRole.SUPER_ADMIN),
                 },
             });
 
@@ -148,9 +149,9 @@ export class AdminsService implements OnModuleInit {
      * @returns {Promise<{ message: string }>} Success message.
      * @throws {BadRequestException} If the student does not exist, is not a student, or is already approved.
      */
-    async approveStudent(studentId: number , adminUserId: number) {
+    async approveStudent(userId: number , adminUserId: number) {
         const student = await this.prisma.student.findUnique({
-            where: { id: studentId },
+            where: {  userId },
             include: { user: true }  
         });
 
@@ -167,7 +168,7 @@ export class AdminsService implements OnModuleInit {
         }
 
         await this.prisma.student.update({
-            where: { id: studentId },
+            where: { userId },
             data: { approvalStatus: ApprovalStatus.APPROVED , approvalUpdatedByUserId: adminUserId},
             
         });
@@ -181,9 +182,9 @@ export class AdminsService implements OnModuleInit {
      * @returns {Promise<{ message: string }>} Success message.
      * @throws {BadRequestException} If the student does not exist, is not a student, or is already approved/rejected.
      */
-    async rejectStudent(studentId: number, adminUserId: number) {
+    async rejectStudent(userId: number, adminUserId: number) {
         const student = await this.prisma.student.findUnique({
-            where: { id: studentId },
+            where: { userId },
             include: { user: true }  
         });
 
@@ -204,7 +205,7 @@ export class AdminsService implements OnModuleInit {
         }
 
         await this.prisma.student.update({
-            where: { id: studentId },
+            where: { userId },
             data: { approvalStatus: ApprovalStatus.REJECTED,
             approvalUpdatedByUserId: adminUserId ,
             }, 
