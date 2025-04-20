@@ -43,8 +43,17 @@ export class AuthService {
   ): Promise<AuthResponse> {
     const { email, username, name, password, academicNumber, department, studyLevel, authMethod = AuthMethod.EMAIL_PASSWORD } = input;
   
+    // Validate that email is provided only for Google OAuth
+    if (authMethod === AuthMethod.EMAIL_PASSWORD && email) {
+      throw new BadRequestException('Email cannot be provided for EMAIL_PASSWORD authentication method');
+    }
+
+    if (authMethod === AuthMethod.OAUTH_GOOGLE && !email) {
+      throw new BadRequestException('Email is required for Google OAuth authentication');
+    }
+
     const existingUser = await this.usersService.findUserByEmailOrUsername(
-      email,
+      email || '',
       username,
     );
 
@@ -119,31 +128,35 @@ export class AuthService {
     };
   }
 
-  /**
+ /**
    * Authenticates a user and generates new tokens.
+   * Supports authentication via username or academic number (for email/password method).
+   *
    * @param input - The user's signin information.
    * @param res - The Express response object (used for setting cookies).
-   * @throws {NotFoundException} If the user is not found.
-   * @throws {UnauthorizedException} If the password is incorrect.
-   * @returns {Promise<AuthResponse>} Authentication response with tokens.
+   * @throws {BadRequestException} If required fields are missing or unsupported authMethod is provided.
+   * @throws {UnauthorizedException} If credentials are invalid.
+   * @returns {Promise<AuthResponse>} Authentication response with JWT tokens and user info.
    */
   async signin(
     input: SigninAuthDto,
     @Res() res: Response,
   ): Promise<AuthResponse> {
-    const { email, password } = input;
+    const { identifier, password } = input;
 
-    const user = await this.usersService.findUserByEmail(email);
+    if (!identifier) {
+      throw new BadRequestException('Username or academic number is required');
+    }
+
+    const user = await this.usersService.findUserByUsernameOrAcademicNumber(identifier);
     if (!user) {
-      throw new NotFoundException(
-        'User not found. Please check your email or sign up.',
-      );
+      throw new UnauthorizedException('Invalid credentials');
     }
 
     const passwordMatch = await bCompare(password, user.password!);
     if (!passwordMatch) {
       throw new UnauthorizedException('Incorrect password. Please try again.');
-    }
+    }    
 
     await this.authUtil.revokeAllRefreshTokens(user.id);
 

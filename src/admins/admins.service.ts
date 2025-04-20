@@ -96,7 +96,7 @@ export class AdminsService implements OnModuleInit {
     async createAdmin(input: AdminSignupDto) {
         const { email, name, username, password } = input;
 
-        const existingUser = await this.usersService.findUserByEmailOrUsername(email, username);
+        const existingUser = await this.usersService.findUserByEmailOrUsername(email || '', username);
         if (existingUser) {
             throw new BadRequestException('Admin with this email or username already exists');
         }
