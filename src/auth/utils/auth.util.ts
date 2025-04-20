@@ -307,4 +307,14 @@ export class AuthUtil {
       },
     });
   }
+
+  buildIncompleteUserRedirect(incompleteUser): string {
+    const redirectUrl = new URL('/complete-signup', process.env.FRONTEND_URL);
+    redirectUrl.searchParams.set('email', incompleteUser.email);
+    redirectUrl.searchParams.set('username', incompleteUser.userName);
+    redirectUrl.searchParams.set('name', incompleteUser.name)
+    redirectUrl.searchParams.set('picture', incompleteUser.picture || '');
+  
+    return redirectUrl.toString();
+  }
 }
