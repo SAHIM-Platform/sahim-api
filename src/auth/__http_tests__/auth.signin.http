@@ -1,33 +1,25 @@
 @port = {{$dotenv API_PORT}}
 @baseUrl = http://localhost:{{port}}
-@email = test15@example.com
-@password = Test123!@#
-@adminEmail = {{$dotenv SUPER_ADMIN_EMAIL}}
+@username = test_user_new_
+@password = Test$1234
+@academicNumber = 1299569589195
+@adminUsername = {{$dotenv SUPER_ADMIN_USERNAME}}
 @adminPassword = {{$dotenv SUPER_ADMIN_PASSWORD}}
 
-### Sign In - Valid Credentials
+### Sign In - Student with Username
 POST {{baseUrl}}/auth/signin
 Content-Type: application/json
 
 {
-    "email": "{{adminEmail}}",
-    "password": "{{adminPassword}}"
-}
-
-### Sign In - Invalid Password
-POST {{baseUrl}}/auth/signin
-Content-Type: application/json
-
-{
-    "email": "{{email}}",
-    "password": "Test123!@#"
-}
-
-### Sign In - Non-existent User
-POST {{baseUrl}}/auth/signin
-Content-Type: application/json
-
-{
-    "email": "nonexistent@example.com",
+    "identifier": "{{username}}",
     "password": "{{password}}"
+}
+
+### Sign In - Admin with Username
+POST {{baseUrl}}/auth/signin
+Content-Type: application/json
+
+{
+    "identifier": "{{adminUsername}}",
+    "password": "{{adminPassword}}"
 }
