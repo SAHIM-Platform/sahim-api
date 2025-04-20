@@ -42,15 +42,6 @@ export class AuthService {
     @Res() res: Response,
   ): Promise<AuthResponse> {
     const { email, username, name, password, academicNumber, department, studyLevel, authMethod = AuthMethod.EMAIL_PASSWORD } = input;
-  
-    // Validate that email is provided only for Google OAuth
-    if (authMethod === AuthMethod.EMAIL_PASSWORD && email) {
-      throw new BadRequestException('Email cannot be provided for EMAIL_PASSWORD authentication method');
-    }
-
-    if (authMethod === AuthMethod.OAUTH_GOOGLE && !email) {
-      throw new BadRequestException('Email is required for Google OAuth authentication');
-    }
 
     const existingUser = await this.usersService.findUserByEmailOrUsername(
       email || '',
