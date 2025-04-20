@@ -99,14 +99,33 @@ export class UsersService {
       throw new NotFoundException('User not found');
     }
 
-    const { id, name, username, email, role, student, photoPath } = userData;
+    const { id, name, username, email, role, student, photoPath, authMethod } = userData;
 
     if (role === UserRole.STUDENT && student) {
-      return { id, name, username, email, role, photoPath, academicNumber: student.academicNumber, department: student.department, level: student.studyLevel };
+      return { 
+        id, 
+        name, 
+        username, 
+        email: email || null, 
+        role, 
+        authMethod,
+        photoPath, 
+        academicNumber: student.academicNumber, 
+        department: student.department, 
+        level: student.studyLevel 
+      };
     }
 
     // Return only general user info for non-students
-    return { id, name, username, email, role, photoPath };
+    return { 
+      id, 
+      name, 
+      username, 
+      email: email || null, 
+      role, 
+      authMethod,
+      photoPath 
+    };
   }
 
   /**
@@ -347,5 +366,22 @@ export class UsersService {
         ...(category_id && { category_id }),
       },
     };
+  }
+
+  async findUserByUsernameOrAcademicNumber(identifier: string, role?: UserRole) {
+    if (role === UserRole.STUDENT || !role) {
+      const student = await this.prisma.student.findUnique({
+        where: { academicNumber: identifier },
+        include: { user: { include: { student: true } } },
+      });
+      if (student) {
+        return student.user;
+      }
+    }
+
+    return this.prisma.user.findUnique({
+      where: { username: identifier },
+      include: { student: true },
+    });
   }
 }

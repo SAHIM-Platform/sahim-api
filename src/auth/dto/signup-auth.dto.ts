@@ -13,13 +13,16 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class SignupAuthDto {
   @ApiProperty({
-    description: 'User email address',
+    description: 'Email address (only required for Google OAuth)',
     example: 'user@example.com',
+    required: false,
     maxLength: 255,
   })
-  @IsEmail()
-  @MaxLength(255)
-  email: string;
+  @IsOptional()
+  @ValidateIf((o) => o.authMethod === AuthMethod.OAUTH_GOOGLE)
+  @IsEmail({}, { message: 'Please provide a valid email address' })
+  @MaxLength(255, { message: 'Email must not exceed 255 characters' })
+  email?: string;
 
   @ApiProperty({
     description: 'Username (letters, numbers, underscores and hyphens only)',
@@ -57,7 +60,7 @@ export class SignupAuthDto {
   @IsOptional()
   authMethod?: AuthMethod;
 
-@ApiProperty({
+  @ApiProperty({
     description: 'Password (required if authMethod is EMAIL_PASSWORD or undefined)',
     required: false
   })
