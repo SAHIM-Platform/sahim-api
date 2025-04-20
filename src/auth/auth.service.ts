@@ -10,7 +10,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { ApprovalStatus, UserRole } from '@prisma/client';
+import { ApprovalStatus, AuthMethod, UserRole } from '@prisma/client';
 import { compare as bCompare } from 'bcryptjs';
 import * as crypto from 'crypto';
 import { Response } from 'express';
@@ -41,8 +41,8 @@ export class AuthService {
     input: StudentSignUpDto,
     @Res() res: Response,
   ): Promise<AuthResponse> {
-    const { email, username, name, password, academicNumber, department, studyLevel } = input;
-
+    const { email, username, name, password, academicNumber, department, studyLevel, authMethod = AuthMethod.EMAIL_PASSWORD } = input;
+  
     const existingUser = await this.usersService.findUserByEmailOrUsername(
       email,
       username,
@@ -66,14 +66,14 @@ export class AuthService {
       throw new BadRequestException('Academic number already registered');
     }
 
-    const hashedPassword = await this.authUtil.hashPassword(password);
-
+    const hashedPassword = authMethod === AuthMethod.EMAIL_PASSWORD ? await this.authUtil.hashPassword(password!) : null;
     const createdUser = await this.prisma.user.create({
       data: {
         email,
         username,
         name: name,
         password: hashedPassword,
+        authMethod,
         role: UserRole.STUDENT,
         photoPath: this.usersService.getDefaultPhotoPath(UserRole.STUDENT),
         student: {

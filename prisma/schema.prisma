@@ -17,6 +17,7 @@ model User {
   password      String?
   name          String?
   photoPath    String?           @default("")
+  authMethod    AuthMethod        @default(EMAIL_PASSWORD) 
   createdAt     DateTime          @default(now())
   lastLoginAt   DateTime?
   isActive      Boolean           @default(true)
@@ -57,6 +58,11 @@ model Student {
   user           User           @relation("StudentUser", fields: [userId], references: [id])
   approvalUpdatedByUserId Int?
   approvalUpdatedByUser   User?      @relation("ApprovalUpdatedByUser", fields: [approvalUpdatedByUserId], references: [id], onDelete: SetNull)
+}
+
+enum AuthMethod {
+  EMAIL_PASSWORD
+  OAUTH_GOOGLE
 }
 
 enum UserRole {
