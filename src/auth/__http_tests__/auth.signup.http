@@ -1,9 +1,9 @@
 @port = {{$dotenv API_PORT}}
 @baseUrl = http://localhost:{{port}}
-@email = test1ss6@example.com
+@email = test1ss3@example.com
 @password = Test123!@$
-@username = eestsuser16s
-@name = Test User 14
+@username = test_user3
+@name = Test User
 
 ### Sign Up - Valid Input
 POST {{baseUrl}}/auth/signup
@@ -12,9 +12,8 @@ Content-Type: application/json
 {
     "email": "{{email}}",
     "username": "{{username}}",
-    "password": "{{password}}",
     "name": "{{name}}",
-    "academicNumber": "1299567589123",
+    "academicNumber": "1299567589126",
     "department": "IT",
     "studyLevel": 2
 }

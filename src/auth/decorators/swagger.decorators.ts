@@ -19,7 +19,7 @@ export function SwaggerAuth() {
 export function SwaggerSignup() {
   return applyDecorators(
     ApiOperation({ summary: 'Register a new student user' }),
-    ApiBody({ type: StudentSignUpDto }),
+    ApiBody({ type: StudentSignUpDto,  description: 'User registration data. Password is required only for EMAIL_PASSWORD auth method.'}),
     ApiResponse({
       status: 201,
       description: 'User registered successfully',
