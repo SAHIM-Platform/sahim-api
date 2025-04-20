@@ -7,6 +7,7 @@ import {
   Req,
   UnauthorizedException,
   UseGuards,
+  HttpStatus,
 } from '@nestjs/common';
 import { Response } from 'express';
 import { AuthService } from './auth.service';
@@ -42,6 +43,7 @@ export class AuthController {
   @Post('signup')
   @SwaggerSignup()
   async signup(@Body() input: StudentSignUpDto, @Res() res: Response) {
+    console.log("Inside signup: ", input);
     const { accessToken, user } = await this.authService.signup(input, res);
     res.json({ message: 'User registered successfully', accessToken, user });
   }
@@ -97,14 +99,28 @@ export class AuthController {
   @Public()
   @Get('google/callback')
   @UseGuards(GoogleAuthGuard)
-  @SwaggerGoogleCallback()
   async handleGoogleRedirect(@Req() req, @Res() res: Response) {
-    const user = req.user;
-    const { accessToken, refreshToken } = await this.authUtil.generateJwtTokens(user.id, req);
-
-    this.authUtil.setRefreshTokenCookie(refreshToken, res);
-
-    return res.json({ msg: 'Logged in successfully using google', accessToken: accessToken });
+    const { googleUser } = req.user;
+  
+    try {
+      const validatedUser = await this.authService.validateGoogleUser(googleUser);
+  
+      // Fully registered user – generate tokens
+      const { accessToken, refreshToken } = await this.authUtil.generateJwtTokens(validatedUser.id, req);
+  
+      this.authUtil.setRefreshTokenCookie(refreshToken, res);
+  
+      return res.redirect(`${process.env.FRONTEND_URL}`);
+    } catch (error) {
+      if (error?.status === HttpStatus.PRECONDITION_REQUIRED) {
+        const incompleteUserData = error?.response?.incompleteUser;
+        console.log('Redirecting incomplete user:', incompleteUserData);
+        const redirectUrl = this.authUtil.buildIncompleteUserRedirect(incompleteUserData);
+        return res.redirect(redirectUrl);      
+      }
+  
+      return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: 'An error occurred during Google login', });
+    }
   }
 
   @Get('status')
