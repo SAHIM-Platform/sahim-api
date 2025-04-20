@@ -2,6 +2,8 @@
 
 SAHIM API is the backend service that powers the SAHIM platform.
 
+[![NestJS](https://img.shields.io/badge/NestJS-v11.0.12-E0234E)](https://nestjs.com/) [![Prisma](https://img.shields.io/badge/Prisma-v6.5.0-2D3748)](https://www.prisma.io/) [![TypeScript](https://img.shields.io/badge/TypeScript-v5.7.3-3178C6)](https://www.typescriptlang.org/) [![Docker](https://img.shields.io/badge/Docker-Enabled-2496ED)](https://www.docker.com/) [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-v15.3-336791)](https://www.postgresql.org/)
+
 - [Prerequisites](#prerequisites)
 - [Getting Started](#getting-started)
 - [Start Development Server](#start-development-server)
@@ -12,6 +14,9 @@ SAHIM API is the backend service that powers the SAHIM platform.
   - [Static Documentation](#static-documentation)
 - [Troubleshooting](#troubleshooting)
   - [1. Database Connection Issues](#1-database-connection-issues)
+- [Contributors](#contributors)
+  - [API](#api)
+  - [Web Client](#web-client)
 
 ---
 
@@ -243,3 +248,23 @@ If you encounter database connection problems:
 > ```
 > DATABASE_URL="postgresql://postgres:postgres@localhost:5433/sahim?schema=public"
 > ```
+
+---
+
+## Contributors
+
+This project is developed by a team of undergraduate students at the Department of **Information Technology, Faculty of Engineering and Information Technology, Taiz University**.
+
+**SAHIM (Student Academic Hub for Integrated Management)** is a comprehensive academic platform built as part of our final Software Engineering course (L3), applying software development principles, team collaboration practices, and agile methodology.
+
+### API
+
+-> [View Repository](https://github.com/SAHIM-Platform/sahim-api)
+
+[![Contributors](https://contrib.rocks/image?repo=SAHIM-Platform/sahim-api)](https://github.com/SAHIM-Platform/sahim-api/graphs/contributors)
+
+### Web Client
+
+-> [View Repository](https://github.com/SAHIM-Platform/sahim-web-client)
+
+[![Contributors](https://contrib.rocks/image?repo=SAHIM-Platform/sahim-web-client)](https://github.com/SAHIM-Platform/sahim-web-client/graphs/contributors)
