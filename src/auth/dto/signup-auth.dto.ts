@@ -1,10 +1,13 @@
-import { Department } from '@prisma/client';
+import { Department, AuthMethod } from '@prisma/client';
 import {
   IsEmail,
   IsString,
   MinLength,
   Matches,
   MaxLength,
+  IsEnum,
+  ValidateIf,
+  IsOptional,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
@@ -45,14 +48,22 @@ export class SignupAuthDto {
   name: string;
 
   @ApiProperty({
-    description: 'Password (must contain uppercase, lowercase, number and special character)',
-    example: 'Password123!',
-    minLength: 8,
-    maxLength: 72,
+    description: 'Auth method (omit for email/password)',
+    enum: AuthMethod,
+    required: false,
+    default: AuthMethod.EMAIL_PASSWORD
   })
+  @IsEnum(AuthMethod)
+  @IsOptional()
+  authMethod?: AuthMethod;
+
+@ApiProperty({
+    description: 'Password (required if authMethod is EMAIL_PASSWORD or undefined)',
+    required: false
+  })
+  @ValidateIf(o => !o.authMethod || o.authMethod === AuthMethod.EMAIL_PASSWORD)
   @IsString()
   @MinLength(8)
-  @MaxLength(72)
   @Matches(
     /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
     {
@@ -60,5 +71,5 @@ export class SignupAuthDto {
         'Password must contain at least 1 uppercase letter, 1 lowercase letter, 1 number and 1 special character',
     },
   )
-  password: string;
+  password?: string;
 }
