@@ -1,6 +1,6 @@
 import { CreateCategoryDto } from '@/admins/dto/create-category.dto';
 import { CategoryNotFoundException } from '@/admins/exceptions/category-not-found.exception';
-import { AuthUtil } from '@/auth/utils/auth.util';
+import { AuthUtil } from '@/auth/utils/auth.helpers';
 import { UsersService } from '@/users/users.service';
 import { BadRequestException, ForbiddenException, Injectable, OnModuleInit } from '@nestjs/common';
 import { ApprovalStatus, UserRole } from '@prisma/client';

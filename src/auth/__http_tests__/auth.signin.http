@@ -11,8 +11,8 @@ POST {{baseUrl}}/auth/signin
 Content-Type: application/json
 
 {
-    "identifier": "{{username}}",
-    "password": "{{password}}"
+    "identifier": "{{adminUsername}}",
+    "password": "{{adminPassword}}"
 }
 
 ### Sign In - Admin with Username

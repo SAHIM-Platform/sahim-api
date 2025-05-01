@@ -10,7 +10,7 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { Response } from 'express';
-import { AuthService } from './auth.service';
+import { AuthService } from './services/auth.service';
 import { SigninAuthDto } from './dto/signin-auth.dto';
 import { SignupAuthDto } from './dto/signup-auth.dto';
 import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiCookieAuth, ApiBearerAuth } from '@nestjs/swagger';
@@ -18,7 +18,7 @@ import { PrismaService } from 'prisma/prisma.service';
 import { Public } from './decorators/public.decorator';
 import { StudentSignUpDto } from './dto/student-signup.dto';
 import { GoogleAuthGuard } from './guards/google-auth-guard.dto';
-import { AuthUtil } from './utils/auth.util';
+import { AuthUtil } from './utils/auth.helpers';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import {
   SwaggerAuth,
@@ -30,6 +30,8 @@ import {
   SwaggerGoogleCallback,
   SwaggerAuthStatus
 } from './decorators/swagger.decorators';
+import { RefreshTokenService } from './services/refresh-token.service';
+import { TokenService } from './services/token.service';
 
 @SwaggerAuth()
 @Controller('auth')
@@ -37,6 +39,8 @@ export class AuthController {
   constructor(
     private readonly authService: AuthService,
     private readonly authUtil: AuthUtil,
+    private readonly refreshTokenService: RefreshTokenService,
+    private readonly tokenService: TokenService,
   ) { }
 
   @Public()
@@ -106,7 +110,7 @@ export class AuthController {
       const validatedUser = await this.authService.validateGoogleUser(googleUser);
   
       // Fully registered user – generate tokens
-      const { accessToken, refreshToken } = await this.authUtil.generateJwtTokens(validatedUser.id, req);
+      const { accessToken, refreshToken } = await this.tokenService.generateJwtTokens(validatedUser.id, req);
   
       this.authUtil.setRefreshTokenCookie(refreshToken, res);
   

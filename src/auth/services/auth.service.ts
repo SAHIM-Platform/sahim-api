@@ -15,10 +15,12 @@ import { compare as bCompare } from 'bcryptjs';
 import * as crypto from 'crypto';
 import { Response } from 'express';
 import { PrismaService } from 'prisma/prisma.service';
-import { StudentSignUpDto } from './dto/student-signup.dto';
-import { GoogleUser } from './interfaces/google-user.interface';
-import { AuthResponse, JwtPayload } from './interfaces/jwt-payload.interface';
-import { AuthUtil } from './utils/auth.util';
+import { StudentSignUpDto } from '../dto/student-signup.dto';
+import { GoogleUser } from '../interfaces/google-user.interface';
+import { AuthResponse, JwtPayload } from '../interfaces/jwt-payload.interface';
+import { AuthUtil } from '../utils/auth.helpers';
+import { RefreshTokenService } from './refresh-token.service';
+import { TokenService } from './token.service';
 
 @Injectable()
 export class AuthService {
@@ -27,6 +29,8 @@ export class AuthService {
     private readonly jwtService: JwtService,
     private readonly prisma: PrismaService,
     private readonly authUtil: AuthUtil,
+    private readonly refreshTokenService: RefreshTokenService,
+    private readonly tokenService: TokenService,
   ) { }
 
 
@@ -96,7 +100,7 @@ export class AuthService {
       },
     });
 
-    const tokens = await this.authUtil.generateJwtTokens(
+    const tokens = await this.tokenService.generateJwtTokens(
       createdUser.id,
       res.req,
     );
@@ -158,9 +162,9 @@ export class AuthService {
       throw new UnauthorizedException('Incorrect password. Please try again.');
     }    
 
-    await this.authUtil.revokeAllRefreshTokens(user.id);
+    await this.refreshTokenService.revokeAllRefreshTokens(user.id);
 
-    const tokens = await this.authUtil.generateJwtTokens(user.id, res.req);
+    const tokens = await this.tokenService.generateJwtTokens(user.id, res.req);
     this.authUtil.setRefreshTokenCookie(tokens.refreshToken, res);
 
     return {
@@ -191,14 +195,14 @@ export class AuthService {
     userId: number,
     @Res() res: Response,
   ): Promise<void> {
-    const isValid = await this.authUtil.validateRefreshToken(
+    const isValid = await this.refreshTokenService.validateRefreshToken(
       refreshToken,
       userId,
     );
     if (!isValid) {
       throw new UnauthorizedException('Invalid refresh token');
     }
-    await this.authUtil.revokeAllRefreshTokens(userId);
+    await this.refreshTokenService.revokeAllRefreshTokens(userId);
     this.authUtil.unsetRefreshTokenCookie(res);
   }
 
@@ -225,8 +229,8 @@ export class AuthService {
       throw new UnauthorizedException('Invalid refresh token');
     }
 
-    if (this.authUtil.isTokenExpired(storedToken.expiresAt)) {
-      await this.authUtil.revokeRefreshToken(storedToken.id);
+    if (this.tokenService.isTokenExpired(storedToken.expiresAt)) {
+      await this.refreshTokenService.revokeRefreshToken(storedToken.id);
       throw new UnauthorizedException('Refresh token has expired');
     }
 
@@ -237,22 +241,22 @@ export class AuthService {
 
     if (payload.sub !== storedToken.userId) {
       // revoke all tokens for this user for security purposes
-      await this.authUtil.revokeAllRefreshTokens(storedToken.userId);
+      await this.refreshTokenService.revokeAllRefreshTokens(storedToken.userId);
       throw new UnauthorizedException('Invalid token');
     }
 
     // Revoke the used refresh token to prevent reuse
-    await this.authUtil.revokeRefreshToken(storedToken.id);
+    await this.refreshTokenService.revokeRefreshToken(storedToken.id);
 
     // Generate new JWT tokens (access and refresh tokens)
-    const tokens = await this.authUtil.generateJwtTokens(
+    const tokens = await this.tokenService.generateJwtTokens(
       storedToken.userId,
       res.req,
     );
 
     this.authUtil.setRefreshTokenCookie(tokens.refreshToken, res);
 
-    this.authUtil.cleanupExpiredTokens().catch(console.error);
+    this.refreshTokenService.cleanupExpiredTokens().catch(console.error);
 
     // Fetch the user from the datebase incluading student data to return approvalStatus if the user is a student
     const user = await this.prisma.user.findUnique({

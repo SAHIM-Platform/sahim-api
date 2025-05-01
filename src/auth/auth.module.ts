@@ -1,15 +1,17 @@
 import { Module } from '@nestjs/common';
-import { AuthService } from './auth.service';
+import { AuthService } from './services/auth.service';
 import { AuthController } from './auth.controller';
 import { UsersModule } from '@/users/users.module';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { jwtConstants } from './utils/constants';
-import { AuthUtil } from './utils/auth.util';
+import { AuthUtil } from './utils/auth.helpers';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import googleOauthConfig from './config/google.oauth.config';
 import { GoogleStrategy } from './strategies/google.strategy';
 import { ConfigModule } from '@nestjs/config';
+import { RefreshTokenService } from './services/refresh-token.service';
+import { TokenService } from './services/token.service';
 
 @Module({
   imports: [
@@ -28,7 +30,7 @@ import { ConfigModule } from '@nestjs/config';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, AuthUtil, JwtStrategy, GoogleStrategy],
-  exports: [AuthUtil]
+  providers: [AuthService, AuthUtil, JwtStrategy, GoogleStrategy, TokenService, RefreshTokenService],
+  exports: [AuthUtil, RefreshTokenService, TokenService],
 })
 export class AuthModule {}
