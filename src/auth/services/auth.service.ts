@@ -24,6 +24,12 @@ import { TokenService } from './token.service';
 import { GoogleAuthService } from './google-auth.service';
 import { TokenType } from '../enums/token-type.enum';
 import { CookieService } from './cookie.service';
+import { InvalidCredentialsException } from '../exceptions/invalid-credentials.exception';
+import { MissingIdentifierException } from '../exceptions/missing-identifier.exception';
+import { UserNotFoundException } from '../exceptions/user-not-found.exception';
+import { AcademicNumberTakenException } from '../exceptions/academic-number-taken.exception';
+import { UsernameTakenException } from '../exceptions/username-taken.exception';
+import { EmailAlreadyExistsException } from '../exceptions/email-already-exists.exception';
 
 @Injectable()
 export class AuthService {
@@ -36,8 +42,7 @@ export class AuthService {
     private readonly tokenService: TokenService,
     private readonly googleAuthService: GoogleAuthService,
     private readonly cookieService: CookieService,
-  ) { }
-
+  ) {}
 
   /**
    * Registers a new user with the provided information.
@@ -50,15 +55,28 @@ export class AuthService {
     input: StudentSignUpDto,
     @Res() res: Response,
   ): Promise<AuthResponse> {
-    const { email, username, name, password, academicNumber, department, studyLevel, authMethod = AuthMethod.EMAIL_PASSWORD } = input;
-  
+    const {
+      email,
+      username,
+      name,
+      password,
+      academicNumber,
+      department,
+      studyLevel,
+      authMethod = AuthMethod.EMAIL_PASSWORD,
+    } = input;
+
     // Validate that email is provided only for Google OAuth
     if (authMethod === AuthMethod.EMAIL_PASSWORD && email) {
-      throw new BadRequestException('Email cannot be provided for EMAIL_PASSWORD authentication method');
+      throw new BadRequestException(
+        'Email cannot be provided for EMAIL_PASSWORD authentication method',
+      );
     }
 
     if (authMethod === AuthMethod.OAUTH_GOOGLE && !email) {
-      throw new BadRequestException('Email is required for Google OAuth authentication');
+      throw new BadRequestException(
+        'Email is required for Google OAuth authentication',
+      );
     }
 
     const existingUser = await this.usersService.findUserByEmailOrUsername(
@@ -68,10 +86,10 @@ export class AuthService {
 
     if (existingUser) {
       if (existingUser.email === email) {
-        throw new BadRequestException('Email already registered');
+        throw new EmailAlreadyExistsException();
       }
       if (existingUser.username === username) {
-        throw new BadRequestException('Username already taken');
+        throw new UsernameTakenException();
       }
     }
 
@@ -81,10 +99,13 @@ export class AuthService {
 
     if (existingStudent) {
       // If academic number is already taken
-      throw new BadRequestException('Academic number already registered');
+      throw new AcademicNumberTakenException();
     }
 
-    const hashedPassword = authMethod === AuthMethod.EMAIL_PASSWORD ? await this.authUtil.hashPassword(password!) : null;
+    const hashedPassword =
+      authMethod === AuthMethod.EMAIL_PASSWORD
+        ? await this.authUtil.hashPassword(password!)
+        : null;
     const createdUser = await this.prisma.user.create({
       data: {
         email,
@@ -99,9 +120,9 @@ export class AuthService {
             academicNumber,
             department,
             studyLevel,
-            approvalStatus: ApprovalStatus.PENDING
-          }
-        }
+            approvalStatus: ApprovalStatus.PENDING,
+          },
+        },
       },
     });
 
@@ -119,7 +140,7 @@ export class AuthService {
 
     // if user is not null
     if (!userWithStudent) {
-      throw new UnauthorizedException('User not found');
+      throw new UserNotFoundException();
     }
 
     return {
@@ -129,15 +150,18 @@ export class AuthService {
         name: createdUser.name!,
         username: createdUser.username,
         role: createdUser.role,
-        ...(userWithStudent.role === UserRole.STUDENT && userWithStudent.student && {
-          approvalStatus: userWithStudent.student.approvalStatus
-        }),
-        photoPath: createdUser.photoPath || this.usersService.getDefaultPhotoPath(createdUser.role)
-      }
+        ...(userWithStudent.role === UserRole.STUDENT &&
+          userWithStudent.student && {
+            approvalStatus: userWithStudent.student.approvalStatus,
+          }),
+        photoPath:
+          createdUser.photoPath ||
+          this.usersService.getDefaultPhotoPath(createdUser.role),
+      },
     };
   }
 
- /**
+  /**
    * Authenticates a user and generates new tokens.
    * Supports authentication via username or academic number (for email/password method).
    *
@@ -154,18 +178,19 @@ export class AuthService {
     const { identifier, password } = input;
 
     if (!identifier) {
-      throw new BadRequestException('Username or academic number is required');
+      throw new MissingIdentifierException();
     }
 
-    const user = await this.usersService.findUserByUsernameOrAcademicNumber(identifier);
+    const user =
+      await this.usersService.findUserByUsernameOrAcademicNumber(identifier);
     if (!user) {
-      throw new UnauthorizedException('Invalid credentials');
+      throw new InvalidCredentialsException();
     }
 
     const passwordMatch = await bCompare(password, user.password!);
     if (!passwordMatch) {
-      throw new UnauthorizedException('Invalid credentials');
-    }    
+      throw new InvalidCredentialsException();
+    }
 
     const tokens = await this.tokenService.generateJwtTokens(user.id, res.req);
     this.cookieService.setRefreshTokenCookie(tokens.refreshToken, res);
@@ -177,11 +202,13 @@ export class AuthService {
         name: user.name!,
         username: user.username,
         role: user.role,
-        ...(user.role === UserRole.STUDENT && user.student && {
-          approvalStatus: user.student.approvalStatus
-        }),
-        photoPath: user.photoPath || this.usersService.getDefaultPhotoPath(user.role)
-      }
+        ...(user.role === UserRole.STUDENT &&
+          user.student && {
+            approvalStatus: user.student.approvalStatus,
+          }),
+        photoPath:
+          user.photoPath || this.usersService.getDefaultPhotoPath(user.role),
+      },
     };
   }
 
@@ -206,7 +233,11 @@ export class AuthService {
       throw new UnauthorizedException('Invalid refresh token');
     }
 
-    const storedToken = await this.refreshTokenService.getValidStoredRefreshTokenByUserId(refreshToken, userId);
+    const storedToken =
+      await this.refreshTokenService.getValidStoredRefreshTokenByUserId(
+        refreshToken,
+        userId,
+      );
     await this.refreshTokenService.revokeRefreshToken(storedToken!.id);
     this.cookieService.unsetRefreshTokenCookie(res);
   }
@@ -246,7 +277,9 @@ export class AuthService {
 
     if (payload.sub !== storedToken.userId) {
       // revoke all tokens for this user for security purposes
-      await this.refreshTokenService.revokeAllUserRefreshTokens(storedToken.userId);
+      await this.refreshTokenService.revokeAllUserRefreshTokens(
+        storedToken.userId,
+      );
       throw new UnauthorizedException('Invalid token');
     }
 
@@ -280,10 +313,13 @@ export class AuthService {
         name: storedToken.user.name!,
         username: storedToken.user.username,
         role: storedToken.user.role,
-        ...(user.role === UserRole.STUDENT && user.student && {
-          approvalStatus: user.student.approvalStatus
-        }),
-        photoPath: storedToken.user.photoPath || this.usersService.getDefaultPhotoPath(storedToken.user.role)
+        ...(user.role === UserRole.STUDENT &&
+          user.student && {
+            approvalStatus: user.student.approvalStatus,
+          }),
+        photoPath:
+          storedToken.user.photoPath ||
+          this.usersService.getDefaultPhotoPath(storedToken.user.role),
       },
     };
   }
@@ -315,5 +351,4 @@ export class AuthService {
   async googleLogin(googleUser: GoogleUser) {
     return await this.googleAuthService.validateGoogleUser(googleUser);
   }
-  
 }

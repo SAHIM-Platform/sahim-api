@@ -29,8 +29,6 @@ export class AuthUtil {
       .update(token)
       .digest('hex');
   }
-
-  // private helpers
   
   buildIncompleteUserRedirect(incompleteUser): string {
     const redirectUrl = new URL('/complete-signup', process.env.FRONTEND_URL);

@@ -13,7 +13,7 @@ export class RefreshTokenService {
     private readonly tokenService: TokenService,
     private readonly prisma: PrismaService,
     @Inject(forwardRef(() => AuthUtil))
-    private readonly authutil: AuthUtil,    
+    private readonly authutil: AuthUtil,
   ) {}
 
   /**
@@ -27,7 +27,10 @@ export class RefreshTokenService {
     refreshToken: string,
     req?: Request,
   ): Promise<void> {
-    const expiresAt = this.tokenService.calcTokenExpiration(TokenType.REFRESH, ExpirationUnit.DATE) as Date;
+    const expiresAt = this.tokenService.calcTokenExpiration(
+      TokenType.REFRESH,
+      ExpirationUnit.DATE,
+    ) as Date;
     const hashedToken = this.authutil.hashToken(refreshToken);
 
     await this.prisma.refreshToken.create({
@@ -45,33 +48,32 @@ export class RefreshTokenService {
       data: { lastLoginAt: new Date() },
     });
   }
-    
-    
+
   /**
    * Retrieves a valid stored refresh token for a user.
    * @param refreshToken - The refresh token to find.
    * @param userId - The ID of the user.
    * @returns A promise that resolves to the found refresh token or null.
    */
-    async getValidStoredRefreshTokenByUserId(
-        refreshToken: string,
-        userId: number,
-      ) {
-        const hashedToken = this.authutil.hashToken(refreshToken);
-        return await this.prisma.refreshToken.findFirst({
-          where: {
-            token: hashedToken,
-            userId: userId,
-            revoked: false,
-            expiresAt: {
-              gt: new Date(),
-            },
-          },
-          include: {
-            user: true,
-          },
-        });
-      }
+  async getValidStoredRefreshTokenByUserId(
+    refreshToken: string,
+    userId: number,
+  ) {
+    const hashedToken = this.authutil.hashToken(refreshToken);
+    return await this.prisma.refreshToken.findFirst({
+      where: {
+        token: hashedToken,
+        userId: userId,
+        revoked: false,
+        expiresAt: {
+          gt: new Date(),
+        },
+      },
+      include: {
+        user: true,
+      },
+    });
+  }
 
   /**
    * Revokes all refresh tokens for a user.
@@ -118,7 +120,7 @@ export class RefreshTokenService {
 
     return true;
   }
-    
+
   /**
    * Revokes a specific refresh token.
    * @param tokenId - The ID of the token to revoke.
