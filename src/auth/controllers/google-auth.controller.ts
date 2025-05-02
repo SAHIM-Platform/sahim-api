@@ -7,6 +7,7 @@ import { CookieService } from "../services/cookie.service";
 import { TokenService } from "../services/token.service";
 import { AuthUtil } from "../utils/auth.helpers";
 import { Response } from "express";
+import { GoogleAuthService } from "../services/google-auth.service";
 
 @Controller('auth/google')
 export class GoogleAuthController {
@@ -14,12 +15,12 @@ export class GoogleAuthController {
       private readonly authService: AuthService,
       private readonly tokenService: TokenService,
       private readonly cookieService: CookieService,
-      private readonly authUtil: AuthUtil,
+      private readonly googleAuthService: GoogleAuthService,
     ) {}
 
-    
+
     @Public()
-    @Get('google/login')
+    @Get('login')
     @UseGuards(GoogleAuthGuard)
     @SwaggerGoogleLogin()
     handleGoogleLogin() {
@@ -27,7 +28,7 @@ export class GoogleAuthController {
     }
   
     @Public()
-    @Get('google/callback')
+    @Get('callback')
     @UseGuards(GoogleAuthGuard)
     async handleGoogleRedirect(@Req() req, @Res() res: Response) {
       const { googleUser } = req.user;
@@ -42,14 +43,7 @@ export class GoogleAuthController {
     
         return res.redirect(`${process.env.FRONTEND_URL}`);
       } catch (error) {
-        if (error?.status === HttpStatus.PRECONDITION_REQUIRED) {
-          const incompleteUserData = error?.response?.incompleteUser;
-          console.log('Redirecting incomplete user:', incompleteUserData);
-          const redirectUrl = this.authUtil.buildIncompleteUserRedirect(incompleteUserData);
-          return res.redirect(redirectUrl);      
-        }
-    
-        return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: 'An error occurred during Google login', });
+        return this.googleAuthService.handleOAuthError(error, res);
       }
     }
 

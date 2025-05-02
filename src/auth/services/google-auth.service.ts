@@ -1,9 +1,14 @@
 import { HttpException, HttpStatus } from '@nestjs/common';
 import { GoogleUser } from '../interfaces/google-user.interface';
 import { UsersService } from '@/users/users.service';
+import { Response } from 'express';
+import { AuthUtil } from '../utils/auth.helpers';
 
 export class GoogleAuthService {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(
+    private readonly usersService: UsersService,
+    private readonly authUtil: AuthUtil, 
+  ) {}
 
   /**
    * Validates a Google user and returns the existing user if found.
@@ -68,4 +73,16 @@ export class GoogleAuthService {
 
     return { defaultUsername };
   }
+
+  async handleOAuthError(error: any, res: Response) {
+    if (error?.status === HttpStatus.PRECONDITION_REQUIRED) {
+      const redirectUrl = this.authUtil.buildIncompleteUserRedirect(error?.response?.incompleteUser);
+      return res.redirect(redirectUrl);
+    }
+  
+    return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+      message: 'An error occurred during Google login',
+    });
+  }
+  
 }
