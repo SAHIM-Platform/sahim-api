@@ -164,7 +164,7 @@ export class AuthService {
 
     const passwordMatch = await bCompare(password, user.password!);
     if (!passwordMatch) {
-      throw new UnauthorizedException('Incorrect password. Please try again.');
+      throw new UnauthorizedException('Invalid credentials');
     }    
 
     const tokens = await this.tokenService.generateJwtTokens(user.id, res.req);
