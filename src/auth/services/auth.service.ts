@@ -23,6 +23,7 @@ import { RefreshTokenService } from './refresh-token.service';
 import { TokenService } from './token.service';
 import { GoogleAuthService } from './google-auth.service';
 import { TokenType } from '../enums/token-type.enum';
+import { CookieService } from './cookie.service';
 
 @Injectable()
 export class AuthService {
@@ -33,7 +34,8 @@ export class AuthService {
     private readonly authUtil: AuthUtil,
     private readonly refreshTokenService: RefreshTokenService,
     private readonly tokenService: TokenService,
-    private readonly googleAuthService: GoogleAuthService
+    private readonly googleAuthService: GoogleAuthService,
+    private readonly cookieService: CookieService,
   ) { }
 
 
@@ -107,7 +109,7 @@ export class AuthService {
       createdUser.id,
       res.req,
     );
-    this.authUtil.setRefreshTokenCookie(tokens.refreshToken, res);
+    this.cookieService.setRefreshTokenCookie(tokens.refreshToken, res);
 
     // After creating the user, fetch the user again including student data to return approvalStatus if the user is a student
     const userWithStudent = await this.prisma.user.findUnique({
@@ -166,7 +168,7 @@ export class AuthService {
     }    
 
     const tokens = await this.tokenService.generateJwtTokens(user.id, res.req);
-    this.authUtil.setRefreshTokenCookie(tokens.refreshToken, res);
+    this.cookieService.setRefreshTokenCookie(tokens.refreshToken, res);
 
     return {
       accessToken: tokens.accessToken,
@@ -206,7 +208,7 @@ export class AuthService {
 
     const storedToken = await this.refreshTokenService.getValidStoredRefreshTokenByUserId(refreshToken, userId);
     await this.refreshTokenService.revokeRefreshToken(storedToken!.id);
-    this.authUtil.unsetRefreshTokenCookie(res);
+    this.cookieService.unsetRefreshTokenCookie(res);
   }
 
   /**
@@ -257,7 +259,7 @@ export class AuthService {
       res.req,
     );
 
-    this.authUtil.setRefreshTokenCookie(tokens.refreshToken, res);
+    this.cookieService.setRefreshTokenCookie(tokens.refreshToken, res);
 
     this.refreshTokenService.cleanupExpiredTokens().catch(console.error);
 

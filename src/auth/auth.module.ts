@@ -13,6 +13,7 @@ import { ConfigModule } from '@nestjs/config';
 import { RefreshTokenService } from './services/refresh-token.service';
 import { TokenService } from './services/token.service';
 import { GoogleAuthService } from './services/google-auth.service';
+import { CookieService } from './services/cookie.service';
 
 @Module({
   imports: [
@@ -31,7 +32,7 @@ import { GoogleAuthService } from './services/google-auth.service';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, AuthUtil, JwtStrategy, GoogleStrategy, TokenService, RefreshTokenService, GoogleAuthService],
-  exports: [AuthUtil, RefreshTokenService, TokenService],
+  providers: [AuthService, AuthUtil, JwtStrategy, GoogleStrategy, TokenService, RefreshTokenService, GoogleAuthService, CookieService],
+  exports: [AuthUtil],
 })
 export class AuthModule {}

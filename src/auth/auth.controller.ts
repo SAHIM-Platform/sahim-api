@@ -32,6 +32,7 @@ import {
 } from './decorators/swagger.decorators';
 import { RefreshTokenService } from './services/refresh-token.service';
 import { TokenService } from './services/token.service';
+import { CookieService } from './services/cookie.service';
 
 @SwaggerAuth()
 @Controller('auth')
@@ -39,8 +40,8 @@ export class AuthController {
   constructor(
     private readonly authService: AuthService,
     private readonly authUtil: AuthUtil,
-    private readonly refreshTokenService: RefreshTokenService,
     private readonly tokenService: TokenService,
+    private readonly cookieService: CookieService,
   ) { }
 
   @Public()
@@ -112,7 +113,7 @@ export class AuthController {
       // Fully registered user – generate tokens
       const { accessToken, refreshToken } = await this.tokenService.generateJwtTokens(validatedUser.id, req);
   
-      this.authUtil.setRefreshTokenCookie(refreshToken, res);
+      this.cookieService.setRefreshTokenCookie(refreshToken, res);
   
       return res.redirect(`${process.env.FRONTEND_URL}`);
     } catch (error) {
