@@ -7,7 +7,6 @@ import {
   Req,
   UnauthorizedException,
   UseGuards,
-  HttpStatus,
 } from '@nestjs/common';
 import { Response } from 'express';
 import { AuthService } from '../services/auth.service';
@@ -23,6 +22,7 @@ import {
   SwaggerSignout,
   SwaggerAuthStatus
 } from '../decorators/swagger.decorators';
+import { GetUser } from '../decorators/get-user.decorator';
 
 @SwaggerAuth()
 @Controller('auth')
@@ -65,8 +65,7 @@ export class AuthController {
 
   @Post('signout')
   @SwaggerSignout()
-  async signout(@Req() req, @Res() res: Response) {
-    const userId = req.user?.sub;
+  async signout(@GetUser('sub') userId, @Req() req, @Res() res: Response) {
     const refreshToken = req.cookies?.refreshToken;
     if (userId === undefined) {
       throw new UnauthorizedException(
