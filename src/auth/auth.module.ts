@@ -12,6 +12,7 @@ import { GoogleStrategy } from './strategies/google.strategy';
 import { ConfigModule } from '@nestjs/config';
 import { RefreshTokenService } from './services/refresh-token.service';
 import { TokenService } from './services/token.service';
+import { GoogleAuthService } from './services/google-auth.service';
 
 @Module({
   imports: [
@@ -30,7 +31,7 @@ import { TokenService } from './services/token.service';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, AuthUtil, JwtStrategy, GoogleStrategy, TokenService, RefreshTokenService],
+  providers: [AuthService, AuthUtil, JwtStrategy, GoogleStrategy, TokenService, RefreshTokenService, GoogleAuthService],
   exports: [AuthUtil, RefreshTokenService, TokenService],
 })
 export class AuthModule {}

@@ -107,7 +107,7 @@ export class AuthController {
     const { googleUser } = req.user;
   
     try {
-      const validatedUser = await this.authService.validateGoogleUser(googleUser);
+      const validatedUser = await this.authService.googleLogin(googleUser);
   
       // Fully registered user – generate tokens
       const { accessToken, refreshToken } = await this.tokenService.generateJwtTokens(validatedUser.id, req);

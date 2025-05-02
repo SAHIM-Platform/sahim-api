@@ -21,6 +21,7 @@ import { AuthResponse, JwtPayload } from '../interfaces/jwt-payload.interface';
 import { AuthUtil } from '../utils/auth.helpers';
 import { RefreshTokenService } from './refresh-token.service';
 import { TokenService } from './token.service';
+import { GoogleAuthService } from './google-auth.service';
 
 @Injectable()
 export class AuthService {
@@ -31,6 +32,7 @@ export class AuthService {
     private readonly authUtil: AuthUtil,
     private readonly refreshTokenService: RefreshTokenService,
     private readonly tokenService: TokenService,
+    private readonly googleAuthService: GoogleAuthService
   ) { }
 
 
@@ -300,60 +302,15 @@ export class AuthService {
   }
 
   /**
-   * Validates a Google user and registers them if they do not exist.
-   * @param googleUser - The Google user object containing name and email.
-   * @throws {Error} If the Google user information is incomplete.
-   * @returns {Promise<any>} The authenticated or newly created user.
+   * Handles Google OAuth authentication flow
+   * @param googleUser - Contains Google-provided user data (email, name, picture)
+   * @returns Existing authenticated user
+   * @throws HttpException with status:
+   *  - 428 (PRECONDITION_REQUIRED) if user needs to complete registration
+   *  - 400/401 for invalid data or auth failures
    */
-  async validateGoogleUser(googleUser: GoogleUser) {
-    const { name, email } = googleUser;
-
-    if (!email || !name) {
-      throw new HttpException('Google user information is incomplete', HttpStatus.BAD_REQUEST);
-    }
-
-    let user = await this.usersService.findUserByEmail(email);
-
-    if (!user) {
-      const { defaultUsername, defaultPassword } = await this.generateDefaultUsernameAndPassword(googleUser);
-
-      const incompleteUser = { ...googleUser, userName: defaultUsername, password: defaultPassword }
-
-      throw new HttpException(
-        {
-          status: 'incomplete',
-          message: 'User not fully registered. Please complete your information.',
-          incompleteUser: incompleteUser,
-        },
-        HttpStatus.PRECONDITION_REQUIRED // 428: Means additional steps are required
-      );
-    }
-
-    return user;
+  async googleLogin(googleUser: GoogleUser) {
+    return await this.googleAuthService.validateGoogleUser(googleUser);
   }
-
-  /**
-   * Generates a unique username based on the Google user's name and a secure random password.
-   * @param googleUser - The Google user object containing the user's name.
-   * @returns {Promise<{ defaultUsername: string, defaultPassword: string }>} The generated username and password.
-   */
-  private async generateDefaultUsernameAndPassword(googleUser: GoogleUser) {
-    let defaultUsername = googleUser.name.replace(/\s+/g, '_').toLowerCase();
-
-    // Check if the generated username already exists
-    let existingUser = await this.usersService.findUserByUsername(defaultUsername);
-
-    // If the username exists, append a number to make it unique
-    let counter = 1;
-    while (existingUser) {
-      defaultUsername = `${googleUser.name.replace(/\s+/g, '_').toLowerCase()}_${counter}`;
-      existingUser = await this.usersService.findUserByUsername(defaultUsername);
-      counter++;
-    }
-
-    // Generate a secure random password
-    const defaultPassword = crypto.randomBytes(16).toString('hex');
-
-    return { defaultUsername, defaultPassword };
-  }
+  
 }
