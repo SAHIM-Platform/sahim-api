@@ -3,6 +3,8 @@ import { PrismaService } from 'prisma/prisma.service';
 import { TokenService } from './token.service';
 import { AuthUtil } from '../utils/auth.helpers';
 import { Request } from 'express';
+import { TokenType } from '../enums/token-type.enum';
+import { ExpirationUnit } from '../enums/expiration-unit.enum';
 
 @Injectable()
 export class RefreshTokenService {
@@ -25,7 +27,7 @@ export class RefreshTokenService {
     refreshToken: string,
     req?: Request,
   ): Promise<void> {
-    const expiresAt = this.tokenService.calcTokenExpiration('refresh', 'date') as Date;
+    const expiresAt = this.tokenService.calcTokenExpiration(TokenType.REFRESH, ExpirationUnit.DATE) as Date;
     const hashedToken = this.authutil.hashToken(refreshToken);
     await this.revokeAllRefreshTokens(userId);
 
@@ -46,7 +48,7 @@ export class RefreshTokenService {
   }
     
     
-    /**
+  /**
    * Retrieves a valid stored refresh token for a user.
    * @param refreshToken - The refresh token to find.
    * @param userId - The ID of the user.
@@ -72,7 +74,7 @@ export class RefreshTokenService {
         });
       }
 
-      /**
+  /**
    * Revokes all refresh tokens for a user.
    * @param userId - The ID of the user.
    * @param exceptTokenId - Optional token ID to exclude from revocation.

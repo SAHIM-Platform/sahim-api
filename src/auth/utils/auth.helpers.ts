@@ -8,19 +8,14 @@ import { ConfigService } from '@nestjs/config';
 import { jwtConstants } from './constants';
 import * as crypto from 'crypto';
 import { UserRole } from "@prisma/client";
-import { UsersService } from '@/users/users.service';
-import { RefreshTokenService } from '../services/refresh-token.service';
 import { TokenService } from '../services/token.service';
+import { TokenType } from '../enums/token-type.enum';
+import { ExpirationUnit } from '../enums/expiration-unit.enum';
 
 @Injectable()
 export class AuthUtil {
   constructor(
-    @Inject(forwardRef(() => RefreshTokenService))
-    private readonly refreshTokenService: RefreshTokenService,
-    private readonly jwtService: JwtService,
-    private readonly prisma: PrismaService,
     private readonly configService: ConfigService,
-    private readonly usersService: UsersService,
     private readonly tokenService: TokenService,
   ) {}
 
@@ -59,7 +54,7 @@ export class AuthUtil {
   setRefreshTokenCookie(refreshToken: string, @Res() res: Response): void {
     res.cookie('refreshToken', refreshToken, {
       ...this.getCookieOptions(),
-      maxAge: this.tokenService.calcTokenExpiration('refresh', 'ms') as number,
+      maxAge: this.tokenService.calcTokenExpiration(TokenType.REFRESH, ExpirationUnit.MS) as number,
     });
   }
 

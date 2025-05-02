@@ -6,6 +6,8 @@ import { jwtConstants } from '../utils/constants';
 import { RefreshTokenService } from './refresh-token.service';
 import { UsersService } from '@/users/users.service';
 import { Request } from 'express';
+import { TokenType } from '../enums/token-type.enum';
+import { ExpirationUnit } from '../enums/expiration-unit.enum';
 
 @Injectable()
 export class TokenService {
@@ -27,7 +29,7 @@ export class TokenService {
   async generateJwtToken(
     sub: number,
     role: UserRole,
-    tokenType: 'access' | 'refresh',
+    tokenType: TokenType,
     req?: Request,
   ): Promise<string> {
     const payload: JwtPayload = { sub, tokenType, role };
@@ -36,7 +38,7 @@ export class TokenService {
       const token = await this.jwtService.signAsync(payload, {
         expiresIn: expiration,
       });
-      if (tokenType === 'refresh') {
+      if (tokenType === TokenType.REFRESH) {
         await this.refreshTokenService.storeRefreshToken(sub, token, req);
       }
       return token;
@@ -50,8 +52,8 @@ export class TokenService {
    * @param tokenType - The type of token ('access' or 'refresh').
    * @returns The expiration time as a string.
    */
-  getTokenExpiration(tokenType: 'access' | 'refresh'): string {
-    return tokenType === 'access'
+  getTokenExpiration(tokenType: TokenType): string {
+    return tokenType === TokenType.ACCESS
       ? jwtConstants.expiration
       : jwtConstants.refreshExpiration;
   }
@@ -63,18 +65,18 @@ export class TokenService {
    * @returns Either milliseconds or a Date object.
    */
   calcTokenExpiration(
-    tokenType: 'access' | 'refresh',
-    unit: 'ms' | 'date' = 'ms',
+    tokenType: TokenType,
+    unit: ExpirationUnit = ExpirationUnit.MS,
   ): number | Date {
     const tokenExpirationPeriod =
-      tokenType === 'access'
+      tokenType === TokenType.ACCESS
         ? jwtConstants.expiration
         : jwtConstants.refreshExpiration;
 
     const DAYS = Number(tokenExpirationPeriod.replace(/\D/g, ''));
     const expirationMs = DAYS * 24 * 60 * 60 * 1000;
 
-    return unit === 'date' ? new Date(Date.now() + expirationMs) : expirationMs;
+    return unit === ExpirationUnit.DATE ? new Date(Date.now() + expirationMs) : expirationMs;
   }
 
   /**
@@ -89,8 +91,8 @@ export class TokenService {
       throw new UnauthorizedException('User not found');
     }
     const [accessToken, refreshToken] = await Promise.all([
-      this.generateJwtToken(sub, user.role, 'access'),
-      this.generateJwtToken(sub, user.role, 'refresh', req),
+      this.generateJwtToken(sub, user.role, TokenType.ACCESS),
+      this.generateJwtToken(sub, user.role, TokenType.REFRESH, req),
     ]);
 
     return { accessToken, refreshToken };
