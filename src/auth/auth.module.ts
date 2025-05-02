@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { AuthService } from './services/auth.service';
-import { AuthController } from './auth.controller';
+import { AuthController } from './controllers/auth.controller';
 import { UsersModule } from '@/users/users.module';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
@@ -14,6 +14,7 @@ import { RefreshTokenService } from './services/refresh-token.service';
 import { TokenService } from './services/token.service';
 import { GoogleAuthService } from './services/google-auth.service';
 import { CookieService } from './services/cookie.service';
+import { GoogleAuthController } from './controllers/google-auth.controller';
 
 @Module({
   imports: [
@@ -31,7 +32,7 @@ import { CookieService } from './services/cookie.service';
       }),
     }),
   ],
-  controllers: [AuthController],
+  controllers: [AuthController, GoogleAuthController],
   providers: [AuthService, AuthUtil, JwtStrategy, GoogleStrategy, TokenService, RefreshTokenService, GoogleAuthService, CookieService],
   exports: [AuthUtil],
 })
