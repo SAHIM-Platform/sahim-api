@@ -2,17 +2,13 @@ import { SigninAuthDto } from '@/auth/dto/signin-auth.dto';
 import { UsersService } from '@/users/users.service';
 import {
   BadRequestException,
-  HttpException,
-  HttpStatus,
   Injectable,
-  NotFoundException,
   Res,
   UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ApprovalStatus, AuthMethod, UserRole } from '@prisma/client';
 import { compare as bCompare } from 'bcryptjs';
-import * as crypto from 'crypto';
 import { Response } from 'express';
 import { PrismaService } from 'prisma/prisma.service';
 import { StudentSignUpDto } from '../dto/student-signup.dto';
@@ -26,7 +22,6 @@ import { TokenType } from '../enums/token-type.enum';
 import { CookieService } from './cookie.service';
 import { InvalidCredentialsException } from '../exceptions/invalid-credentials.exception';
 import { MissingIdentifierException } from '../exceptions/missing-identifier.exception';
-import { UserNotFoundException } from '../exceptions/user-not-found.exception';
 import { AcademicNumberTakenException } from '../exceptions/academic-number-taken.exception';
 import { UsernameTakenException } from '../exceptions/username-taken.exception';
 import { EmailAlreadyExistsException } from '../exceptions/email-already-exists.exception';
@@ -138,10 +133,6 @@ export class AuthService {
       include: { student: true },
     });
 
-    // if user is not null
-    if (!userWithStudent) {
-      throw new UserNotFoundException();
-    }
 
     return {
       accessToken: tokens.accessToken,
@@ -150,9 +141,9 @@ export class AuthService {
         name: createdUser.name!,
         username: createdUser.username,
         role: createdUser.role,
-        ...(userWithStudent.role === UserRole.STUDENT &&
-          userWithStudent.student && {
-            approvalStatus: userWithStudent.student.approvalStatus,
+        ...(userWithStudent!.role === UserRole.STUDENT &&
+          userWithStudent!.student && {
+            approvalStatus: userWithStudent!.student.approvalStatus,
           }),
         photoPath:
           createdUser.photoPath ||
