@@ -22,6 +22,7 @@ import { AuthUtil } from '../utils/auth.helpers';
 import { RefreshTokenService } from './refresh-token.service';
 import { TokenService } from './token.service';
 import { GoogleAuthService } from './google-auth.service';
+import { TokenType } from '../enums/token-type.enum';
 
 @Injectable()
 export class AuthService {
@@ -164,8 +165,6 @@ export class AuthService {
       throw new UnauthorizedException('Incorrect password. Please try again.');
     }    
 
-    await this.refreshTokenService.revokeAllRefreshTokens(user.id);
-
     const tokens = await this.tokenService.generateJwtTokens(user.id, res.req);
     this.authUtil.setRefreshTokenCookie(tokens.refreshToken, res);
 
@@ -185,7 +184,7 @@ export class AuthService {
   }
 
   /**
-   * Signs out a user by revoking their refresh tokens.
+   * Signs out a user by revoking their refresh token.
    * @param refreshToken - The refresh token to be revoked.
    * @param userId - The ID of the user signing out.
    * @param res - The Express response object (used for unsetting cookies).
@@ -204,7 +203,9 @@ export class AuthService {
     if (!isValid) {
       throw new UnauthorizedException('Invalid refresh token');
     }
-    await this.refreshTokenService.revokeAllRefreshTokens(userId);
+
+    const storedToken = await this.refreshTokenService.getValidStoredRefreshTokenByUserId(refreshToken, userId);
+    await this.refreshTokenService.revokeRefreshToken(storedToken!.id);
     this.authUtil.unsetRefreshTokenCookie(res);
   }
 
@@ -237,13 +238,13 @@ export class AuthService {
     }
 
     const payload = this.jwtService.verify<JwtPayload>(oldRefreshToken);
-    if (payload.tokenType !== 'refresh') {
+    if (payload.tokenType !== TokenType.REFRESH) {
       throw new UnauthorizedException('Invalid token type');
     }
 
     if (payload.sub !== storedToken.userId) {
       // revoke all tokens for this user for security purposes
-      await this.refreshTokenService.revokeAllRefreshTokens(storedToken.userId);
+      await this.refreshTokenService.revokeAllUserRefreshTokens(storedToken.userId);
       throw new UnauthorizedException('Invalid token');
     }
 

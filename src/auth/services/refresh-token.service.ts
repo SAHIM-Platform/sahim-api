@@ -29,7 +29,6 @@ export class RefreshTokenService {
   ): Promise<void> {
     const expiresAt = this.tokenService.calcTokenExpiration(TokenType.REFRESH, ExpirationUnit.DATE) as Date;
     const hashedToken = this.authutil.hashToken(refreshToken);
-    await this.revokeAllRefreshTokens(userId);
 
     await this.prisma.refreshToken.create({
       data: {
@@ -79,7 +78,7 @@ export class RefreshTokenService {
    * @param userId - The ID of the user.
    * @param exceptTokenId - Optional token ID to exclude from revocation.
    */
-  async revokeAllRefreshTokens(
+  async revokeAllUserRefreshTokens(
     userId: number,
     exceptTokenId?: number,
   ): Promise<void> {
