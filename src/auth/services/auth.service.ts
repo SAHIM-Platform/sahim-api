@@ -20,7 +20,7 @@ import { TokenService } from './token.service';
 import { GoogleAuthService } from './google-auth.service';
 import { TokenType } from '../enums/token-type.enum';
 import { CookieService } from './cookie.service';
-import { InvalidCredentialsException } from '../exceptions/invalid-credentials.exception';
+import { InvalidCredentialsException } from '../../common/exceptions/invalid-credentials.exception';
 import { MissingIdentifierException } from '../exceptions/missing-identifier.exception';
 import { AcademicNumberTakenException } from '../exceptions/academic-number-taken.exception';
 import { UsernameTakenException } from '../exceptions/username-taken.exception';
