@@ -1,11 +1,10 @@
-import { Controller, Get, HttpStatus, Req, Res, UseGuards } from "@nestjs/common";
+import { Controller, Get, Req, Res, UseGuards } from "@nestjs/common";
 import { Public } from "../decorators/public.decorator";
 import { SwaggerGoogleLogin } from "../decorators/swagger.decorators";
 import { GoogleAuthGuard } from "../guards/google-auth-guard.dto";
 import { AuthService } from "../services/auth.service";
 import { CookieService } from "../services/cookie.service";
 import { TokenService } from "../services/token.service";
-import { AuthUtil } from "../utils/auth.helpers";
 import { Response } from "express";
 import { GoogleAuthService } from "../services/google-auth.service";
 
@@ -17,7 +16,6 @@ export class GoogleAuthController {
       private readonly cookieService: CookieService,
       private readonly googleAuthService: GoogleAuthService,
     ) {}
-
 
     @Public()
     @Get('login')

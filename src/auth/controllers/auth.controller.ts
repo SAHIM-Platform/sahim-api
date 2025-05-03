@@ -7,6 +7,7 @@ import {
   Req,
   UnauthorizedException,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { Response } from 'express';
 import { AuthService } from '../services/auth.service';
@@ -34,38 +35,32 @@ export class AuthController {
   @Public()
   @Post('signup')
   @SwaggerSignup()
-  async signup(@Body() input: StudentSignUpDto, @Res() res: Response) {
+  async signup(@Body() input: StudentSignUpDto, @Res({ passthrough: true }) res: Response) {
     console.log("Inside signup: ", input);
-    const { accessToken, user } = await this.authService.signup(input, res);
-    res.json({ message: 'User registered successfully', accessToken, user });
+    return await this.authService.signup(input, res);
   }
 
   @Public()
   @Post('signin')
   @SwaggerSignin()
-  async signin(@Body() input: SigninAuthDto, @Res() res: Response) {
-    const { accessToken, user } = await this.authService.signin(input, res);
-    res.json({ message: 'Sign in successful', accessToken, user });
+  async signin(@Body() input: SigninAuthDto, @Res({ passthrough: true }) res: Response) {
+    return await this.authService.signin(input, res);
   }
 
   @Public()
   @Post('refresh')
   @SwaggerRefresh()
-  async refreshToken(@Req() req, @Res() res: Response) {
+  async refreshToken(@Req() req, @Res({ passthrough: true }) res: Response) {
     const refreshToken = req.cookies?.refreshToken;
     if (!refreshToken) {
       throw new UnauthorizedException('Refresh token not found in cookies');
     }
-    const { accessToken, user } = await this.authService.refreshToken(
-      refreshToken,
-      res,
-    );
-    res.json({ message: 'Access token refreshed successfully', accessToken, user });
+    return await this.authService.refreshToken(refreshToken, res);
   }
 
   @Post('signout')
   @SwaggerSignout()
-  async signout(@GetUser('sub') userId, @Req() req, @Res() res: Response) {
+  async signout(@GetUser('sub') userId, @Req() req, @Res({ passthrough: true }) res: Response) {
     const refreshToken = req.cookies?.refreshToken;
     if (userId === undefined) {
       throw new UnauthorizedException(
@@ -76,7 +71,7 @@ export class AuthController {
       throw new UnauthorizedException('Refresh token not found in cookies');
     }
     await this.authService.signout(refreshToken, userId, res);
-    res.json({ message: 'Sign out successful' });
+    return { message: 'Sign out successful' };
   }
 
   @Get('status')

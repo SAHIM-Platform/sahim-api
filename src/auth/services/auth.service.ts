@@ -135,19 +135,22 @@ export class AuthService {
 
 
     return {
-      accessToken: tokens.accessToken,
-      user: {
-        id: createdUser.id,
-        name: createdUser.name!,
-        username: createdUser.username,
-        role: createdUser.role,
-        ...(userWithStudent!.role === UserRole.STUDENT &&
-          userWithStudent!.student && {
-            approvalStatus: userWithStudent!.student.approvalStatus,
-          }),
-        photoPath:
-          createdUser.photoPath ||
-          this.usersService.getDefaultPhotoPath(createdUser.role),
+      message: 'Sign up successful',
+      data: {
+        accessToken: tokens.accessToken,
+        user: {
+          id: createdUser.id,
+          name: createdUser.name!,
+          username: createdUser.username,
+          role: createdUser.role,
+          ...(userWithStudent!.role === UserRole.STUDENT &&
+            userWithStudent!.student && {
+              approvalStatus: userWithStudent!.student.approvalStatus,
+            }),
+          photoPath:
+            createdUser.photoPath ||
+            this.usersService.getDefaultPhotoPath(createdUser.role),
+        },
       },
     };
   }
@@ -187,18 +190,19 @@ export class AuthService {
     this.cookieService.setRefreshTokenCookie(tokens.refreshToken, res);
 
     return {
-      accessToken: tokens.accessToken,
-      user: {
-        id: user.id,
-        name: user.name!,
-        username: user.username,
-        role: user.role,
-        ...(user.role === UserRole.STUDENT &&
-          user.student && {
+      message: 'Sign in successful',
+      data: {
+        accessToken: tokens.accessToken,
+        user: {
+          id: user.id,
+          name: user.name!,
+          username: user.username,
+          role: user.role,
+          ...(user.role === UserRole.STUDENT && user.student && {
             approvalStatus: user.student.approvalStatus,
           }),
-        photoPath:
-          user.photoPath || this.usersService.getDefaultPhotoPath(user.role),
+          photoPath: user.photoPath || this.usersService.getDefaultPhotoPath(user.role),
+        },
       },
     };
   }
@@ -298,19 +302,22 @@ export class AuthService {
     }
 
     return {
-      accessToken: tokens.accessToken,
-      user: {
-        id: storedToken.user.id,
-        name: storedToken.user.name!,
-        username: storedToken.user.username,
-        role: storedToken.user.role,
-        ...(user.role === UserRole.STUDENT &&
-          user.student && {
-            approvalStatus: user.student.approvalStatus,
-          }),
-        photoPath:
-          storedToken.user.photoPath ||
-          this.usersService.getDefaultPhotoPath(storedToken.user.role),
+      message: 'Access token refreshed successfully',
+      data: {
+        accessToken: tokens.accessToken,
+        user: {
+          id: storedToken.user.id,
+          name: storedToken.user.name!,
+          username: storedToken.user.username,
+          role: storedToken.user.role,
+          ...(user.role === UserRole.STUDENT &&
+            user.student && {
+              approvalStatus: user.student.approvalStatus,
+            }),
+          photoPath:
+            storedToken.user.photoPath ||
+            this.usersService.getDefaultPhotoPath(storedToken.user.role),
+        },
       },
     };
   }
