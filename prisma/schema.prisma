@@ -10,30 +10,30 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id            Int               @id @default(autoincrement())
-  email         String?           @unique
-  username      String            @unique
-  password      String?
-  name          String?
-  photoPath    String?           @default("")
-  authMethod    AuthMethod        @default(EMAIL_PASSWORD) 
-  createdAt     DateTime          @default(now())
-  lastLoginAt   DateTime?
-  isActive      Boolean           @default(true)
-  isDeleted    Boolean           @default(false)
-  deletedAt    DateTime?
-  role          UserRole          @default(STUDENT)
-  refreshTokens RefreshToken[]
-  student       Student?          @relation("StudentUser")
-  approvedStudents Student[]        @relation("ApprovalUpdatedByUser")
-  threads       Thread[]
-  threadComments ThreadComment[]
-  threadVotes   ThreadVote[]
-  commentVotes  CommentVote[]
-  bookmarks     BookmarkedThread[]
-  categories      Category[]        @relation("CategoryAuthor")
-}
+  model User {
+    id            Int               @id @default(autoincrement())
+    email         String?           @unique
+    username      String            @unique
+    password      String?
+    name          String?
+    photoPath    String?           @default("")
+    authMethod    AuthMethod        @default(EMAIL_PASSWORD) 
+    createdAt     DateTime          @default(now())
+    lastLoginAt   DateTime?
+    isActive      Boolean           @default(true)
+    isDeleted    Boolean           @default(false)
+    deletedAt    DateTime?
+    role          UserRole          @default(STUDENT)
+    refreshTokens RefreshToken[]
+    student       Student?          @relation("StudentUser")
+    approvedStudents Student[]        @relation("ApprovalUpdatedByUser")
+    threads       Thread[]
+    threadComments ThreadComment[]
+    threadVotes   ThreadVote[]
+    commentVotes  CommentVote[]
+    bookmarks     BookmarkedThread[]
+    categories      Category[]        @relation("CategoryAuthor")
+  }
 
 model RefreshToken {
   id         Int       @id @default(autoincrement())

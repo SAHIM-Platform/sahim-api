@@ -1,5 +1,4 @@
 import { Controller, Get, NotFoundException, Req, UseGuards, Query, Body, Delete, Patch } from '@nestjs/common';
-import { UsersService } from './users.service';
 import { GetUser } from '@/auth/decorators/get-user.decorator';
 import { JwtAuthGuard } from '@/auth/guards/jwt-auth.guard';
 import {
@@ -14,11 +13,19 @@ import { BookmarksQueryDto } from './dto/bookmarks-query.dto';
 import { DeleteMeDto } from './dto/delete-me.dto';
 import { UpdateMeDto } from './dto/update-me.dto';
 import { MyThreadsQueryDto } from './dto/my-threads-query.dto';
+import { UserContentService } from './services/user-content.service';
+import { UserDetailsService } from './services/user-details.service';
+import { UserService } from './services/user.service';
 
 @SwaggerUsersController()
 @Controller('users')
 export class UsersController {
-  constructor(private readonly usersService: UsersService) { }
+  constructor(
+    private readonly userService: UserService,
+    private readonly userContentService: UserContentService,
+    private readonly userDetailsService: UserDetailsService,
+
+  ) {}
 
   @Get('test-approved-student')
   @SwaggerTestApprovedStudent()
@@ -27,35 +34,34 @@ export class UsersController {
   }
 
   @Get('me/threads')
-  getMyThreads(@GetUser('sub') userId: number, @Query() query: MyThreadsQueryDto) {
-    return this.usersService.getUserThreads(userId, query);
+  async getMyThreads(@GetUser('sub') userId: number, @Query() query: MyThreadsQueryDto) {
+    return await this.userContentService.getUserThreads(userId, query);
   } 
 
   @Get('me/bookmarks')
   @SwaggerGetUserBookmarks()
-  getUserBookmarks(
+  async getUserBookmarks(
     @GetUser('sub') userId: number,
     @Query() query: BookmarksQueryDto
   ) {
-    return this.usersService.getUserBookmarks(userId, query);
+    return await this.userContentService.getUserBookmarks(userId, query);
   }
 
   @Get('me')
   @SwaggerGetMe()
   async getMe(@GetUser('sub') userId: number) {
-    return this.usersService.getUserDetails(userId);
+    return await this.userDetailsService.getUserDetails(userId);
   }
 
   @Patch('me')
   @SwaggerUpdateMe()
   async updateMe(@GetUser('sub') userId: number, @Body() dto: UpdateMeDto) {
-    return this.usersService.updateMe(userId, dto);
+    return await this.userService.updateMe(userId, dto);
   }
 
   @Delete('me')
   @SwaggerDeleteMe()
   async deleteMe(@GetUser('sub') userId: number, @Body() dto: DeleteMeDto) {
-    await this.usersService.deleteUserAccount(userId, dto.password);
-    return { message: 'Account deleted successfully' };
+    return await this.userService.deleteUserAccount(userId, dto.password);
   }
 }

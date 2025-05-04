@@ -4,7 +4,7 @@ import { UserRole } from '@prisma/client';
 import { JwtPayload, JwtTokens } from '../interfaces/jwt-payload.interface';
 import { jwtConstants } from '../utils/constants';
 import { RefreshTokenService } from './refresh-token.service';
-import { UsersService } from '@/users/users.service';
+import { UserService } from '@/users/services/user.service';
 import { Request } from 'express';
 import { TokenType } from '../enums/token-type.enum';
 import { ExpirationUnit } from '../enums/expiration-unit.enum';
@@ -15,7 +15,7 @@ export class TokenService {
     @Inject(forwardRef(() => RefreshTokenService))
     private readonly refreshTokenService: RefreshTokenService,
     private readonly jwtService: JwtService,
-    private readonly usersService: UsersService,
+    private readonly userService: UserService,
   ) {}
 
   /**
@@ -86,7 +86,7 @@ export class TokenService {
    * @returns A promise that resolves to an object containing the access and refresh tokens.
    */
   async generateJwtTokens(sub: number, req?: Request): Promise<JwtTokens> {
-    const user = await this.usersService.findUserById(sub);
+    const user = await this.userService.findUserById(sub);
     if (!user) {
       throw new UnauthorizedException('User not found');
     }

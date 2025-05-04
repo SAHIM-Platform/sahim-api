@@ -1,7 +1,7 @@
 import { CreateCategoryDto } from '@/admins/dto/create-category.dto';
 import { CategoryNotFoundException } from '@/admins/exceptions/category-not-found.exception';
 import { AuthUtil } from '@/auth/utils/auth.helpers';
-import { UsersService } from '@/users/users.service';
+import { UserService } from '@/users/services/user.service';
 import { BadRequestException, ForbiddenException, Injectable, OnModuleInit } from '@nestjs/common';
 import { ApprovalStatus, UserRole } from '@prisma/client';
 import { PrismaService } from 'prisma/prisma.service';
@@ -11,12 +11,14 @@ import { StudentQueryDto } from './dto/student-query.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { CategoryAlreadyExistsException } from './exceptions/category-already-exists.exception';
 import { SUPER_ADMIN_EMAIL, SUPER_ADMIN_PASSWORD, SUPER_ADMIN_USERNAME } from './utils/constans';
+import { UserDetailsService } from '@/users/services/user-details.service';
 
 @Injectable()
 export class AdminsService implements OnModuleInit {
 
     constructor(
-        private readonly usersService: UsersService,
+        private readonly userService: UserService,
+        private readonly userDetailsService: UserDetailsService,
         private readonly prisma: PrismaService,
         private readonly authUtil: AuthUtil
     ) { }
@@ -63,7 +65,7 @@ export class AdminsService implements OnModuleInit {
             return;
         }
 
-        const existingSuperAdmin = await this.usersService.findUserByEmailOrUsername(
+        const existingSuperAdmin = await this.userService.findUserByEmailOrUsername(
             SUPER_ADMIN_EMAIL, 
             SUPER_ADMIN_USERNAME
         );
@@ -78,7 +80,7 @@ export class AdminsService implements OnModuleInit {
                     name: 'Super Admin',
                     password: hashedPassword,
                     role: UserRole.SUPER_ADMIN, 
-                    photoPath: this.usersService.getDefaultPhotoPath(UserRole.SUPER_ADMIN),
+                    photoPath: this.userDetailsService.getDefaultPhotoPath(UserRole.SUPER_ADMIN),
                 },
             });
 
@@ -96,7 +98,7 @@ export class AdminsService implements OnModuleInit {
     async createAdmin(input: AdminSignupDto) {
         const { email, name, username, password } = input;
 
-        const existingUser = await this.usersService.findUserByEmailOrUsername(email || '', username);
+        const existingUser = await this.userService.findUserByEmailOrUsername(email || '', username);
         if (existingUser) {
             throw new BadRequestException('Admin with this email or username already exists');
         }
@@ -124,7 +126,7 @@ export class AdminsService implements OnModuleInit {
      * @throws {ForbiddenException} If an admin tries to delete another admin.
      */
     async deleteAdmin(adminId: number, requesterId: number, requesterRole: UserRole) {
-        const admin = await this.usersService.findUserById(adminId);
+        const admin = await this.userService.findUserById(adminId);
 
         if (!admin) {
             throw new BadRequestException('Admin not found');

@@ -1,5 +1,5 @@
 import { SigninAuthDto } from '@/auth/dto/signin-auth.dto';
-import { UsersService } from '@/users/users.service';
+import { UserService } from '@/users/services/user.service';
 import {
   BadRequestException,
   Injectable,
@@ -25,11 +25,13 @@ import { MissingIdentifierException } from '../exceptions/missing-identifier.exc
 import { AcademicNumberTakenException } from '../exceptions/academic-number-taken.exception';
 import { UsernameTakenException } from '../exceptions/username-taken.exception';
 import { EmailAlreadyExistsException } from '../exceptions/email-already-exists.exception';
+import { UserDetailsService } from '@/users/services/user-details.service';
 
 @Injectable()
 export class AuthService {
   constructor(
-    private readonly usersService: UsersService,
+    private readonly userService: UserService,
+    private readonly userDetailsService: UserDetailsService,
     private readonly jwtService: JwtService,
     private readonly prisma: PrismaService,
     private readonly authUtil: AuthUtil,
@@ -74,7 +76,7 @@ export class AuthService {
       );
     }
 
-    const existingUser = await this.usersService.findUserByEmailOrUsername(
+    const existingUser = await this.userService.findUserByEmailOrUsername(
       email || '',
       username,
     );
@@ -109,7 +111,7 @@ export class AuthService {
         password: hashedPassword,
         authMethod,
         role: UserRole.STUDENT,
-        photoPath: this.usersService.getDefaultPhotoPath(UserRole.STUDENT),
+        photoPath: this.userDetailsService.getDefaultPhotoPath(UserRole.STUDENT),
         student: {
           create: {
             academicNumber,
@@ -149,7 +151,7 @@ export class AuthService {
             }),
           photoPath:
             createdUser.photoPath ||
-            this.usersService.getDefaultPhotoPath(createdUser.role),
+            this.userDetailsService.getDefaultPhotoPath(createdUser.role),
         },
       },
     };
@@ -176,7 +178,7 @@ export class AuthService {
     }
 
     const user =
-      await this.usersService.findUserByUsernameOrAcademicNumber(identifier);
+      await this.userService.findUserByUsernameOrAcademicNumber(identifier);
     if (!user) {
       throw new InvalidCredentialsException();
     }
@@ -201,7 +203,7 @@ export class AuthService {
           ...(user.role === UserRole.STUDENT && user.student && {
             approvalStatus: user.student.approvalStatus,
           }),
-          photoPath: user.photoPath || this.usersService.getDefaultPhotoPath(user.role),
+          photoPath: user.photoPath || this.userDetailsService.getDefaultPhotoPath(user.role),
         },
       },
     };
@@ -316,7 +318,7 @@ export class AuthService {
             }),
           photoPath:
             storedToken.user.photoPath ||
-            this.usersService.getDefaultPhotoPath(storedToken.user.role),
+            this.userDetailsService.getDefaultPhotoPath(storedToken.user.role),
         },
       },
     };
@@ -329,13 +331,13 @@ export class AuthService {
    * @returns {Promise<any>} The sanitized user object if validation is successful, null otherwise.
    */
   async validateUser(email: string, password: string): Promise<any> {
-    const user = await this.usersService.findUserByEmail(email);
+    const user = await this.userService.findUserByEmail(email);
     if (!user || !user.password || user.isDeleted) return null;
 
     const passwordMatch = await bCompare(password, user.password);
     if (!passwordMatch) return null;
 
-    return this.usersService.sanitizeUser(user);
+    return this.userService.sanitizeUser(user);
   }
 
   /**

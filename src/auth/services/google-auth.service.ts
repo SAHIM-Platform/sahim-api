@@ -1,12 +1,13 @@
-import { HttpException, HttpStatus } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { GoogleUser } from '../interfaces/google-user.interface';
-import { UsersService } from '@/users/users.service';
+import { UserService } from '@/users/services/user.service';
 import { Response } from 'express';
 import { AuthUtil } from '../utils/auth.helpers';
 
+@Injectable()
 export class GoogleAuthService {
   constructor(
-    private readonly usersService: UsersService,
+    private readonly userService: UserService,
     private readonly authUtil: AuthUtil, 
   ) {}
 
@@ -27,7 +28,7 @@ export class GoogleAuthService {
       );
     }
 
-    let user = await this.usersService.findUserByEmail(email);
+    let user = await this.userService.findUserByEmail(email);
 
     if (!user) {
       const { defaultUsername } =
@@ -60,14 +61,14 @@ export class GoogleAuthService {
 
     // Check if the generated username already exists
     let existingUser =
-      await this.usersService.findUserByUsername(defaultUsername);
+      await this.userService.findUserByUsername(defaultUsername);
 
     // If the username exists, append a number to make it unique
     let counter = 1;
     while (existingUser) {
       defaultUsername = `${googleUser.name.replace(/\s+/g, '_').toLowerCase()}_${counter}`;
       existingUser =
-        await this.usersService.findUserByUsername(defaultUsername);
+        await this.userService.findUserByUsername(defaultUsername);
       counter++;
     }
 
