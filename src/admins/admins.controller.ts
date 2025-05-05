@@ -3,7 +3,7 @@ import { GetUser } from '@/auth/decorators/get-user.decorator';
 import { Roles } from '@/auth/decorators/role.decorator';
 import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Query } from '@nestjs/common';
 import { UserRole } from '@prisma/client';
-import { AdminsService } from './admins.service';
+import { AdminManagementService } from './services/admin-management.service';
 import {
     SwaggerAdminController,
     SwaggerApproveStudent,
@@ -20,64 +20,66 @@ import { AdminSignupDto } from './dto/create-admin.dto';
 import { StudentSearchQueryDto } from './dto/search-student-query.dto';
 import { StudentQueryDto } from './dto/student-query.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
+import { CategoryService } from './services/category.service';
+import { StudentApprovalService } from './services/student-approval.service';
 
 @SwaggerAdminController()
 @Controller('admins')
 export class AdminsController {
 
-
-    constructor(private readonly adminsService: AdminsService) { }
+    constructor(
+        private readonly adminManagementService: AdminManagementService,
+        private readonly categoryService: CategoryService,
+        private readonly studentApprovalService: StudentApprovalService,
+    ) { }
 
 
     @Get()
     @Roles(UserRole.SUPER_ADMIN)
     async getAllAdmins() {
-        return this.adminsService.getAllAdmins();
+        return this.adminManagementService.getAllAdmins();
     }
-
-
-
 
     @Post()
     @SwaggerCreateAdmin()
     @Roles(UserRole.SUPER_ADMIN)
     async createAdmin(@Body() dto: AdminSignupDto) {
-        return await this.adminsService.createAdmin(dto);
+        return await this.adminManagementService.createAdmin(dto);
     }
 
     @Delete(':id')
     @Roles(UserRole.SUPER_ADMIN, UserRole.ADMIN)
     @SwaggerDeleteAdmin()
     async deleteAdmin(@GetUser() user, @Param('id', ParseIntPipe) adminId: number) {
-        return await this.adminsService.deleteAdmin(adminId, user.id, user.role);
+        return await this.adminManagementService.deleteAdmin(adminId, user.id, user.role);
     }
 
     @Patch('students/:id/approve')
     @Roles(UserRole.SUPER_ADMIN, UserRole.ADMIN)
     @SwaggerApproveStudent()
     async approveStudent(@GetUser('sub') adminId, @Param('id', ParseIntPipe) userId: number) {
-        return await this.adminsService.approveStudent(userId, adminId);
+        return await this.studentApprovalService.approveStudent(userId, adminId);
     }
 
     @Patch('students/:id/reject')
     @Roles(UserRole.SUPER_ADMIN, UserRole.ADMIN)
     @SwaggerRejectStudent()
     async rejectStudent(@GetUser('sub') adminId, @Param('id', ParseIntPipe) userId: number) {
-        return await this.adminsService.rejectStudent(userId, adminId);
+        return await this.studentApprovalService.rejectStudent(userId, adminId);
     }
 
     @Post('categories')
     @Roles(UserRole.SUPER_ADMIN, UserRole.ADMIN)
     @SwaggerCreateCategory()
     async createCategory(@GetUser('sub') userId: number, @Body() input: CreateCategoryDto) {
-        return await this.adminsService.createCategory(input, userId);
+        return await this.categoryService.createCategory(input, userId);
     }
 
     @Delete('categories/:id')
     @Roles(UserRole.SUPER_ADMIN, UserRole.ADMIN)
     @SwaggerDeleteCategory()
     async deleteCategory(@Param('id', ParseIntPipe) categoryId: number) {
-        return await this.adminsService.deleteCategory(categoryId);
+        return await this.categoryService.deleteCategory(categoryId);
     }
 
     @Patch('categories/:id')
@@ -87,20 +89,20 @@ export class AdminsController {
         @Param('id') categoryId: number,
         @Body() input: UpdateCategoryDto
     ) {
-        return this.adminsService.updateCategory(categoryId, input);
+        return this.categoryService.updateCategory(categoryId, input);
     }
 
     @Get('users/students')
     @Roles(UserRole.SUPER_ADMIN, UserRole.ADMIN)
     @SwaggerGetAllStudents()
     async getAllStudents(@Query() query: StudentQueryDto) {
-        return await this.adminsService.getAllStudents(query);
+        return await this.studentApprovalService.getAllStudents(query);
     }
 
     @Get('users/students/search')
     @SwaggerSearchStudents()
     @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
     async searchStudents(@Query() query: StudentSearchQueryDto) {
-        return this.adminsService.searchStudents(query);
+        return this.studentApprovalService.searchStudents(query);
     }
 }
