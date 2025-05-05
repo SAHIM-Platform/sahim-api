@@ -9,7 +9,7 @@ import {
   Query,
   UseGuards
 } from '@nestjs/common';
-import { ThreadsService } from './threads.service';
+import { ThreadService } from './services/thread.service';
 import { CreateThreadDto } from './dto/create-thread.dto';
 import { UpdateThreadDto } from './dto/update-thread.dto';
 import { CommentQueryDto } from './dto/comment-query.dto';
@@ -39,87 +39,95 @@ import { UpdateCommentDto } from './dto/update-comment.dto';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { GetUser } from '@/auth/decorators/get-user.decorator';
+import { CommentService } from './services/comment.service';
+import { BookmarkService } from './services/bookmark.service';
+import { VotingService } from './services/voting.service';
 
 @SwaggerThreads()
 @UseGuards(JwtAuthGuard)
 @Controller('threads')
 export class ThreadsController {
-  constructor(private readonly threadsService: ThreadsService) { }
+  constructor(
+    private readonly threadService: ThreadService,
+    private readonly commentService: CommentService,
+    private readonly bookmarkService: BookmarkService,
+    private readonly votingService: VotingService,
+  ) { }
 
   @Get('search')
   @SwaggerSearchThreads()
-  searchThreads(@GetUser('sub') userId: number,@Query() queryDto: SearchThreadsDto) {
-    return this.threadsService.searchThreads(queryDto, userId);
+  async searchThreads(@GetUser('sub') userId: number,@Query() queryDto: SearchThreadsDto) {
+    return await this.threadService.searchThreads(queryDto, userId);
   }
 
   @Post()
   @SwaggerCreateThread()
-  create(@GetUser('sub') userId: number, @Body() createThreadDto: CreateThreadDto) {
-    return this.threadsService.create(userId, createThreadDto);
+  async create(@GetUser('sub') userId: number, @Body() createThreadDto: CreateThreadDto) {
+    return await this.threadService.create(userId, createThreadDto);
   }
 
   @Get()
   @SwaggerGetThreads()
-  findAll(@GetUser('sub') userId: number, @Query() query: ThreadQueryDto) {
-    return this.threadsService.findAll(query, userId);
+  async findAll(@GetUser('sub') userId: number, @Query() query: ThreadQueryDto) {
+    return await this.threadService.findAll(query, userId);
   }
 
   @Get('categories')
   @SwaggerGetCategories()
-  getAllCategories() {
-    return this.threadsService.getAllCategories();
+  async getAllCategories() {
+    return await this.threadService.getAllCategories();
   }
 
   @Get(':id')
   @SwaggerGetThread()
-  findOne(
+  async findOne(
     @GetUser('sub') userId: number,
     @Param() params: ThreadParamsDto,
     @Query() query: any
   ) {
-    return this.threadsService.findOne(params.id, query, userId);
+    return await this.threadService.findOne(params.id, query, userId);
   }
 
   @Patch(':id')
   @SwaggerUpdateThread()
-  update(
+  async update(
     @GetUser('sub') userId: number,
     @Param() params: ThreadParamsDto,
     @Body() updateThreadDto: UpdateThreadDto
   ) {
-    return this.threadsService.update(userId, params.id, updateThreadDto);
+    return await this.threadService.update(userId, params.id, updateThreadDto);
   }
 
   @Delete(':id')
   @SwaggerRemoveThread()
-  remove(@GetUser('sub') userId: number, @Param() params: ThreadParamsDto) {
-    return this.threadsService.remove(userId, params.id);
+  async remove(@GetUser('sub') userId: number, @Param() params: ThreadParamsDto) {
+    return await this.threadService.remove(userId, params.id);
   }
 
   @Post(':id/comments')
   @SwaggerCreateComment()
-  createComment(
+  async createComment(
     @GetUser('sub') userId: number,
     @Param() params: ThreadParamsDto,
     @Body() createCommentDto: CreateCommentDto
   ) {
-    return this.threadsService.createComment(userId, params.id, createCommentDto);
+    return await this.commentService.createComment(userId, params.id, createCommentDto);
   }
 
   @Get(':id/comments')
   @SwaggerGetComments()
-  getComments(@Param() params: ThreadParamsDto, @Query() query: CommentQueryDto) {
-    return this.threadsService.getThreadComments(params.id, query);
+  async getComments(@Param() params: ThreadParamsDto, @Query() query: CommentQueryDto) {
+    return await this.commentService.getThreadComments(params.id, query);
   }
 
   @Patch(':id/comments/:commentId')
   @SwaggerUpdateComment()
-  updateComment(
+  async updateComment(
     @GetUser('sub') userId: number,
     @Param() params: CommentParamsDto,
     @Body() updateCommentDto: UpdateCommentDto
   ) {
-    return this.threadsService.updateComment(
+    return await this.commentService.updateComment(
       userId,
       params.id,
       params.commentId,
@@ -129,39 +137,39 @@ export class ThreadsController {
 
   @Delete(':id/comments/:commentId')
   @SwaggerRemoveComment()
-  removeComment(@GetUser('sub') userId: number, @Param() params: CommentParamsDto) {
-    return this.threadsService.deleteComment(userId, params.id, params.commentId);
+  async removeComment(@GetUser('sub') userId: number, @Param() params: CommentParamsDto) {
+    return await this.commentService.deleteComment(userId, params.id, params.commentId);
   }
 
   @Post(':id/vote')
   @SwaggerVoteThread()
-  voteThread(
+  async voteThread(
     @GetUser('sub') userId: number,
     @Param() params: ThreadParamsDto,
     @Body() voteDto: VoteDto
   ) {
-    return this.threadsService.voteThread(userId, params.id, voteDto);
+    return await this.votingService.voteThread(userId, params.id, voteDto);
   }
 
   @Post(':id/comments/:commentId/vote')
   @SwaggerVoteComment()
-  voteComment(
+  async voteComment(
     @GetUser('sub') userId: number,
     @Param() params: CommentParamsDto,
     @Body() voteDto: VoteDto
   ) {
-    return this.threadsService.voteComment(userId, params.id, params.commentId, voteDto);
+    return await this.votingService.voteComment(userId, params.id, params.commentId, voteDto);
   }
 
   @Post(':id/bookmark')
   @SwaggerBookmarkThread()
-  bookmarkThread(@GetUser('sub') userId: number, @Param() params: ThreadParamsDto) {
-    return this.threadsService.bookmarkThread(userId, params.id);
+  async bookmarkThread(@GetUser('sub') userId: number, @Param() params: ThreadParamsDto) {
+    return await this.bookmarkService.bookmarkThread(userId, params.id);
   }
 
   @Delete(':id/bookmark')
   @SwaggerUnbookmarkThread()
-  unbookmarkThread(@GetUser('sub') userId: number, @Param() params: ThreadParamsDto) {
-    return this.threadsService.unbookmarkThread(userId, params.id);
+  async unbookmarkThread(@GetUser('sub') userId: number, @Param() params: ThreadParamsDto) {
+    return await this.bookmarkService.unbookmarkThread(userId, params.id);
   }
 }

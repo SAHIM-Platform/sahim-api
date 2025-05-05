@@ -33,7 +33,6 @@ export class AdminsController {
         private readonly studentApprovalService: StudentApprovalService,
     ) { }
 
-
     @Get()
     @Roles(UserRole.SUPER_ADMIN)
     async getAllAdmins() {

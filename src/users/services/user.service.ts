@@ -1,7 +1,7 @@
 import { SignupAuthDto } from '@/auth/dto/signup-auth.dto';
 import { BadRequestException, ForbiddenException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { PrismaService } from 'prisma/prisma.service';
-import { ThreadsService } from '@/threads/threads.service';
+import { ThreadService } from '@/threads/services/thread.service';
 import { formatVotes, isUserDeleted } from '@/threads/utils/threads.utils';
 import { BookmarksQueryDto } from '../dto/bookmarks-query.dto';
 import { SortType } from '@/threads/enum/sort-type.enum';
@@ -19,7 +19,7 @@ import { UsernameTakenException } from '@/auth/exceptions/username-taken.excepti
 export class UserService {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly threadsService: ThreadsService,
+    private readonly threadService: ThreadService,
   ) { }
 
  /**
