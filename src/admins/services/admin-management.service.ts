@@ -1,17 +1,13 @@
-import { CreateCategoryDto } from '@/admins/dto/create-category.dto';
-import { CategoryNotFoundException } from '@/admins/exceptions/category-not-found.exception';
 import { AuthUtil } from '@/auth/utils/auth.helpers';
 import { UserService } from '@/users/services/user.service';
 import { BadRequestException, ForbiddenException, Injectable, OnModuleInit } from '@nestjs/common';
-import { ApprovalStatus, UserRole } from '@prisma/client';
+import { User, UserRole } from '@prisma/client';
 import { PrismaService } from 'prisma/prisma.service';
 import { AdminSignupDto } from '../dto/create-admin.dto';
-import { StudentSearchQueryDto } from '../dto/search-student-query.dto';
-import { StudentQueryDto } from '../dto/student-query.dto';
-import { UpdateCategoryDto } from '../dto/update-category.dto';
-import { CategoryAlreadyExistsException } from '../exceptions/category-already-exists.exception';
 import { SUPER_ADMIN_EMAIL, SUPER_ADMIN_PASSWORD, SUPER_ADMIN_USERNAME } from '../utils/constans';
 import { UserDetailsService } from '@/users/services/user-details.service';
+import { ApiResponse } from '@/common/interfaces/api-response.interface';
+import { AdminsListResponse } from '../interfaces/admins-list-response.interface';
 
 @Injectable()
 export class AdminManagementService implements OnModuleInit {
@@ -22,28 +18,6 @@ export class AdminManagementService implements OnModuleInit {
         private readonly prisma: PrismaService,
         private readonly authUtil: AuthUtil
     ) { }
-
-
-    async getAllAdmins() {
-        const admins = await this.prisma.user.findMany({
-            where: {
-                role: UserRole.ADMIN,
-            },
-            select: {
-                id: true,
-                name: true,
-                email: true,
-                username: true,
-                createdAt: true,
-            },
-            orderBy: {
-                createdAt: 'desc',
-            },
-        });
-
-        return [...admins];
-    }
-
 
 
     /**
@@ -95,7 +69,7 @@ export class AdminManagementService implements OnModuleInit {
      * @returns {Promise<{ message: string }>} Success message.
      * @throws {BadRequestException} If an admin with the same email or username already exists.
      */
-    async createAdmin(input: AdminSignupDto) {
+    async createAdmin(input: AdminSignupDto): Promise<ApiResponse<User>> {
         const { email, name, username, password } = input;
 
         const existingUser = await this.userService.findUserByEmailOrUsername(email || '', username);
@@ -105,7 +79,7 @@ export class AdminManagementService implements OnModuleInit {
 
         const hashedPassword = await this.authUtil.hashPassword(password);
 
-        await this.prisma.user.create({
+        const createdAdmin = await this.prisma.user.create({
             data: {
                 ...input,
                 password: hashedPassword,
@@ -113,7 +87,10 @@ export class AdminManagementService implements OnModuleInit {
             },
         });
 
-        return { message: "Admin created successfully" };
+        return {
+            message: 'Admin created successfully',
+            data: createdAdmin,
+        }
     }
 
     /**
@@ -125,7 +102,7 @@ export class AdminManagementService implements OnModuleInit {
      * @throws {BadRequestException} If the admin does not exist or if attempting to delete a Super Admin.
      * @throws {ForbiddenException} If an admin tries to delete another admin.
      */
-    async deleteAdmin(adminId: number, requesterId: number, requesterRole: UserRole) {
+    async deleteAdmin(adminId: number, requesterId: number, requesterRole: UserRole): Promise<ApiResponse<null>> {
         const admin = await this.userService.findUserById(adminId);
 
         if (!admin) {
@@ -142,7 +119,37 @@ export class AdminManagementService implements OnModuleInit {
 
         await this.prisma.user.delete({ where: { id: adminId } });
 
-        return { message: "Admin deleted successfully" };
+        return {
+            message: 'Admin deleted successfully',
+            data: null,
+        }
+    }
+
+    /**
+     * Retrieves a list of all admins in the system.
+     * @returns {Promise<ApiResponse<AdminsListResponse[]>>} List of admins.
+     */
+    async getAllAdmins(): Promise<ApiResponse<AdminsListResponse[]>> {
+        const admins = await this.prisma.user.findMany({
+            where: {
+                role: UserRole.ADMIN,
+            },
+            select: {
+                id: true,
+                name: true,
+                email: true,
+                username: true,
+                createdAt: true,
+            },
+            orderBy: {
+                createdAt: 'desc',
+            },
+        });
+
+        return {
+            message: 'Admins retrieved successfully',
+            data: admins,
+        }
     }
 
 }

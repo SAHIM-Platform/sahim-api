@@ -3,6 +3,8 @@ import { UserRole, ApprovalStatus } from '@prisma/client';
 import { PrismaService } from 'prisma/prisma.service';
 import { StudentSearchQueryDto } from '../dto/search-student-query.dto';
 import { StudentQueryDto } from '../dto/student-query.dto';
+import { ApiResponse } from '@/common/interfaces/api-response.interface';
+import { StudentsListResponse } from '../interfaces/students-list-response.interface';
 
 @Injectable()
 export class StudentApprovalService {
@@ -17,7 +19,7 @@ export class StudentApprovalService {
    * @returns {Promise<{ message: string }>} Success message.
    * @throws {BadRequestException} If the student does not exist, is not a student, or is already approved.
    */
-  async approveStudent(userId: number, adminUserId: number) {
+  async approveStudent(userId: number, adminUserId: number): Promise<ApiResponse<null>> {
     const student = await this.prisma.student.findUnique({
       where: { userId },
       include: { user: true },
@@ -43,7 +45,10 @@ export class StudentApprovalService {
       },
     });
 
-    return { message: 'Student approved successfully' };
+    return {
+        message: 'Student approved successfully',
+        data: null,
+    }
   }
 
   /**
@@ -52,7 +57,7 @@ export class StudentApprovalService {
    * @returns {Promise<{ message: string }>} Success message.
    * @throws {BadRequestException} If the student does not exist, is not a student, or is already approved/rejected.
    */
-  async rejectStudent(userId: number, adminUserId: number) {
+  async rejectStudent(userId: number, adminUserId: number): Promise<ApiResponse<null>> {
     const student = await this.prisma.student.findUnique({
       where: { userId },
       include: { user: true },
@@ -82,8 +87,12 @@ export class StudentApprovalService {
       },
     });
 
-    return { message: 'Student rejected successfully' };
+    return {
+        message: 'Student rejected successfully',
+        data: null,
+    }
   }
+
  /**
   * Retrieves a paginated list of students with optional approval status filter.
   * 
@@ -94,7 +103,7 @@ export class StudentApprovalService {
   * 
   * @returns {Promise<{ data: Array<Object>, meta: Object }>} - Paginated list of students and metadata.
   */
- async getAllStudents(query: StudentQueryDto) {
+ async getAllStudents(query: StudentQueryDto): Promise<ApiResponse<StudentsListResponse[]>> {
     const { page = 1, limit = 10, status } = query;
     const skip = (page - 1) * limit;
   
@@ -121,6 +130,7 @@ export class StudentApprovalService {
     ]);
   
     return {
+      message: 'Students retrieved successfully',
       data: students,
       meta: {
         total,
@@ -145,7 +155,7 @@ export class StudentApprovalService {
      * @throws {BadRequestException} If any invalid parameter is provided.
      * 
      */
-    async searchStudents(query: StudentSearchQueryDto) {
+    async searchStudents(query: StudentSearchQueryDto): Promise<ApiResponse<StudentsListResponse[]>> {
         const { query: searchTerm, page = 1, limit = 10, status } = query;
         const skip = (page - 1) * limit;
         
@@ -160,20 +170,25 @@ export class StudentApprovalService {
         if (status) {
             where.student = { approvalStatus: status };
         }
+
+        const searchStudents = await this.prisma.user.findMany({
+            where,
+            skip,
+            take: limit,
+            select: {
+                id: true,
+                name: true,
+                email: true,
+                student: true,
+            },
+            orderBy: {
+                name: 'asc'
+            }
+            });
     
-        return this.prisma.user.findMany({
-        where,
-        skip,
-        take: limit,
-        select: {
-            id: true,
-            name: true,
-            email: true,
-            student: true,
-        },
-        orderBy: {
-            name: 'asc'
+        return {
+            message: 'Students retrieved successfully',
+            data: searchStudents,
         }
-        });
     }  
 }

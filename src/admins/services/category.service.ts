@@ -4,6 +4,8 @@ import { UpdateCategoryDto } from "../dto/update-category.dto";
 import { CategoryAlreadyExistsException } from "../exceptions/category-already-exists.exception";
 import { CategoryNotFoundException } from "../exceptions/category-not-found.exception";
 import { PrismaService } from "prisma/prisma.service";
+import { ApiResponse } from "@/common/interfaces/api-response.interface";
+import { Category } from "@prisma/client";
 
 @Injectable()
 export class CategoryService {
@@ -17,7 +19,7 @@ export class CategoryService {
      * @returns {Promise<{ id: number, name: string }>} The created category.
      * @throws {BadRequestException} If a category with the same name already exists.
      */
-        async createCategory(input: CreateCategoryDto, userId: number) {
+        async createCategory(input: CreateCategoryDto, userId: number): Promise<ApiResponse<Category>> {
           const { name } = input;
   
           // Check if category already exists
@@ -37,7 +39,10 @@ export class CategoryService {
               },
           });
   
-          return createdCategory;
+          return {
+            message: 'Category created successfully',
+            data: createdCategory
+          }
       }
   
       /**
@@ -46,7 +51,7 @@ export class CategoryService {
        * @returns {Promise<{ message: string }>} Success message.
        * @throws {CategoryNotFoundException} If the category does not exist.
        */
-      async deleteCategory(categoryId: number) {
+      async deleteCategory(categoryId: number): Promise<ApiResponse<null>> {
           // Check if category exists
           const category = await this.prisma.category.findUnique({
               where: { category_id: categoryId },
@@ -71,7 +76,10 @@ export class CategoryService {
               where: { category_id: categoryId },
           });
   
-          return { message: 'Category deleted successfully' };
+          return {
+            message: 'Category deleted successfully',
+            data: null,
+        };
       }
 
     /**
@@ -81,7 +89,7 @@ export class CategoryService {
    * @returns {Promise<any>} - The updated category.
    * @throws {CategoryNotFoundException} If category not found.
    */
-  async updateCategory(categoryId: number, input: UpdateCategoryDto) {
+  async updateCategory(categoryId: number, input: UpdateCategoryDto): Promise<ApiResponse<Category>> {
     const { name } = input;
 
     const existingCategory = await this.prisma.category.findUnique({
@@ -91,13 +99,17 @@ export class CategoryService {
     if (!existingCategory) {
         throw new CategoryNotFoundException(categoryId);
     }
+    
+    const updatedCategory = await this.prisma.category.update({
+        where: { category_id: categoryId },
+        data: {
+            name,
+        },
+        });
 
-    return await this.prisma.category.update({
-      where: { category_id: categoryId },
-      data: {
-        name,
-      },
-    });
-
+    return {
+        message: 'Category updated successfully',
+        data: updatedCategory,
+    }
   }
 }
