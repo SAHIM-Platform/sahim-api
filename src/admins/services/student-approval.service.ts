@@ -104,21 +104,35 @@ export class StudentApprovalService {
   * @returns {Promise<{ data: Array<Object>, meta: Object }>} - Paginated list of students and metadata.
   */
  async getAllStudents(query: StudentQueryDto): Promise<ApiResponse<StudentsListResponse[]>> {
-    const { page = 1, limit = 10, status } = query;
+    const { page = 1, limit = 10, status, search } = query;
     const skip = (page - 1) * limit;
   
     const where: any = { role: UserRole.STUDENT };
+    const andConditions: Array<Record<string, any>> = [];
   
     if (status) {
-      where.student = { approvalStatus: status };
-    }
+        andConditions.push({ student: { approvalStatus: status } });
+      }
+  
+      if (search) {
+        andConditions.push({
+          OR: [
+            { name: { contains: search, mode: 'insensitive' } },
+            { student: { academicNumber: { contains: search, mode: 'insensitive' } } },
+          ]
+        });
+      }
+  
+      if (andConditions.length > 0) {
+        where.AND = andConditions;
+      }
   
     const [students, total] = await Promise.all([
       this.prisma.user.findMany({
         where,
         skip,
         take: limit,
-        orderBy: { createdAt: 'desc' },
+        orderBy: search ? { name: 'asc' } : { createdAt: 'desc' },
         select: {
           id: true,
           name: true,
@@ -141,54 +155,4 @@ export class StudentApprovalService {
     };
   }
 
-    /**
-     * Searches for students by name or academic number, with an optional filter for approval status.
-     * 
-     * @param {StudentSearchQueryDto} query - The query parameters for the student search.
-     * @param {string} query.query - The search term (name or academic number) to filter students.
-     * @param {number} [query.page=1] - The page number for pagination (defaults to 1).
-     * @param {number} [query.limit=10] - The number of students per page (defaults to 10).
-     * @param {ApprovalStatus} [query.status] - The approval status to filter students by (optional).
-     * 
-     * @returns {Promise<any[]>} A promise that resolves to an array of students matching the search criteria.
-     * 
-     * @throws {BadRequestException} If any invalid parameter is provided.
-     * 
-     */
-    async searchStudents(query: StudentSearchQueryDto): Promise<ApiResponse<StudentsListResponse[]>> {
-        const { query: searchTerm, page = 1, limit = 10, status } = query;
-        const skip = (page - 1) * limit;
-        
-        const where: any = {
-            role: UserRole.STUDENT,
-            OR: [
-                { name: { contains: searchTerm, mode: 'insensitive' } },
-                { student: { academicNumber: { contains: searchTerm, mode: 'insensitive' } } },
-            ],
-        };
-    
-        if (status) {
-            where.student = { approvalStatus: status };
-        }
-
-        const searchStudents = await this.prisma.user.findMany({
-            where,
-            skip,
-            take: limit,
-            select: {
-                id: true,
-                name: true,
-                email: true,
-                student: true,
-            },
-            orderBy: {
-                name: 'asc'
-            }
-            });
-    
-        return {
-            message: 'Students retrieved successfully',
-            data: searchStudents,
-        }
-    }  
 }

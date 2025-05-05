@@ -98,11 +98,4 @@ export class AdminsController {
     async getAllStudents(@Query() query: StudentQueryDto) {
         return await this.studentApprovalService.getAllStudents(query);
     }
-
-    @Get('users/students/search')
-    @SwaggerSearchStudents()
-    @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
-    async searchStudents(@Query() query: StudentSearchQueryDto) {
-        return this.studentApprovalService.searchStudents(query);
-    }
 }
