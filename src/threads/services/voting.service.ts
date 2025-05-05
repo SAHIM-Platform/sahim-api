@@ -3,6 +3,7 @@ import { PrismaService } from "prisma/prisma.service";
 import { VoteDto } from "../dto/vote.dto";
 import { formatVotes } from "../utils/threads.utils";
 import { ThreadService } from "./thread.service";
+import { ApiResponse } from "@/common/interfaces/api-response.interface";
 
 
 @Injectable()
@@ -20,7 +21,7 @@ export class VotingService {
      * @returns Updated vote counts for the thread
      * @throws NotFoundException if the thread does not exist
      */
-      async voteThread(userId: number, threadId: number, voteDto: VoteDto) {
+      async voteThread(userId: number, threadId: number, voteDto: VoteDto): Promise<ApiResponse<any>> {
         await this.threadService.ensureThreadExists(threadId);
     
         // First, check if the user has already voted on this thread
@@ -75,8 +76,8 @@ export class VotingService {
         });
     
         return {
-          success: true,
-          updatedVotes: formatVotes(updatedVotes, userId),
+          message: 'Vote updated successfully',
+          data: formatVotes(updatedVotes, userId),
         };
       }
     
@@ -94,7 +95,7 @@ export class VotingService {
         threadId: number,
         commentId: number,
         voteDto: VoteDto,
-      ) {
+      ): Promise<ApiResponse<any>> {
         const comment = await this.prisma.threadComment.findUnique({
           where: { comment_id: commentId, thread_id: threadId },
         });
@@ -155,10 +156,8 @@ export class VotingService {
         });
     
         return {
-          success: true,
-          updatedVotes: formatVotes(updatedVotes, userId),
+          message: 'Vote updated successfully',
+          data: formatVotes(updatedVotes, userId),
         };
       }
-    
-    
 }

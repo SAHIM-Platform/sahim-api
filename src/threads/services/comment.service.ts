@@ -6,6 +6,8 @@ import { SortType } from "../enum/sort-type.enum";
 import { formatVotes } from "../utils/threads.utils";
 import { PrismaService } from "prisma/prisma.service";
 import { ThreadService } from "./thread.service";
+import { ApiResponse } from "@/common/interfaces/api-response.interface";
+import { CommentResponse } from "../interfaces/comment-response.interface";
 
 
 @Injectable()
@@ -26,7 +28,7 @@ export class CommentService {
         userId: number,
         threadId: number,
         createCommentDto: CreateCommentDto,
-      ) {
+      ): Promise<ApiResponse<CommentResponse>> {
         await this.threadService.ensureThreadExists(threadId);
     
         const comment = await this.prisma.threadComment.create({
@@ -42,8 +44,11 @@ export class CommentService {
         });
     
         return ({
-          ...comment,
-          votes: formatVotes(comment.votes, userId),
+          message: 'Comment created successfully',
+          data: {
+            ...comment,
+            votes: formatVotes(comment.votes, userId),
+          },
         });
       }
     
@@ -61,7 +66,7 @@ export class CommentService {
         threadId: number,
         commentId: number,
         updateCommentDto: UpdateCommentDto,
-      ) {
+      ): Promise<ApiResponse<CommentResponse>> {
         await this.threadService.ensureThreadExists(threadId); // Ensure the thread exists
         // Verify comment exists and belongs to user
         const comment = await this.prisma.threadComment.findUnique({
@@ -86,8 +91,11 @@ export class CommentService {
         });
     
         return ({
-          ...updatedComment,
-          votes: formatVotes(updatedComment.votes, userId),
+          message: 'Comment updated successfully',
+          data: {
+            ...updatedComment,
+            votes: formatVotes(updatedComment.votes, userId),
+          },
         });
       }
     
@@ -104,7 +112,7 @@ export class CommentService {
         userId: number,
         threadId: number,
         commentId: number,
-      ) {
+      ): Promise<ApiResponse<null>> {
         await this.threadService.ensureThreadExists(threadId); // Ensure the thread exists
     
         // Verify comment exists and belongs to user
@@ -121,7 +129,10 @@ export class CommentService {
         }
     
         await this.prisma.threadComment.delete({ where: { comment_id: commentId } });
-        return { success: true };
+        return {
+            message: 'Comment deleted successfully',
+            data: null,
+        }
       }
     
     
@@ -137,7 +148,7 @@ export class CommentService {
         threadId: number,
         query: CommentQueryDto,
         userId?: number,
-      ) {
+      ): Promise<ApiResponse<CommentResponse[]>> {
         await this.threadService.ensureThreadExists(threadId);
         const { page = 1, limit = 10, sort = SortType.LATEST } = query;
     
@@ -167,6 +178,7 @@ export class CommentService {
         }));
     
         return {
+          message: 'Comments retrieved successfully',
           data: formattedComments,
           meta: {
             total,

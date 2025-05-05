@@ -11,14 +11,13 @@ import { SortType } from '../enum/sort-type.enum';
 import { ThreadWithDetails } from '../types/threads.types';
 import { FindOneThreadQueryDto } from '../dto/find-thread-query.dto';
 import { buildThreadIncludeOptions, formatVotes } from '../utils/threads.utils';
-import { CreateCommentDto } from '../dto/create-comment.dto';
-import { UpdateCommentDto } from '../dto/update-comment.dto';
-import { CommentQueryDto } from '../dto/comment-query.dto';
-import { VoteDto } from '../dto/vote.dto';
 import { CategoryNotFoundException } from '@/admins/exceptions/category-not-found.exception';
-import { Prisma } from '@prisma/client';
+import { Prisma, Thread } from '@prisma/client';
 import { SearchThreadsDto } from '../dto/search-threads.dto';
 import { formatThreadResponse } from '../utils/threads.utils';
+import { ApiResponse } from '@/common/interfaces/api-response.interface';
+import { ThreadResponse } from '../interfaces/thread-response.interface';
+import { CategoryResponse } from '../interfaces/category-response.interface';
 
 @Injectable()
 export class ThreadService {
@@ -41,7 +40,7 @@ export class ThreadService {
   async searchThreads(
     { query, sort = SortType.LATEST, page = 1, limit = 10, category_id }: SearchThreadsDto,
     userId?: number
-  ) {
+  ): Promise<ApiResponse<Thread[]>> {
     const orderBy = {
       created_at: sort === SortType.LATEST ? 'desc' as const : 'asc' as const,
     };
@@ -76,13 +75,16 @@ export class ThreadService {
       }),
       this.prisma.thread.count({ where }),
     ]);
+
+    const data =  threads.map(({ bookmarks, ...thread }) => ({
+      ...thread,
+      votes: formatVotes(thread.votes, userId),
+      bookmarked: !!(bookmarks?.some(b => b.user_id === userId)),
+    }))
   
     return {
-      data: threads.map(({ bookmarks, ...thread }) => ({
-        ...thread,
-        votes: formatVotes(thread.votes, userId),
-        bookmarked: !!(bookmarks?.some(b => b.user_id === userId)),
-      })),
+      message: 'Threads retrieved successfully',
+      data,
       meta: { 
         total, 
         page, 
@@ -100,7 +102,7 @@ export class ThreadService {
    * @returns The created thread with author information and vote counts
    * @throws CategoryNotFoundException if category doesn't exist
    */
-  async create(userId: number, createThreadDto: CreateThreadDto) {
+  async create(userId: number, createThreadDto: CreateThreadDto): Promise<ApiResponse<ThreadResponse>> {
     // Check if category exists
     const category = await this.prisma.category.findUnique({
       where: { category_id: createThreadDto.category_id },
@@ -124,8 +126,11 @@ export class ThreadService {
     });
 
     return {
-      ...thread,
-      votes: formatVotes(thread.votes),
+      message: 'Thread created successfully',
+      data: {
+        ...thread,
+        votes: formatVotes(thread.votes),
+      },
     };
   }
 
@@ -134,7 +139,7 @@ export class ThreadService {
    * @param query - Query parameters including sort type, page, and limit
    * @returns Paginated list of threads with metadata
    */
-  async findAll({ sort = SortType.LATEST, page = 1, limit = 10 , category_id}: ThreadQueryDto, userId?: number) {
+  async findAll({ sort = SortType.LATEST, page = 1, limit = 10 , category_id}: ThreadQueryDto, userId?: number): Promise<ApiResponse<Thread[]>> {
     const orderBy = {
       created_at: sort === SortType.LATEST ? 'desc' as const : 'asc' as const,
     };
@@ -161,12 +166,15 @@ export class ThreadService {
       this.prisma.thread.count({ where }),
     ]);
 
+    const data = threads.map(({ bookmarks, ...thread }) => ({
+      ...thread,
+      votes: formatVotes(thread.votes, userId),
+      bookmarked: !!(bookmarks?.some(b => b.user_id === userId)),
+    }));
+
     return {
-      data: threads.map(({ bookmarks, ...thread }) => ({
-        ...thread,
-        votes: formatVotes(thread.votes, userId),
-        bookmarked: !!(bookmarks?.some(b => b.user_id === userId)),
-      })),
+      message: 'Threads retrieved successfully',
+      data,
       meta: { total, page, limit, totalPages: Math.ceil(total / limit) },
     };
   }
@@ -183,7 +191,7 @@ export class ThreadService {
     threadId: number,
     options?: FindOneThreadQueryDto,
     userId?: number,
-  ): Promise<ThreadWithDetails> {
+  ): Promise<ApiResponse<ThreadWithDetails>> {
     const {
       includeComments = true,
       commentsPage = 1,
@@ -205,7 +213,12 @@ export class ThreadService {
       throw new NotFoundException('Thread not found');
     }
 
-    return formatThreadResponse(thread, userId, includeComments, includeVotes);
+    const data = formatThreadResponse(thread, userId, includeComments, includeVotes);
+    
+    return {
+      message: 'Thread retrieved successfully',
+      data,
+    }
   }
 
   /**
@@ -216,7 +229,7 @@ export class ThreadService {
    * @returns The updated thread
    * @throws ForbiddenException if user doesn't own the thread
    */
-  async update(userId: number, id: number, updateThreadDto: UpdateThreadDto) {
+  async update(userId: number, id: number, updateThreadDto: UpdateThreadDto): Promise<ApiResponse<ThreadResponse>> {
     const thread = await this.getThreadById(id);
     if (thread.author_user_id !== userId) {
       throw new ForbiddenException('You can only update your own threads');
@@ -233,8 +246,11 @@ export class ThreadService {
     });
 
     return {
-      ...updatedThread,
-      votes: formatVotes(updatedThread.votes, userId),
+      message: 'Thread updated successfully',
+      data: {
+        ...updatedThread,
+        votes: formatVotes(updatedThread.votes),
+      },
     };
   }
 
@@ -245,14 +261,17 @@ export class ThreadService {
    * @returns Success status
    * @throws ForbiddenException if user doesn't own the thread
    */
-  async remove(userId: number, id: number): Promise<{ success: boolean }> {
+  async remove(userId: number, id: number): Promise<ApiResponse<null>> {
     const thread = await this.getThreadById(id);
     if (thread.author_user_id !== userId) {
       throw new ForbiddenException('You can only delete your own threads');
     }
 
     await this.prisma.thread.delete({ where: { thread_id: id } });
-    return { success: true };
+    return {
+      message: 'Thread deleted successfully',
+      data: null,
+    }
   }
 
 
@@ -288,7 +307,7 @@ export class ThreadService {
    * @returns {Promise<{ data: Array<{ category_id: number, name: string }> }>} List of categories.
    * @throws NotFoundException if no categories exist
    */
-  async getAllCategories() {
+  async getAllCategories(): Promise<ApiResponse<CategoryResponse[]>> {
     const categories = await this.prisma.category.findMany({
       select: {
         category_id: true,
@@ -300,6 +319,7 @@ export class ThreadService {
     });
 
     return {
+      message: 'Categories retrieved successfully',
       data: categories,
     };
   }

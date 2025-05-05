@@ -1,6 +1,7 @@
 import { ForbiddenException, Injectable } from "@nestjs/common";
 import { PrismaService } from "prisma/prisma.service";
 import { ThreadService } from "./thread.service";
+import { ApiResponse } from "@/common/interfaces/api-response.interface";
 
 @Injectable()
 export class BookmarkService {
@@ -17,7 +18,7 @@ export class BookmarkService {
    * @returns {Promise<{ message: string, success: boolean }>} Success message and status.
    * @throws {ForbiddenException} If the thread is already bookmarked by the user.
    */
-  async bookmarkThread(userId: number, threadId: number) {
+  async bookmarkThread(userId: number, threadId: number): Promise<ApiResponse<null>> {
     await this.threadService.ensureThreadExists(threadId);
 
     const existingBookmark = await this.prisma.bookmarkedThread.findUnique({
@@ -46,7 +47,7 @@ export class BookmarkService {
 
     return {
       message: 'Thread bookmarked successfully',
-      success: true,
+      data: null,
     };
   }
 
@@ -58,7 +59,7 @@ export class BookmarkService {
    * @returns {Promise<{ message: string, success: boolean }>} Success message and status.
    * @throws {ForbiddenException} If the thread is not bookmarked by the user.
    */
-  async unbookmarkThread(userId: number, threadId: number) {
+  async unbookmarkThread(userId: number, threadId: number): Promise<ApiResponse<null>> {
     await this.threadService.ensureThreadExists(threadId);
 
     const bookmarkedThread = await this.prisma.bookmarkedThread.findUnique({
@@ -89,7 +90,7 @@ export class BookmarkService {
 
     return {
       message: 'Thread unbookmarked successfully',
-      success: true
+      data: null,
     };
   }
 
