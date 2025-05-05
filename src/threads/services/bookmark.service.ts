@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable } from "@nestjs/common";
+import { ConflictException, ForbiddenException, Injectable, NotFoundException } from "@nestjs/common";
 import { PrismaService } from "prisma/prisma.service";
 import { ThreadService } from "./thread.service";
 import { ApiResponse } from "@/common/interfaces/api-response.interface";
@@ -31,11 +31,7 @@ export class BookmarkService {
     });
 
     if (existingBookmark) {
-      throw new ForbiddenException({
-        message: 'Thread already bookmarked',
-        error: 'Forbidden',
-        statusCode: 403,
-      });
+      throw new ConflictException("Thread already bookmarked");
     }
 
     await this.prisma.bookmarkedThread.create({
@@ -72,11 +68,7 @@ export class BookmarkService {
     });
 
     if (!bookmarkedThread) {
-      throw new ForbiddenException({
-        message: 'Thread is not bookmarked',
-        error: 'Forbidden',
-        statusCode: 403,
-      });
+      throw new NotFoundException("Thread not bookmarked");
     }
 
     await this.prisma.bookmarkedThread.delete({

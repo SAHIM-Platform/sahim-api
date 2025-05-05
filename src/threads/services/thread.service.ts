@@ -18,6 +18,8 @@ import { formatThreadResponse } from '../utils/threads.utils';
 import { ApiResponse } from '@/common/interfaces/api-response.interface';
 import { ThreadResponse } from '../interfaces/thread-response.interface';
 import { CategoryResponse } from '../interfaces/category-response.interface';
+import { ThreadNotFoundException } from '../exceptions/thread-not-found.exception';
+import { ThreadOwnershipException } from '../exceptions/thread-ownership.exception';
 
 @Injectable()
 export class ThreadService {
@@ -199,6 +201,8 @@ export class ThreadService {
       includeVotes = true
     } = options || {};
 
+    console.log(typeof includeComments);
+
     const thread = await this.prisma.thread.findUnique({
       where: { thread_id: threadId },
       include: {
@@ -210,7 +214,7 @@ export class ThreadService {
     });
 
     if (!thread) {
-      throw new NotFoundException('Thread not found');
+      throw new ThreadNotFoundException(threadId);
     }
 
     const data = formatThreadResponse(thread, userId, includeComments, includeVotes);
@@ -232,7 +236,7 @@ export class ThreadService {
   async update(userId: number, id: number, updateThreadDto: UpdateThreadDto): Promise<ApiResponse<ThreadResponse>> {
     const thread = await this.getThreadById(id);
     if (thread.author_user_id !== userId) {
-      throw new ForbiddenException('You can only update your own threads');
+      throw new ThreadOwnershipException('update');
     }
 
     const updatedThread = await this.prisma.thread.update({
@@ -264,7 +268,7 @@ export class ThreadService {
   async remove(userId: number, id: number): Promise<ApiResponse<null>> {
     const thread = await this.getThreadById(id);
     if (thread.author_user_id !== userId) {
-      throw new ForbiddenException('You can only delete your own threads');
+      throw new ThreadOwnershipException('delete');
     }
 
     await this.prisma.thread.delete({ where: { thread_id: id } });
@@ -284,7 +288,7 @@ export class ThreadService {
    */
   private async getThreadById(threadId: number) {
     const thread = await this.prisma.thread.findUnique({ where: { thread_id: threadId } });
-    if (!thread) throw new NotFoundException('Thread not found');
+    if (!thread) throw new ThreadNotFoundException(threadId);
     return thread;
   }
 
@@ -297,7 +301,7 @@ export class ThreadService {
   async ensureThreadExists(threadId: number) {
     const thread = await this.prisma.thread.findUnique({ where: { thread_id: threadId } });
     if (!thread) {
-      throw new NotFoundException(`Thread with ID ${threadId} not found`);
+      throw new ThreadNotFoundException(threadId);
     }
   }
 

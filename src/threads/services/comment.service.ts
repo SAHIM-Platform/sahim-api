@@ -8,6 +8,7 @@ import { PrismaService } from "prisma/prisma.service";
 import { ThreadService } from "./thread.service";
 import { ApiResponse } from "@/common/interfaces/api-response.interface";
 import { CommentResponse } from "../interfaces/comment-response.interface";
+import { CommentNotFoundException } from "../exceptions/comment-not-found.exception";
 
 
 @Injectable()
@@ -78,7 +79,7 @@ export class CommentService {
         });
     
         if (!comment) {
-          throw new NotFoundException('Comment not found or unauthorized');
+          throw new CommentNotFoundException(commentId);
         }
     
         const updatedComment = await this.prisma.threadComment.update({
@@ -125,7 +126,7 @@ export class CommentService {
         });
     
         if (!comment) {
-          throw new NotFoundException('Comment not found or unauthorized');
+          throw new CommentNotFoundException(commentId);
         }
     
         await this.prisma.threadComment.delete({ where: { comment_id: commentId } });

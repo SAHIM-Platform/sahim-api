@@ -4,6 +4,7 @@ import { VoteDto } from "../dto/vote.dto";
 import { formatVotes } from "../utils/threads.utils";
 import { ThreadService } from "./thread.service";
 import { ApiResponse } from "@/common/interfaces/api-response.interface";
+import { CommentNotFoundException } from "../exceptions/comment-not-found.exception";
 
 
 @Injectable()
@@ -101,7 +102,7 @@ export class VotingService {
         });
     
         if (!comment) {
-          throw new NotFoundException(`Comment with ID ${commentId} not found`);
+          throw new CommentNotFoundException(commentId);
         }
     
         // First, check if the user has already voted on this comment
