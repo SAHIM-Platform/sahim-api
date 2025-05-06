@@ -42,6 +42,7 @@ import { GetUser } from '@/auth/decorators/get-user.decorator';
 import { CommentService } from './services/comment.service';
 import { BookmarkService } from './services/bookmark.service';
 import { VotingService } from './services/voting.service';
+import { FindOneThreadQueryDto } from './dto/find-thread-query.dto';
 
 @SwaggerThreads()
 @UseGuards(JwtAuthGuard)
@@ -83,7 +84,7 @@ export class ThreadsController {
   async findOne(
     @GetUser('sub') userId: number,
     @Param() params: ThreadParamsDto,
-    @Query() query: any
+    @Query() query: FindOneThreadQueryDto
   ) {
     return await this.threadService.findOne(params.id, query, userId);
   }
