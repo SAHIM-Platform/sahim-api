@@ -11,15 +11,6 @@ import {
 import { SortType } from '@/threads/enum/sort-type.enum';
 import { UpdateMeDto } from '../dto/update-me.dto';
 
-export const SwaggerGetAllAdmins = () => {
-  return applyDecorators(
-    ApiOperation({ summary: 'Get all admins (ADMIN + SUPER_ADMIN)' }),
-    ApiResponse({ status: 200, description: 'List of admin users retrieved successfully' }),
-    ApiResponse({ status: 403, description: 'Forbidden. Only SUPER_ADMINs are allowed.' }),
-  );
-};
-
-
 export function SwaggerUsersController() {
   return applyDecorators(
     ApiTags('Users'),
@@ -31,10 +22,6 @@ export function SwaggerUsersController() {
     })
   );
 }
-
-
-
-
 
 export function SwaggerTestApprovedStudent() {
   return applyDecorators(
@@ -82,6 +69,7 @@ export function SwaggerGetUserBookmarks() {
       description: 'List of bookmarked threads retrieved successfully',
       schema: {
         example: {
+          message: 'Bookmarks retrieved successfully',
           data: [
             {
               thread_id: 1,
@@ -124,6 +112,17 @@ export function SwaggerGetUserBookmarks() {
         }
       }
     }),
+    ApiResponse({ 
+      status: 200, 
+      description: 'No bookmarks found',
+      schema: {
+        example: {
+          message: 'No bookmarks found',
+          data: [],
+          meta: { total: 0, page: 1, limit: 10, totalPages: 0 }
+        }
+      }
+    }),
     ApiResponse({ status: 401, description: 'Unauthorized' })
   );
 }
@@ -136,14 +135,19 @@ export function SwaggerGetMe() {
       description: 'User profile information retrieved successfully',
       schema: {
         example: {
-          id: 1,
-          name: 'User Name',
-          username: 'username',
-          email: 'user@example.com',
-          role: 'STUDENT',
-          academicNumber: '123456789',
-          department: 'Computer Science',
-          level: 2
+          message: 'User details retrieved successfully',
+          data: {
+            id: 1,
+            name: 'User Name',
+            username: 'username',
+            email: 'user@example.com',
+            role: 'STUDENT',
+            authMethod: 'EMAIL',
+            photoPath: '/path/to/photo.jpg',
+            academicNumber: '123456789',
+            department: 'Computer Science',
+            level: 2
+          }
         }
       }
     }),
@@ -156,9 +160,24 @@ export function SwaggerDeleteMe() {
   return applyDecorators(
     ApiOperation({ summary: 'Delete current user account' }),
     ApiBody({ schema: { example: { password: 'currentPassword123' } } }),
-    ApiResponse({ status: 200, description: 'User deleted successfully' }),
+    ApiResponse({ 
+      status: 200, 
+      description: 'User deleted successfully',
+      schema: {
+        example: {
+          message: 'User account deleted successfully',
+          data: {
+            id: 1,
+            username: 'deleted_user_1',
+            isDeleted: true,
+            deletedAt: '2024-04-09T12:00:00Z'
+          }
+        }
+      }
+    }),
     ApiResponse({ status: 400, description: 'Bad request' }),
     ApiResponse({ status: 401, description: 'Unauthorized' }),
+    ApiResponse({ status: 403, description: 'Forbidden - Cannot delete super admin account' })
   );
 }
 
@@ -171,13 +190,17 @@ export function SwaggerUpdateMe() {
       description: 'User updated successfully',
       schema: {
         example: {
-          id: 1,
-          name: 'Updated Name',
-          username: 'updatedUsername',
-          email: 'user@example.com',
-          role: 'STUDENT',
-        },
-      },
+          message: 'Profile updated successfully',
+          data: {
+            id: 1,
+            name: 'Updated Name',
+            username: 'updatedUsername',
+            email: 'user@example.com',
+            role: 'STUDENT',
+            photoPath: '/updated/path.jpg'
+          }
+        }
+      }
     }),
     ApiResponse({ status: 400, description: 'Username is already taken' }),
     ApiResponse({ status: 401, description: 'Unauthorized' }),
@@ -192,23 +215,37 @@ export function SwaggerGetUserThreads() {
     ApiQuery({ name: 'limit', required: false, type: Number, description: 'Number of items per page (max 100)', example: 10, minimum: 1, maximum: 100 }),
     ApiQuery({ name: 'search', required: false, type: String, description: 'Search query to filter threads by title or content' }),
     ApiQuery({ name: 'category_id', required: false, type: Number, description: 'Category ID to filter threads' }),
-    ApiResponse({ status: 200, description: 'List of user threads retrieved successfully', schema: { example: {
-      data: [{
-        thread_id: 1,
-        category_id: 1,
-        author_user_id: 1,
-        title: 'My Thread Title',
-        content: 'This is my thread content',
-        thumbnail_url: null,
-        created_at: '2023-01-01T00:00:00.000Z',
-        author: { id: 1, username: 'myusername', name: 'My Name', photoPath: '/path/to/photo.jpg' },
-        category: { category_id: 1, name: 'General' },
-        _count: { comments: 5, votes: 10 },
-        votes: { score: 8, user_vote: 'UP', counts: { up: 9, down: 1 } },
-        bookmarked: false
-      }],
-      meta: { total: 15, page: 1, limit: 10, totalPages: 2, search: 'thread', category_id: 1 }
-    }}}),
+    ApiResponse({ 
+      status: 200, 
+      description: 'List of user threads retrieved successfully', 
+      schema: { 
+        example: {
+          message: 'Threads retrieved successfully',
+          data: [{
+            thread_id: 1,
+            category_id: 1,
+            author_user_id: 1,
+            title: 'My Thread Title',
+            content: 'This is my thread content',
+            thumbnail_url: null,
+            created_at: '2023-01-01T00:00:00.000Z',
+            author: { id: 1, username: 'myusername', name: 'My Name', photoPath: '/path/to/photo.jpg' },
+            category: { category_id: 1, name: 'General' },
+            _count: { comments: 5, votes: 10 },
+            votes: { score: 8, user_vote: 'UP', counts: { up: 9, down: 1 } },
+            bookmarked: false
+          }],
+          meta: { 
+            total: 15, 
+            page: 1, 
+            limit: 10, 
+            totalPages: 2, 
+            search: 'thread', 
+            category_id: 1 
+          }
+        }
+      }
+    }),
     ApiResponse({ status: 401, description: 'Unauthorized - valid access token required' }),
     ApiResponse({ status: 403, description: 'Forbidden - user must be approved student' })
   );
