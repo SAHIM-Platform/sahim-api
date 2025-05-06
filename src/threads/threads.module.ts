@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { ThreadsController } from './threads.controller';
+import { ThreadsController } from './controllers/threads.controller';
 import { ThreadService } from './services/thread.service';
 import { CommentService } from './services/comment.service';
 import { BookmarkService } from './services/bookmark.service';

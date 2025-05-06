@@ -3,7 +3,7 @@ import { GetUser } from '@/auth/decorators/get-user.decorator';
 import { Roles } from '@/auth/decorators/role.decorator';
 import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Query } from '@nestjs/common';
 import { UserRole } from '@prisma/client';
-import { AdminManagementService } from './services/admin-management.service';
+import { AdminManagementService } from '../services/admin-management.service';
 import {
     SwaggerAdminController,
     SwaggerApproveStudent,
@@ -15,13 +15,13 @@ import {
     SwaggerRejectStudent,
     SwaggerSearchStudents,
     SwaggerUpdateCategory
-} from './decorators/swagger.decorators';
-import { AdminSignupDto } from './dto/create-admin.dto';
-import { StudentSearchQueryDto } from './dto/search-student-query.dto';
-import { StudentQueryDto } from './dto/student-query.dto';
-import { UpdateCategoryDto } from './dto/update-category.dto';
-import { CategoryService } from './services/category.service';
-import { StudentApprovalService } from './services/student-approval.service';
+} from '../decorators/swagger.decorators';
+import { AdminSignupDto } from '../dto/create-admin.dto';
+import { StudentSearchQueryDto } from '../dto/search-student-query.dto';
+import { StudentQueryDto } from '../dto/student-query.dto';
+import { UpdateCategoryDto } from '../dto/update-category.dto';
+import { CategoryService } from '../services/category.service';
+import { StudentApprovalService } from '../services/student-approval.service';
 
 @SwaggerAdminController()
 @Controller('admins')

@@ -8,14 +8,14 @@ import {
   SwaggerGetMe,
   SwaggerDeleteMe,
   SwaggerUpdateMe
-} from './decorators/swagger.decorators';
-import { BookmarksQueryDto } from './dto/bookmarks-query.dto';
-import { DeleteMeDto } from './dto/delete-me.dto';
-import { UpdateMeDto } from './dto/update-me.dto';
-import { MyThreadsQueryDto } from './dto/my-threads-query.dto';
-import { UserContentService } from './services/user-content.service';
-import { UserDetailsService } from './services/user-details.service';
-import { UserService } from './services/user.service';
+} from '../decorators/swagger.decorators';
+import { BookmarksQueryDto } from '../dto/bookmarks-query.dto';
+import { DeleteMeDto } from '../dto/delete-me.dto';
+import { UpdateMeDto } from '../dto/update-me.dto';
+import { MyThreadsQueryDto } from '../dto/my-threads-query.dto';
+import { UserContentService } from '../services/user-content.service';
+import { UserDetailsService } from '../services/user-details.service';
+import { UserService } from '../services/user.service';
 
 @SwaggerUsersController()
 @Controller('users')

@@ -9,12 +9,12 @@ import {
   Query,
   UseGuards
 } from '@nestjs/common';
-import { ThreadService } from './services/thread.service';
-import { CreateThreadDto } from './dto/create-thread.dto';
-import { UpdateThreadDto } from './dto/update-thread.dto';
-import { CommentQueryDto } from './dto/comment-query.dto';
-import { VoteDto } from './dto/vote.dto';
-import { SearchThreadsDto } from './dto/search-threads.dto';
+import { ThreadService } from '../services/thread.service';
+import { CreateThreadDto } from '../dto/create-thread.dto';
+import { UpdateThreadDto } from '../dto/update-thread.dto';
+import { CommentQueryDto } from '../dto/comment-query.dto';
+import { VoteDto } from '../dto/vote.dto';
+import { SearchThreadsDto } from '../dto/search-threads.dto';
 import {
   SwaggerThreads,
   SwaggerCreateThread,
@@ -32,17 +32,17 @@ import {
   SwaggerGetComments,
   SwaggerUpdateComment,
   SwaggerRemoveComment
-} from './decorators/swagger.decorators';
-import { ThreadQueryDto } from './dto/thread-query.dto';
-import { CommentParamsDto, ThreadParamsDto } from './dto/thread-params.dto';
-import { UpdateCommentDto } from './dto/update-comment.dto';
-import { CreateCommentDto } from './dto/create-comment.dto';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+} from '../decorators/swagger.decorators';
+import { ThreadQueryDto } from '../dto/thread-query.dto';
+import { CommentParamsDto, ThreadParamsDto } from '../dto/thread-params.dto';
+import { UpdateCommentDto } from '../dto/update-comment.dto';
+import { CreateCommentDto } from '../dto/create-comment.dto';
+import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { GetUser } from '@/auth/decorators/get-user.decorator';
-import { CommentService } from './services/comment.service';
-import { BookmarkService } from './services/bookmark.service';
-import { VotingService } from './services/voting.service';
-import { FindOneThreadQueryDto } from './dto/find-thread-query.dto';
+import { CommentService } from '../services/comment.service';
+import { BookmarkService } from '../services/bookmark.service';
+import { VotingService } from '../services/voting.service';
+import { FindOneThreadQueryDto } from '../dto/find-thread-query.dto';
 
 @SwaggerThreads()
 @UseGuards(JwtAuthGuard)
