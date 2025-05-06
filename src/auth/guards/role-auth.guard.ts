@@ -37,14 +37,6 @@ export class RolesGuard implements CanActivate {
     const request = context.switchToHttp().getRequest();
     const user = request.user;
 
-    // If user is not signed in, don't allow access
-    if (!user) {
-      throw new UnauthorizedException('Access denied. Please log in.');
-    }
-
-    console.log('user ', user);
-    console.log('requiredRoles ', requiredRoles);
-
     return requiredRoles.includes(user.role);
   }
 }
