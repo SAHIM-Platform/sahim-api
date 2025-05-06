@@ -14,13 +14,16 @@ export interface JwtTokens {
 }
 
 export interface AuthResponse {
-  accessToken: string;
-  refreshToken?: string;
-  user: {
-    id: number;
-    name: string;
-    username?: string;
-    role: string;
-    photoPath?: string;
+  message: string;
+  data: {
+    accessToken: string;
+    refreshToken?: string;
+    user: {
+      id: number;
+      name: string;
+      username?: string;
+      role: string;
+      photoPath?: string;
+    };
   };
 }

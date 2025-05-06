@@ -11,28 +11,28 @@ datasource db {
 }
 
 model User {
-  id            Int               @id @default(autoincrement())
-  email         String?           @unique
-  username      String            @unique
-  password      String?
-  name          String?
-  photoPath    String?           @default("")
-  authMethod    AuthMethod        @default(EMAIL_PASSWORD) 
-  createdAt     DateTime          @default(now())
-  lastLoginAt   DateTime?
-  isActive      Boolean           @default(true)
-  isDeleted    Boolean           @default(false)
-  deletedAt    DateTime?
-  role          UserRole          @default(STUDENT)
-  refreshTokens RefreshToken[]
-  student       Student?          @relation("StudentUser")
-  approvedStudents Student[]        @relation("ApprovalUpdatedByUser")
-  threads       Thread[]
-  threadComments ThreadComment[]
-  threadVotes   ThreadVote[]
-  commentVotes  CommentVote[]
-  bookmarks     BookmarkedThread[]
-  categories      Category[]        @relation("CategoryAuthor")
+  id               Int                @id @default(autoincrement())
+  email            String?            @unique
+  username         String             @unique
+  password         String?
+  name             String?
+  photoPath        String?            @default("")
+  authMethod       AuthMethod         @default(EMAIL_PASSWORD)
+  createdAt        DateTime           @default(now())
+  lastLoginAt      DateTime?
+  isActive         Boolean            @default(true)
+  isDeleted        Boolean            @default(false)
+  deletedAt        DateTime?
+  role             UserRole           @default(STUDENT)
+  refreshTokens    RefreshToken[]
+  student          Student?           @relation("StudentUser")
+  approvedStudents Student[]          @relation("ApprovalUpdatedByUser")
+  threads          Thread[]
+  threadComments   ThreadComment[]
+  threadVotes      ThreadVote[]
+  commentVotes     CommentVote[]
+  bookmarks        BookmarkedThread[]
+  categories       Category[]         @relation("CategoryAuthor")
 }
 
 model RefreshToken {
@@ -49,15 +49,15 @@ model RefreshToken {
 }
 
 model Student {
-  id             Int            @id @default(autoincrement())
-  userId         Int            @unique
-  academicNumber String         @unique
-  department     Department
-  studyLevel     Int
-  approvalStatus ApprovalStatus @default(PENDING)
-  user           User           @relation("StudentUser", fields: [userId], references: [id])
+  id                      Int            @id @default(autoincrement())
+  userId                  Int            @unique
+  academicNumber          String         @unique
+  department              Department
+  studyLevel              Int
+  approvalStatus          ApprovalStatus @default(PENDING)
+  user                    User           @relation("StudentUser", fields: [userId], references: [id])
   approvalUpdatedByUserId Int?
-  approvalUpdatedByUser   User?      @relation("ApprovalUpdatedByUser", fields: [approvalUpdatedByUserId], references: [id], onDelete: SetNull)
+  approvalUpdatedByUser   User?          @relation("ApprovalUpdatedByUser", fields: [approvalUpdatedByUserId], references: [id], onDelete: SetNull)
 }
 
 enum AuthMethod {
@@ -85,49 +85,49 @@ enum ApprovalStatus {
   APPROVED
   REJECTED
 }
-model Category {
-  category_id     Int      @id @default(autoincrement())
-  name            String   @unique
-  threads         Thread[]
 
-  author_user_id  Int?
-  author          User?    @relation("CategoryAuthor",fields: [author_user_id], references: [id], onDelete: SetNull)
+model Category {
+  category_id Int      @id @default(autoincrement())
+  name        String   @unique
+  threads     Thread[]
+
+  author_user_id Int?
+  author         User? @relation("CategoryAuthor", fields: [author_user_id], references: [id], onDelete: SetNull)
 }
 
 model Thread {
-  thread_id      Int               @id @default(autoincrement())
+  thread_id      Int                @id @default(autoincrement())
   category_id    Int
-  category       Category          @relation(fields: [category_id], references: [category_id])
+  category       Category           @relation(fields: [category_id], references: [category_id])
   author_user_id Int
-  author         User              @relation(fields: [author_user_id], references: [id])
+  author         User               @relation(fields: [author_user_id], references: [id])
   title          String
   content        String
-  thumbnail_url  String?          
-  created_at     DateTime          @default(now())
+  thumbnail_url  String?
+  created_at     DateTime           @default(now())
   comments       ThreadComment[]
   votes          ThreadVote[]
   bookmarks      BookmarkedThread[]
 }
 
-
 model ThreadComment {
-  comment_id     Int            @id @default(autoincrement())
+  comment_id     Int           @id @default(autoincrement())
   thread_id      Int
-  thread         Thread         @relation(fields: [thread_id], references: [thread_id], onDelete: Cascade)
+  thread         Thread        @relation(fields: [thread_id], references: [thread_id], onDelete: Cascade)
   author_user_id Int
-  author         User           @relation(fields: [author_user_id], references: [id])
+  author         User          @relation(fields: [author_user_id], references: [id])
   content        String
-  created_at     DateTime       @default(now())
+  created_at     DateTime      @default(now())
   votes          CommentVote[]
 }
 
 model ThreadVote {
   thread_id     Int
-  thread        Thread @relation(fields: [thread_id], references: [thread_id], onDelete: Cascade)
+  thread        Thread   @relation(fields: [thread_id], references: [thread_id], onDelete: Cascade)
   voter_user_id Int
-  user          User   @relation(fields: [voter_user_id], references: [id])
+  user          User     @relation(fields: [voter_user_id], references: [id])
   vote_type     VoteType
-  
+
   @@id([thread_id, voter_user_id])
 }
 
@@ -137,7 +137,7 @@ model CommentVote {
   voter_user_id Int
   user          User          @relation(fields: [voter_user_id], references: [id])
   vote_type     VoteType
-  
+
   @@id([comment_id, voter_user_id])
 }
 
@@ -146,7 +146,7 @@ model BookmarkedThread {
   user      User   @relation(fields: [user_id], references: [id])
   thread_id Int
   thread    Thread @relation(fields: [thread_id], references: [thread_id], onDelete: Cascade)
-  
+
   @@id([user_id, thread_id])
 }
 

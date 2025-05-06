@@ -1,4 +1,4 @@
-import { IsOptional, IsEnum, IsInt, Min, Max } from 'class-validator';
+import { IsOptional, IsEnum, IsInt, Min, Max, IsString } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApprovalStatus } from '@prisma/client';
 import { ApiProperty } from '@nestjs/swagger';
@@ -38,4 +38,12 @@ export class StudentQueryDto {
   @Min(1)
   @Max(50)
   limit?: number = 10;
+
+  @ApiProperty({
+    description: 'Search term (name or academic number)',
+    required: false
+  })
+  @IsOptional()
+  @IsString()
+  search: string;
 }

@@ -1,4 +1,0 @@
-@port = {{$dotenv API_PORT}}
-@baseUrl = http://localhost:{{port}}
-
-GET {{baseUrl}}

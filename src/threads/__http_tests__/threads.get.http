@@ -1,12 +1,13 @@
 @port = {{$dotenv API_PORT}}
 @baseUrl = http://localhost:{{port}}
-@authToken = eyJhbGciOiJQUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjE0LCJ0b2tlblR5cGUiOiJhY2Nlc3MiLCJyb2xlIjoiU1VQRVJfQURNSU4iLCJpYXQiOjE3NDM3MTk0ODEsImV4cCI6MTc0MzcyMDM4MX0.IhPXO59E9ytHcI5_hOvBmAEmiQ3JadxpqdQu4ybW9XhTSVE2JSNtBro02qpjQDrPLHhhkmXERpir6UCLgFwb7vjuG3_Ej39sWySm3y4_IZGJEKCzhr6kqn0T9yUURLO8kqgJvfdLXxEGDp20dh2yjiWXjFhPStMOXLNdg89LzakXh_lM9P7VEjx8-4qtp2-y-pE8KWcSpiHB5VrxNFPqfYSm9HvDprpy87HKsK8QmnDKtGklEp8ul4_DxVwnEMHwqoqCuo4vPjqdWUCGVRyIBfYaI1LH9YbJccoCbVL492qNxpKkH_P9tjE0yA4GYawIzJzx049emeuhci9gxBKtvIcaHVA3Ggil-43taVKBJDZSnmJ0rgSKgQvHSPrCGAIRda3bAU--yXwpnik7jWHkMBNX97NrIasPmYP-4DQTA7AYtP8Jbwr2whwio1dwKMJNKrnKbRv_WidKW3MSFyHrgEoIjK4tN3tR1byUOLXrRPjMUgD6_KMqb9WhkTmWQLeW2MYCSl_mPKrPFmuYEcIf3hpL5LrDHuhhyWpPPiMclkKXsQqRMk0oZBLuAeAhcMpJOuLrKmTtGtwuLfs-0Iy8iQ4YQr4Mgd626Fj7ChX7dgfqUJ_cWnuee-3xMdd_ymqPMoPmHdUq_sBI7Y5k2p9MRGfKkryYecTaDnbgLs7R6k0
-@threadId = 3
+@authToken = eyJhbGciOiJQUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsInRva2VuVHlwZSI6ImFjY2VzcyIsInJvbGUiOiJTVVBFUl9BRE1JTiIsImlhdCI6MTc0NjQ4ODIzMywiZXhwIjoxNzQ2NDg5MTMzfQ.jr8mSA1d7974EXJTR5zW1_8PASP-279m6GLj1-ePg80TLuJqngt-HVHAulOEg-IA7KJ6zSYeNscTzKU6_SKD8X-mUJThdJ5RKDISJZhR7R-Fwqog12jcODVtFJ2KJm1kBEECIHWVZYwKGUgmbx-Ih4qoougDQ6_K9BnN_qZG2g8ZoQIOGx7tIICFMgv0dghqyvZChl1uR4m1MXV0RjkPQueyHGirvaXtTnwc8Z3-FfiyMWlBrsan3SH4n_RIhhNCYCyqRKVbqr9p67GcNtUsTuY0yt_dH1FZbem-uIxi6daNxsug2d9LHLI6DyeX24OciSq9-yfaEaPr-qkXpWa-YeFjNI2UQQOBZ4aIoPpN4KYvvDPTJmjINK6xHml0P8x7JCdYbFOmz6hoeGtemTjZPtUCg5_4cFR-hoEagKxYMtQdT5RwV-ke-Bm6bIpDR-uSLA0vcVu2B5F-73pZfSPZpO6qSoap4XSO7fM6OEawJyRqMuoRRc8cc08RQ2Uw35_QggCzVHOwDNQoDmlZCfMsn81idL39dkJby6GOGCMBYELsngwV29FbeB6HVhVttaRZxJ1utmaqL5sM0dV6RbQkT4BZ4d9aBdmZSEi47Dv__0Csw5wv2leH7IICJ2H2a-iQbdI0HLwyUTu4OugP31w1-Q8A1PCvbpKwBE7UvO1QV3s
+@threadId = 1
 
 ### Get thread with default parameters
 GET {{baseUrl}}/threads/{{threadId}}
 Authorization: Bearer {{authToken}}
 Accept: application/json
+
 
 ### Get thread without comments
 GET {{baseUrl}}/threads/{{threadId}}?includeComments=false
@@ -19,7 +20,8 @@ Authorization: Bearer {{authToken}}
 Accept: application/json
 
 ### Get thread without votes
-GET {{baseUrl}}/threads/{{threadId}}?includeVotes=false
+GET {{baseU
+rl}}/threads/{{threadId}}?includeVotes=false
 Authorization: Bearer {{authToken}}
 Accept: application/json
 
