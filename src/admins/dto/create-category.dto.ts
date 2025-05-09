@@ -1,26 +1,26 @@
 import { IsString, IsNotEmpty, MaxLength, MinLength, Matches } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { Transform } from 'class-transformer';
-import * as sanitizeHtml from 'sanitize-html';
 
 export class CreateCategoryDto {
   @ApiProperty({
-    description: 'Category name',
+    description: 'Category name. Letters, numbers, spaces, dots, hyphens. Must include ≥2 letters. No leading number/dot or trailing hyphen.',
     example: 'Programming',
     minLength: 2,
     maxLength: 50,
-    pattern: '^(?=.*[A-Za-z\u0600-\u06FF])[A-Za-z\u0600-\u06FF ]+$'
+    pattern: '^(?=.{2,50}$)(?![0-9\\.])(?!-)(?!.*--)(?=.*[A-Za-z].*[A-Za-z])[A-Za-z0-9 .-]+(?<!-)$'
   })
   @IsString({ message: 'Category name must be a string.' })
   @IsNotEmpty({ message: 'Category name cannot be empty.' })
   @MinLength(2, { message: 'Category name must be at least $constraint1 characters long.' })
   @MaxLength(50, { message: 'Category name cannot be longer than $constraint1 characters.' })
-  @Matches(/^(?=.*[A-Za-z\u0600-\u06FF])[A-Za-z\u0600-\u06FF ]+$/, {
-    message:
-      'Category name must contain at least one letter (English or Arabic) and only letters and spaces.',
+  @Matches(/^(?=.{2,50}$)(?![0-9\.])(?!-)(?!.*--)(?=.*[A-Za-z].*[A-Za-z])[A-Za-z0-9 .-]+(?<!-)$/, {
+    message: [
+      'Allowed chars: letters, numbers, spaces, dots (.), hyphens (-).',
+      'Must include at least two letters.',
+      'Cannot start with a digit or dot.',
+      'Cannot start or end with a hyphen.',
+      'Cannot contain consecutive hyphens.',
+    ].join(' '),
   })
-  @Transform(({ value }) =>
-    sanitizeHtml(value, { allowedTags: [], allowedAttributes: {} }).trim()
-  )
   name: string;
 }
