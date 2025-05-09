@@ -31,8 +31,8 @@ export class UserContentService {
       AND: [
         ...(search ? [{
           OR: [
-            { title: { contains: search, mode: Prisma.QueryMode.insensitive } },
-            { content: { contains: search, mode: Prisma.QueryMode.insensitive } },
+            { title: { search: search, mode: Prisma.QueryMode.insensitive } },
+            { content: { search: search, mode: Prisma.QueryMode.insensitive } },
           ],
         }] : []),
         ...(category_id ? [{ category_id }] : []),

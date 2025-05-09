@@ -51,8 +51,8 @@ export class ThreadService {
       AND: [
         {
           OR: [
-            { title: { contains: query, mode: 'insensitive' } },
-            { content: { contains: query, mode: 'insensitive' } },
+            { title: { search: query, mode: 'insensitive' } },
+            { content: { search: query, mode: 'insensitive' } },
           ],
         },
         ...(category_id ? [{ category_id }] : []),

@@ -117,8 +117,8 @@ export class StudentApprovalService {
       if (search) {
         andConditions.push({
           OR: [
-            { name: { contains: search, mode: 'insensitive' } },
-            { student: { academicNumber: { contains: search, mode: 'insensitive' } } },
+            { name: { search: search, mode: 'insensitive' } },
+            { student: { academicNumber: { search: search, mode: 'insensitive' } } },
           ]
         });
       }
