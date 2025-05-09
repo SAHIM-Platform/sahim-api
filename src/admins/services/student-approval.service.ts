@@ -107,7 +107,7 @@ export class StudentApprovalService {
     const { page = 1, limit = 10, status, search } = query;
     const skip = (page - 1) * limit;
   
-    const where: any = { role: UserRole.STUDENT };
+    const where: any = { role: UserRole.STUDENT, isDeleted: false };
     const andConditions: Array<Record<string, any>> = [];
   
     if (status) {

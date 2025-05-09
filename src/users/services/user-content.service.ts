@@ -46,7 +46,7 @@ export class UserContentService {
         take: limit,
         orderBy,
         include: {
-          author: { select: { id: true, username: true, name: true, photoPath: true, role: true, student: { select: { department: true }} } },
+          author: { select: { id: true, username: true, name: true, photoPath: true, role: true, student: { select: { department: true }}, isDeleted: true } },
           category: true,
           _count: { select: { comments: true, votes: true } },
           votes: { select: { vote_type: true, voter_user_id: true } },
@@ -118,7 +118,7 @@ export class UserContentService {
         take: limit,
         orderBy,
         include: {
-          author: { select: { id: true, username: true, name: true, photoPath: true, role: true, student: { select: { department: true }} } },
+          author: { select: { id: true, username: true, name: true, photoPath: true, role: true, student: { select: { department: true }}, isDeleted: true } },
           category: true,
           _count: { select: { comments: true, votes: true } },
           votes: { select: { vote_type: true, voter_user_id: true } },

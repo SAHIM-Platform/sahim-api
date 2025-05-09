@@ -28,7 +28,7 @@ export function buildThreadIncludeOptions(
 ): Prisma.ThreadInclude {
     
   return {
-    author: { select: { id: true, username: true, role: true, student: { select: { department: true }} } },
+    author: { select: { id: true, username: true, role: true, student: { select: { department: true }}, isDeleted: true } },
     category: true,
     votes: includeVotes 
       ? { select: { vote_type: true, voter_user_id: true } } 
