@@ -9,6 +9,7 @@ import { UserNotFoundException } from '@/common/exceptions/user-not-found.except
 import { InvalidCredentialsException } from '@/common/exceptions/invalid-credentials.exception';
 import { ApiResponse } from '@/common/interfaces/api-response.interface';
 import { UsernameTakenException } from '@/auth/exceptions/username-taken.exception';
+import { SuperAdminModificationForbiddenException } from '../exceptions/super-admin-modification-forbidden.exception';
 
 @Injectable()
 export class UserService {
@@ -16,67 +17,67 @@ export class UserService {
     private readonly prisma: PrismaService,
   ) { }
 
- /**
+  /**
    * Finds a user by their email address.
    * @param email - The email address to search for.
    * @returns The user if found, otherwise null.
    */
-    async findUserByEmail(email: string) {
-        return await this.prisma.user.findUnique({
-          where: { email },
-          include: { student: true }
-        });
-      }
+  async findUserByEmail(email: string) {
+      return await this.prisma.user.findUnique({
+        where: { email },
+        include: { student: true }
+      });
+    }
+  
+    async findUserByUsername(username: string) {
+      return await this.prisma.user.findUnique({
+        where: { username }
+      })
+    }
     
-      async findUserByUsername(username: string) {
-        return await this.prisma.user.findUnique({
-          where: { username }
-        })
-      }
-    
-      /**
-       * Finds a user by their email address or username.
-       * @param email - The email address to search for.
-       * @param username - The username to search for.
-       * @returns The user if found, otherwise null.
-       */
-      async findUserByEmailOrUsername(email: string, username: string) {
-        return await this.prisma.user.findFirst({
-          where: {
-            OR: [
-              { email },
-              { username }
-            ],
-            AND: {
-              isDeleted: false
-            }
-          },
-        });
-      }
-    
-      /**
-       * Finds a user by their ID.
-       * @param userId - The ID of the user to find.
-       * @returns The user if found, otherwise null.
-       */
-      async findUserById(userId: number) {
-        return await this.prisma.user.findFirst({
-          where: {
-            id: userId,
-            isDeleted: false
-          },
-        });
-      }
-    
-      /**
-       * Removes sensitive information from a user object.
-       * @param user - The user object to sanitize.
-       * @returns A new object with sensitive fields removed.
-       */
-      sanitizeUser(user: any): Omit<any, 'password'> {
-        const { password, ...sanitizedUser } = user;
-        return sanitizedUser;
-      }
+  /**
+   * Finds a user by their email address or username.
+   * @param email - The email address to search for.
+   * @param username - The username to search for.
+   * @returns The user if found, otherwise null.
+   */
+  async findUserByEmailOrUsername(email: string, username: string) {
+    return await this.prisma.user.findFirst({
+      where: {
+        OR: [
+          { email },
+          { username }
+        ],
+        AND: {
+          isDeleted: false
+        }
+      },
+    });
+  }
+
+  /**
+   * Finds a user by their ID.
+   * @param userId - The ID of the user to find.
+   * @returns The user if found, otherwise null.
+   */
+  async findUserById(userId: number) {
+    return await this.prisma.user.findFirst({
+      where: {
+        id: userId,
+        isDeleted: false
+      },
+    });
+  }
+
+  /**
+   * Removes sensitive information from a user object.
+   * @param user - The user object to sanitize.
+   * @returns A new object with sensitive fields removed.
+   */
+  sanitizeUser(user: any): Omit<any, 'password'> {
+    const { password, ...sanitizedUser } = user;
+    return sanitizedUser;
+  }
     
 
   /**
@@ -100,7 +101,7 @@ export class UserService {
 
     // Prevent deletion of super admin accounts
     if (user.role === UserRole.SUPER_ADMIN) {
-      throw new ForbiddenException('Super admin accounts cannot be deleted');
+      throw new SuperAdminModificationForbiddenException();
     }
 
     // Validate the password
@@ -158,6 +159,11 @@ export class UserService {
     // Check if user is deleted
     if (!user || isUserDeleted(user)) {
       throw new DeletedUserException();
+    }
+
+    // Prevent modification of super admin accounts
+    if (user.role === UserRole.SUPER_ADMIN) {
+      throw new SuperAdminModificationForbiddenException();
     }
 
     // Check if username is taken (if provided)

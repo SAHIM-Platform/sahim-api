@@ -11,24 +11,30 @@ import {
   export class TransformInterceptor<T> implements NestInterceptor<T, any> {
     intercept(context: ExecutionContext, next: CallHandler<T>): Observable<any> {
       return next.handle().pipe(
-        map((response) => {
-          const statusCode = context.switchToHttp().getResponse().statusCode;
-  
+        map((response) => {  
           // If the response already follows a standard format, just return it
           if (
             response &&
             typeof response === 'object' &&
-            ('statusCode' in response || 'message' in response || 'data' in response)
+            ('message' in response && 'data' in response)
           ) {
-            return {
-              statusCode,
-              ...response,
-            };
+            return response;
           }
+
+          // If there's a top-level meta, preserve it
+          if (response && 
+            typeof response === 'object' && 
+            'meta' in response) {
+              const { meta, ...rest } = response as any;
+              return {
+                message: 'Request successful',
+                data: rest,
+                meta,
+              };
+            }
   
           // Otherwise, wrap it in the default format
           return {
-            statusCode,
             message: 'Request successful',
             data: response,
           };
