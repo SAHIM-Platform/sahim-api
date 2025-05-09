@@ -39,7 +39,11 @@ export class CommentService {
             author_user_id: userId,
           },
           include: {
+<<<<<<< HEAD
             author: { select: { id: true, username: true, name: true, photoPath: true, isDeleted: true  } },
+=======
+            author: { select: { id: true, username: true, name: true, photoPath: true, role: true, student: { select: { department: true }}, isDeleted: true } },
+>>>>>>> main
             votes: { select: { vote_type: true, voter_user_id: true } },
           },
         });
@@ -86,7 +90,11 @@ export class CommentService {
           where: { comment_id: commentId },
           data: updateCommentDto,
           include: {
+<<<<<<< HEAD
             author: { select: { id: true, username: true, name: true, photoPath: true, isDeleted: true  } },
+=======
+            author: { select: { id: true, username: true, name: true, photoPath: true, role: true, student: { select: { department: true }}, isDeleted: true } },
+>>>>>>> main
             votes: { select: { vote_type: true, voter_user_id: true } },
           },
         });
@@ -164,7 +172,7 @@ export class CommentService {
             take: limit,
             orderBy,
             include: {
-              author: { select: { id: true, username: true, name: true, photoPath: true, isDeleted: true  } },
+              author: { select: { id: true, username: true, name: true, photoPath: true, role: true, student: { select: { department: true }}, isDeleted: true } },
               votes: { select: { vote_type: true, voter_user_id: true } },
             },
           }),
