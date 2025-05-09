@@ -120,7 +120,7 @@ export class ThreadService {
         author_user_id: userId,
       },
       include: {
-        author: { select: { id: true, username: true, name: true, photoPath: true } },
+        author: { select: { id: true, username: true, name: true, photoPath: true, role: true, student: { select: { department: true }} } },
         category: true,
         _count: { select: { comments: true, votes: true } },
         votes: { select: { vote_type: true, voter_user_id: true } },
@@ -156,7 +156,7 @@ export class ThreadService {
         take: limit,
         orderBy,
         include: {
-          author: { select: { id: true, username: true, name: true, photoPath: true } },
+          author: { select: { id: true, username: true, name: true, photoPath: true, role: true, student: { select: { department: true }} } },
           category: true,
           _count: { select: { comments: true, votes: true } },
           votes: { select: { vote_type: true, voter_user_id: true } },
@@ -243,7 +243,7 @@ export class ThreadService {
       where: { thread_id: id },
       data: updateThreadDto,
       include: {
-        author: { select: { id: true, username: true, name: true, photoPath: true } },
+        author: { select: { id: true, username: true, name: true, photoPath: true, role: true, student: { select: { department: true }} } },
         category: true,
         votes: { select: { vote_type: true, voter_user_id: true } },
       },
