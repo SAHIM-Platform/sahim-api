@@ -26,13 +26,15 @@ export class UserContentService {
       created_at: sort === SortType.LATEST ? 'desc' as const : 'asc' as const,
     };
 
+    const formattedSearch = search?.trim().split(/\s+/).join(' & ');
+
     const where: Prisma.ThreadWhereInput = {
       author_user_id: userId,
       AND: [
         ...(search ? [{
           OR: [
-            { title: { search: search, mode: Prisma.QueryMode.insensitive } },
-            { content: { search: search, mode: Prisma.QueryMode.insensitive } },
+            { title: { search: formattedSearch, mode: Prisma.QueryMode.insensitive } },
+            { content: { search: formattedSearch, mode: Prisma.QueryMode.insensitive } },
           ],
         }] : []),
         ...(category_id ? [{ category_id }] : []),

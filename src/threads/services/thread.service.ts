@@ -46,13 +46,17 @@ export class ThreadService {
     const orderBy = {
       created_at: sort === SortType.LATEST ? 'desc' as const : 'asc' as const,
     };
+    
+    // Ensure query is trimmed and split by whitespace
+    // to handle multiple words and join them with '&' for full-text search
+    const formattedQuery = query.trim().split(/\s+/).join(' & ');
   
     const where: Prisma.ThreadWhereInput = {
       AND: [
         {
           OR: [
-            { title: { search: query, mode: 'insensitive' } },
-            { content: { search: query, mode: 'insensitive' } },
+            { title: { search: formattedQuery, mode: 'insensitive' } },
+            { content: { search: formattedQuery, mode: 'insensitive' } },
           ],
         },
         ...(category_id ? [{ category_id }] : []),
