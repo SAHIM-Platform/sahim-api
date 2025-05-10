@@ -1,15 +1,10 @@
-import { SignupAuthDto } from '@/auth/dto/signup-auth.dto';
-import { BadRequestException, ForbiddenException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { ForbiddenException, Injectable} from '@nestjs/common';
 import { PrismaService } from 'prisma/prisma.service';
-import { ThreadService } from '@/threads/services/thread.service';
-import { formatVotes, isUserDeleted } from '@/threads/utils/threads.utils';
-import { BookmarksQueryDto } from '../dto/bookmarks-query.dto';
-import { SortType } from '@/threads/enum/sort-type.enum';
+import { isUserDeleted } from '@/threads/utils/threads.utils';
 import * as bcrypt from 'bcryptjs';
 import { UpdateMeDto } from '../dto/update-me.dto';
-import { Prisma, UserRole } from '@prisma/client';
+import { UserRole } from '@prisma/client';
 import { DeletedUserException } from '../exceptions/deleted-user.exception';
-import { MyThreadsQueryDto } from '../dto/my-threads-query.dto';
 import { UserNotFoundException } from '@/common/exceptions/user-not-found.exception';
 import { InvalidCredentialsException } from '@/common/exceptions/invalid-credentials.exception';
 import { ApiResponse } from '@/common/interfaces/api-response.interface';
@@ -20,7 +15,6 @@ import { SuperAdminModificationForbiddenException } from '../exceptions/super-ad
 export class UserService {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly threadService: ThreadService,
   ) { }
 
   /**
