@@ -55,8 +55,8 @@ export class ThreadService {
       AND: [
         {
           OR: [
-            { title: { search: formattedQuery, mode: 'insensitive' } },
-            { content: { search: formattedQuery, mode: 'insensitive' } },
+            { title: { search: formattedQuery, mode: 'insensitive' as Prisma.QueryMode } },
+            { content: { search: formattedQuery, mode: 'insensitive' as Prisma.QueryMode } },
           ],
         },
         ...(category_id ? [{ category_id }] : []),
@@ -145,13 +145,34 @@ export class ThreadService {
    * @param query - Query parameters including sort type, page, and limit
    * @returns Paginated list of threads with metadata
    */
-  async findAll({ sort = SortType.LATEST, page = 1, limit = 10 , category_id}: ThreadQueryDto, userId?: number): Promise<ApiResponse<Thread[]>> {
+  async findAll({search, sort = SortType.LATEST, page = 1, limit = 10 , category_id}: ThreadQueryDto, userId?: number): Promise<ApiResponse<Thread[]>> {
     const orderBy = {
       created_at: sort === SortType.LATEST ? 'desc' as const : 'asc' as const,
     };
 
-    // Filter by category if provided
-    const where = category_id ? { category_id } : {};
+    // Start with base conditions
+    const andConditions: Prisma.ThreadWhereInput[] = [];
+
+    // Only add full-text search if the client provided a non-empty search string
+    if (search?.trim()) {
+      const formattedSearch = search.split(/\s+/).join(' & ');
+      andConditions.push({
+        OR: [
+          { title: { search: formattedSearch, mode: 'insensitive' } },
+          { content: { search: formattedSearch, mode: 'insensitive' } },
+        ],
+      });
+    }
+
+    // Category filter if present
+    if (category_id) {
+      andConditions.push({ category_id });
+    }
+
+    // Combine into the final where; if no conditions, use undefined (match all)
+    const where = andConditions.length > 0
+      ? { AND: andConditions }
+      : {};
 
     const [threads, total] = await Promise.all([
       this.prisma.thread.findMany({
