@@ -3,11 +3,11 @@ import { PassportStrategy } from '@nestjs/passport';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtPayload } from '../interfaces/jwt-payload.interface';
 import { jwtConstants } from '../utils/constants';
-import { UsersService } from '@/users/users.service';
+import { UserService } from '@/users/services/user.service';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
-  constructor(private readonly usersService: UsersService) {
+  constructor(private readonly userService: UserService) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
@@ -27,7 +27,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       throw new UnauthorizedException('Invalid or missing token type');
     }
 
-    const user = await this.usersService.findUserById(payload.sub);
+    const user = await this.userService.findUserById(payload.sub);
     if (!user) {
       throw new UnauthorizedException('User not found');
     }

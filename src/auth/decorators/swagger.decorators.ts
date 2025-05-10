@@ -9,6 +9,7 @@ import {
 } from '@nestjs/swagger';
 import { StudentSignUpDto } from '../dto/student-signup.dto';
 import { SigninAuthDto } from '../dto/signin-auth.dto';
+import { stat } from 'fs';
 
 export function SwaggerAuth() {
   return applyDecorators(
@@ -25,14 +26,17 @@ export function SwaggerSignup() {
       description: 'User registered successfully',
       schema: {
         example: {
+          statusCode: 201,
           message: 'User registered successfully',
-          accessToken: 'eyJhbGciOi...',
-          user: {
-            id: 1,
-            email: 'student@example.com',
-            username: 'student1',
-            name: 'Student Name',
-            role: 'STUDENT'
+          data: {
+            accessToken: 'eyJhbGciOi...',
+            user: {
+              id: 1,
+              email: 'user@example.com',
+              username: 'username',
+              name: 'User Name',
+              role: 'STUDENT'
+            }
           }
         }
       }
@@ -50,14 +54,17 @@ export function SwaggerSignin() {
       description: 'Sign in successful',
       schema: {
         example: {
+          statusCode: 200,
           message: 'Sign in successful',
-          accessToken: 'eyJhbGciOi...',
-          user: {
-            id: 1,
-            email: 'user@example.com',
-            username: 'username',
-            name: 'User Name',
-            role: 'STUDENT'
+          data: {
+            accessToken: 'eyJhbGciOi...',
+            user: {
+              id: 1,
+              email: 'user@example.com',
+              username: 'username',
+              name: 'User Name',
+              role: 'STUDENT'
+            }
           }
         }
       }
@@ -75,13 +82,17 @@ export function SwaggerRefresh() {
       description: 'Access token refreshed successfully',
       schema: {
         example: {
+          statusCode: 200,
           message: 'Access token refreshed successfully',
-          accessToken: 'eyJhbGciOi...', 
-          user: {
-            id: 1,
-            name: 'John Doe',
-            username: 'john_doe',
-            role: 'admin'
+          data: {
+            accessToken: 'eyJhbGciOi...',
+            user: {
+              id: 1,
+              email: 'user@example.com',
+              username: 'username',
+              name: 'User Name',
+              role: 'STUDENT'
+            }
           }
         }
       }
@@ -100,6 +111,7 @@ export function SwaggerSignout() {
       description: 'Sign out successful',
       schema: {
         example: {
+          statusCode: 200,
           message: 'Sign out successful'
         }
       }

@@ -4,6 +4,7 @@ import * as cookieParser from 'cookie-parser';
 import { setupCors } from './config/cors/cors.config';
 import { ValidationPipe } from '@nestjs/common';
 import { setupSwagger } from './config/swagger.config';
+import { TransformInterceptor } from './common/interceptors/transform.interceptor';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -20,6 +21,8 @@ async function bootstrap() {
       stopAtFirstError: false, // Allows all validation errors to be shown, not just the first one
     }),
   );
+
+  app.useGlobalInterceptors(new TransformInterceptor());
 
   if (process.env.NODE_ENV === 'development') {
     setupSwagger(app);

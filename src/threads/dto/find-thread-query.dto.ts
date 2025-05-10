@@ -1,7 +1,5 @@
-// find-one-thread-query.dto.ts
 import { IsBoolean, IsNumber, IsOptional } from 'class-validator';
-import { Transform } from 'class-transformer';
-import { Type } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class FindOneThreadQueryDto {
@@ -11,7 +9,7 @@ export class FindOneThreadQueryDto {
     required: false
   })
   @IsOptional()
-  @Transform(({ value }) => value === 'true')
+  @Type(() => Boolean)
   @IsBoolean()
   includeComments?: boolean = true;
 
@@ -41,7 +39,7 @@ export class FindOneThreadQueryDto {
     required: false
   })
   @IsOptional()
-  @Transform(({ value }) => value === 'true')
+  @Type(() => Boolean)
   @IsBoolean()
   includeVotes?: boolean = true;
 }

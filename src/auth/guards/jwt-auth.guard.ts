@@ -27,15 +27,8 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
   }
 
   handleRequest(err: Error | null, user: User): any {
-    if (err) {
-      throw new UnauthorizedException(
-        'Authentication error. Please try again.',
-      );
-    }
-    if (!user) {
-      throw new ForbiddenException(
-        'Access denied. Valid authentication required.',
-      );
+    if (err || !user) {
+      throw new UnauthorizedException('Authentication required');
     }
     return user;
   }

@@ -1,5 +1,5 @@
 import { Prisma, User, VoteType } from '@prisma/client';
-import { FormattedVote } from '../types/threads.types';
+import { FormattedVote, ThreadWithDetails } from '../types/threads.types';
 
 export function formatVotes(
   votes: { vote_type: VoteType; voter_user_id: number }[],
@@ -28,7 +28,7 @@ export function buildThreadIncludeOptions(
 ): Prisma.ThreadInclude {
     
   return {
-    author: { select: { id: true, username: true, name: true } },
+    author: { select: { id: true, username: true, name: true, photoPath: true, role: true, student: { select: { department: true }}, isDeleted: true } },
     category: true,
     votes: includeVotes 
       ? { select: { vote_type: true, voter_user_id: true } } 
@@ -38,7 +38,7 @@ export function buildThreadIncludeOptions(
       take: limit,
       orderBy: { created_at: 'asc' },
       include: {
-        author: { select: { id: true, username: true } },
+        author: { select: { id: true, username: true, name: true, photoPath: true, role: true, student: { select: { department: true }} } },
         ...(includeVotes && { 
           votes: { select: { vote_type: true, voter_user_id: true } } 
         }),
@@ -56,3 +56,37 @@ export function buildThreadIncludeOptions(
 export function isUserDeleted(user: User): boolean {
   return user.isDeleted || user.name == null || user.password == null || user.name.trim() === '' || user.password.trim() === '';
 }
+
+
+export function formatThreadResponse(
+  thread: any,
+  userId?: number,
+  includeComments?: boolean,
+  includeVotes?: boolean
+
+): ThreadWithDetails {
+  const { bookmarks, ...threadWithoutBookmarks } = thread;
+
+  const baseResponse: ThreadWithDetails = {
+    ...threadWithoutBookmarks,
+    ...(includeVotes && {
+      votes: formatVotes(thread.votes, userId)
+    }),
+    bookmarked: !!(thread.bookmarks?.some((b: any) => b.user_id === userId)),
+  };
+
+  if (includeComments) {
+    baseResponse.comments = thread.comments
+    .sort((a: any, b: any) => b.created_at.getTime() - a.created_at.getTime())
+    .map((comment: any) => ({
+      ...comment,
+      ...(includeVotes && {
+        votes: formatVotes(comment.votes, userId)
+      }),
+    }));
+
+  }
+
+  return baseResponse;
+}
+
