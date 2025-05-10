@@ -4,8 +4,8 @@ import { SortType } from '@/threads/enum/sort-type.enum';
 import { formatVotes } from '@/threads/utils/threads.utils';
 import { BookmarksQueryDto } from '../dto/bookmarks-query.dto';
 import { Prisma, Thread } from '@prisma/client';
-import { MyThreadsQueryDto } from '../dto/my-threads-query.dto';
 import { ApiResponse } from '@/common/interfaces/api-response.interface';
+import { ThreadQueryDto } from '@/threads/dto/thread-query.dto';
 
 
 @Injectable()
@@ -19,7 +19,7 @@ export class UserContentService {
    * @param query - Query parameters for pagination, sorting, and searching
    * @returns Paginated list of threads with the a similar structure to GET /threads
    */
-  async getUserThreads(userId: number, query: MyThreadsQueryDto): Promise<ApiResponse<Thread[]>> {
+  async getUserThreads(userId: number, query: ThreadQueryDto): Promise<ApiResponse<Thread[]>> {
     const { sort = SortType.LATEST, page = 1, limit = 10, search, category_id } = query;
 
     const orderBy = {
