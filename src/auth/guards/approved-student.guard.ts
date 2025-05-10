@@ -19,6 +19,12 @@ export class ApprovedStudentGuard implements CanActivate {
     const userId = request.user?.sub; // Assuming the user ID is stored in the JWT payload
     const userRole = request.user?.role; // Assuming the role is in the JWT payload
 
+    // allow to /auth/signout
+    const url = request.url;
+    if (url === '/auth/signout' || url.startsWith('/auth/signout?')) {
+      return true;
+    }
+
     // If the user is an admin or the super admin, bypass the check
     if ([UserRole.ADMIN, UserRole.SUPER_ADMIN].includes(userRole)) {
       return true;
