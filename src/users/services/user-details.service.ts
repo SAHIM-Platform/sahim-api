@@ -5,11 +5,17 @@ import { UserNotFoundException } from '@/common/exceptions/user-not-found.except
 import { UserRole } from '@prisma/client';
 import { UserDetailsData } from '../inerfaces/user-details-data.interface';
 import { ApiResponse } from '@/common/interfaces/api-response.interface';
+import { UserContentService } from './user-content.service';
+import { PublicProfileResponse } from '../inerfaces/public-profile-response.interface';
+import {  ProfileQueryDto } from '../dto/profile-query.dto';
 
 
 @Injectable()
 export class UserDetailsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly userContentService: UserContentService,
+  ) {}
 
   /**
    * Retrieves the details of the currently authenticated user,
@@ -66,6 +72,47 @@ export class UserDetailsService {
   }
 
   /**
+   * Fetches a user’s public profile by username.
+   * If includeThreads=true, includes a paginated, filterable list of their threads.
+   */
+  async getPublicProfile(username: string, {includeThreads, ...threadQuery}: ProfileQueryDto): Promise<PublicProfileResponse> {
+    const user = await this.prisma.user.findUnique({
+      where: { username },
+      include: { student: { select: { department: true } } },
+    });
+    if (!user || user.isDeleted) {
+      throw new UserNotFoundException();
+    }
+
+    const profileData: PublicProfileResponse[ 'data' ] = {
+      id:         user.id,
+      name:       user.name!,
+      username:   user.username,
+      role:       user.role,
+      department: user.student?.department,
+    };
+
+    if (includeThreads) {
+      const { data: threads, meta: threadsMeta } = await this.userContentService.getUserThreads(user.id, threadQuery);
+
+      return {
+        message: 'Profile retrieved successfully',
+        data: {
+          ...profileData,
+          threads,
+          threadsMeta,
+        },
+      };
+    }
+
+    return {
+      message: 'Profile retrieved successfully',
+      data: profileData,
+    };
+  }
+
+
+  /**
    * Gets the default photo path based on user role
    * @param role - The user's role
    * @returns {string} The default photo path for the role
@@ -81,4 +128,6 @@ export class UserDetailsService {
         return '/public/avatars/defaults/user.webp';
     }
   }
+  
+
 }
