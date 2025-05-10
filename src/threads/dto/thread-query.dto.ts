@@ -1,5 +1,5 @@
-import { IsOptional, IsIn, IsInt, Min, Max } from 'class-validator';
-import { Type } from 'class-transformer';
+import { IsOptional, IsIn, IsInt, Min, Max, IsNotEmpty, IsString, MaxLength } from 'class-validator';
+import { Transform, Type } from 'class-transformer';
 import { SortType } from '../enum/sort-type.enum';
 import { ApiProperty } from '@nestjs/swagger';
 
@@ -50,4 +50,11 @@ export class ThreadQueryDto {
   @IsInt()
   @Min(1)
   category_id?: number;
+
+  @IsString()
+  @IsOptional()
+  @MaxLength(100, { message: 'Search query is too long' })
+  @Transform(({ value }) => value.trim())
+  @IsNotEmpty({ message: 'Search query cannot be empty' })
+  search?: string;
 }
