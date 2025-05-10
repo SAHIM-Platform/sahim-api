@@ -63,8 +63,8 @@ export class AdminsController {
     @Patch('students/:id/reject')
     @Roles(UserRole.SUPER_ADMIN, UserRole.ADMIN)
     @SwaggerRejectStudent()
-    async rejectStudent(@GetUser('sub') adminId, @Param('id', ParseIntPipe) userId: number) {
-        return await this.studentApprovalService.rejectStudent(userId, adminId);
+    async rejectStudent(@GetUser('sub') adminId, @GetUser('role') adminRole: UserRole, @Param('id', ParseIntPipe) userId: number) {
+        return await this.studentApprovalService.rejectStudent(userId, adminId, adminRole);
     }
 
     @Post('categories')
