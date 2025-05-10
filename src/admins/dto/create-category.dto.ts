@@ -1,5 +1,7 @@
 import { IsString, IsNotEmpty, MaxLength, MinLength, Matches } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { Transform } from 'class-transformer';
+import * as sanitizeHtml from 'sanitize-html';
 
 export class CreateCategoryDto {
   @ApiProperty({

@@ -115,10 +115,12 @@ export class StudentApprovalService {
       }
   
       if (search) {
+        const formattedSearch = search.trim().split(/\s+/).join(' & ');
+
         andConditions.push({
           OR: [
-            { name: { contains: search, mode: 'insensitive' } },
-            { student: { academicNumber: { contains: search, mode: 'insensitive' } } },
+            { name: { search: formattedSearch, mode: 'insensitive' } },
+            { student: { academicNumber: { search: formattedSearch, mode: 'insensitive' } } },
           ]
         });
       }
