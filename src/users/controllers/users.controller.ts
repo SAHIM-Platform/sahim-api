@@ -6,7 +6,8 @@ import {
   SwaggerGetUserBookmarks,
   SwaggerGetMe,
   SwaggerDeleteMe,
-  SwaggerUpdateMe
+  SwaggerUpdateMe,
+  SwaggerGetUserPublicProfile
 } from '../decorators/swagger.decorators';
 import { BookmarksQueryDto } from '../dto/bookmarks-query.dto';
 import { DeleteMeDto } from '../dto/delete-me.dto';
@@ -66,6 +67,7 @@ export class UsersController {
   }
 
   @Get(':username')
+  @SwaggerGetUserPublicProfile()
   async getProfile(
     @Param('username') username: string, 
     @Query() profileQueryDto: ProfileQueryDto
