@@ -250,3 +250,49 @@ export function SwaggerGetUserThreads() {
     ApiResponse({ status: 403, description: 'Forbidden - user must be approved student' })
   );
 }
+
+export function SwaggerGetUserPublicProfile() {
+  return applyDecorators(
+    ApiOperation({
+      summary: 'Get a public user profile by username',
+      description: 'Returns user public info and optionally their threads with pagination, filtering, and sorting.'
+    }),
+    ApiQuery({ name: 'includeThreads', required: false, type: Boolean, description: 'Whether to include user threads in the response', example: true }),
+    ApiQuery({ name: 'sort', required: false, enum: SortType, description: 'Sort order for threads', example: SortType.LATEST }),
+    ApiQuery({ name: 'page', required: false, type: Number, description: 'Page number for thread pagination', example: 1, minimum: 1 }),
+    ApiQuery({ name: 'limit', required: false, type: Number, description: 'Number of threads per page', example: 10, minimum: 1, maximum: 50 }),
+    ApiQuery({ name: 'category_id', required: false, type: Number, description: 'Filter threads by category ID', example: 3, minimum: 1 }),
+    ApiQuery({ name: 'search', required: false, type: String, description: 'Search threads by title or content', example: 'help with NestJS' }),
+    ApiResponse({
+      status: 200,
+      description: 'User public profile retrieved successfully',
+      schema: {
+        example: {
+          message: 'User public profile retrieved successfully',
+          data: {
+            id: 1,
+            username: 'johndoe',
+            name: 'John Doe',
+            photoPath: '/avatars/john.jpg',
+            role: 'STUDENT',
+            department: 'Computer Science',
+            level: 3,
+            threads: [
+              {
+                thread_id: 101,
+                title: 'Interesting Topic',
+                content: 'This is the thread content...',
+                created_at: '2025-05-01T10:00:00Z',
+                category: { category_id: 2, name: 'Tech' },
+                _count: { comments: 3, votes: 12 }
+              }
+            ],
+            meta: { total: 5, page: 1, limit: 10, totalPages: 1 }
+          }
+        }
+      }
+    }),
+    ApiResponse({ status: 404, description: 'User not found' }),
+    ApiResponse({ status: 400, description: 'Invalid query parameters' })
+  );
+}
