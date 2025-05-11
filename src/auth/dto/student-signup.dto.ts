@@ -5,13 +5,13 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class StudentSignUpDto extends SignupAuthDto {
   @ApiProperty({
-    description: 'Academic number (must be exactly 13 digits)',
+    description: 'Academic number (must be exactly 5, 6, or 13 digits)',
     example: '1234567890123',
-    pattern: '^\\d{13}$',
+    pattern: '^\\d{5}$|^\\d{6}$|^\\d{13}$',
   })
   @IsString({ message: 'Academic number must be a string' })
-  @Matches(/^\d{13}$/, {
-    message: 'Academic number must be exactly 13 digits',
+  @Matches(/^\d{5}$|^\d{6}$|^\d{13}$/, {
+    message: 'Academic number must be exactly 5, 6, or 13 digits',
   })
   academicNumber: string;
 
