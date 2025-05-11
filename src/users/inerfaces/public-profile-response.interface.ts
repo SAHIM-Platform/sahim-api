@@ -9,6 +9,7 @@ export interface PublicProfileResponse {
     username: string;
     role: string;
     department?: string;
+    photoPath?: string | null;
     threads?: ThreadResponse[];
     threadsMeta?: PaginationMeta;
   };

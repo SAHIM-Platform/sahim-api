@@ -38,7 +38,7 @@ export function buildThreadIncludeOptions(
       take: limit,
       orderBy: { created_at: 'asc' },
       include: {
-        author: { select: { id: true, username: true, name: true, photoPath: true, role: true, student: { select: { department: true }} } },
+        author: { select: { id: true, username: true, name: true, photoPath: true, role: true, student: { select: { department: true } }, isDeleted: true } },
         ...(includeVotes && { 
           votes: { select: { vote_type: true, voter_user_id: true } } 
         }),

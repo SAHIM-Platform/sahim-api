@@ -90,6 +90,7 @@ export class UserDetailsService {
       username:   user.username,
       role:       user.role,
       department: user.student?.department,
+      photoPath:  user?.photoPath,
     };
 
     if (includeThreads) {
