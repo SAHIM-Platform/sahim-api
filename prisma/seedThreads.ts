@@ -1,36 +1,121 @@
-import { Department, PrismaClient, UserRole } from '@prisma/client';
+import { Department, PrismaClient, UserRole, ApprovalStatus } from '@prisma/client';
 import * as bcrypt from 'bcryptjs';
-
 
 const prisma = new PrismaClient();
 
 async function seed() {
+    // Create test users with different approval statuses
+    const testUsers = [
+        // Approved Students
+        {
+            username: 'approved1',
+            password: 'password123',
+            name: 'Approved Student 1',
+            role: UserRole.STUDENT,
+            photoPath: '/public/avatars/defaults/user.webp',
+            student: {
+                academicNumber: "1234567890123",
+                department: Department.IT,
+                studyLevel: 4,
+                approvalStatus: ApprovalStatus.APPROVED
+            }
+        },
+        {
+            username: 'approved2',
+            password: 'password123',
+            name: 'Approved Student 2',
+            role: UserRole.STUDENT,
+            photoPath: '/public/avatars/defaults/user.webp',
+            student: {
+                academicNumber: "1234567890124",
+                department: Department.SE,
+                studyLevel: 3,
+                approvalStatus: ApprovalStatus.APPROVED
+            }
+        },
+        // Pending Students
+        {
+            username: 'pending1',
+            password: 'password123',
+            name: 'Pending Student 1',
+            role: UserRole.STUDENT,
+            photoPath: '/public/avatars/defaults/user.webp',
+            student: {
+                academicNumber: "1234567890125",
+                department: Department.COM,
+                studyLevel: 2,
+                approvalStatus: ApprovalStatus.PENDING
+            }
+        },
+        {
+            username: 'pending2',
+            password: 'password123',
+            name: 'Pending Student 2',
+            role: UserRole.STUDENT,
+            photoPath: '/public/avatars/defaults/user.webp',
+            student: {
+                academicNumber: "1234567890126",
+                department: Department.IMSE,
+                studyLevel: 1,
+                approvalStatus: ApprovalStatus.PENDING
+            }
+        },
+        // Rejected Students
+        {
+            username: 'rejected1',
+            password: 'password123',
+            name: 'Rejected Student 1',
+            role: UserRole.STUDENT,
+            photoPath: '/public/avatars/defaults/user.webp',
+            student: {
+                academicNumber: "1234567890127",
+                department: Department.CND,
+                studyLevel: 5,
+                approvalStatus: ApprovalStatus.REJECTED
+            }
+        },
+        {
+            username: 'rejected2',
+            password: 'password123',
+            name: 'Rejected Student 2',
+            role: UserRole.STUDENT,
+            photoPath: '/public/avatars/defaults/user.webp',
+            student: {
+                academicNumber: "1234567890128",
+                department: Department.MRE,
+                studyLevel: 4,
+                approvalStatus: ApprovalStatus.REJECTED
+            }
+        }
+    ];
 
-    let user = await prisma.user.findFirst({
-        where: { email: 'test@example.com' },
-    });
-
-    if (!user) {
-        user = await prisma.user.create({
-            data: {
-                email: 'test@example.com',
-                username: 'testuser',
-                password: await bcrypt.hash('password123', 10),
-                name: 'Test User',
-                role: UserRole.STUDENT,
-                photoPath: '/public/avatars/defaults/user.webp',
-                student: {
-                    create: {
-
-                        academicNumber: "1234567890123",
-                        department: Department.IT,
-                        studyLevel: 4,
-                    },
-                },
-            },
+    // Create or update test users
+    for (const userData of testUsers) {
+        const existingUser = await prisma.user.findFirst({
+            where: { username: userData.username }
         });
+
+        if (!existingUser) {
+            await prisma.user.create({
+                data: {
+                    ...userData,
+                    password: await bcrypt.hash(userData.password, 10),
+                    student: {
+                        create: userData.student
+                    }
+                }
+            });
+        }
     }
 
+    // Get the first approved user for creating threads
+    const approvedUser = await prisma.user.findFirst({
+        where: { username: 'approved1' }
+    });
+
+    if (!approvedUser) {
+        throw new Error('Approved test user not found');
+    }
 
     let category = await prisma.category.findFirst({
         where: { name: 'عام' },
@@ -43,7 +128,6 @@ async function seed() {
             },
         });
     }
-
 
     const threads = [
         {
@@ -73,7 +157,7 @@ async function seed() {
             data: {
                 title: thread.title,
                 content: thread.content,
-                author_user_id: user.id,
+                author_user_id: approvedUser.id,
                 category_id: category.category_id,
             },
         });

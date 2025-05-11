@@ -57,7 +57,7 @@ export class StudentApprovalService {
    * @returns {Promise<{ message: string }>} Success message.
    * @throws {BadRequestException} If the student does not exist, is not a student, or is already approved/rejected.
    */
-  async rejectStudent(userId: number, adminUserId: number): Promise<ApiResponse<null>> {
+  async rejectStudent(userId: number, adminUserId: number, adminRole: UserRole): Promise<ApiResponse<null>> {
     const student = await this.prisma.student.findUnique({
       where: { userId },
       include: { user: true },
@@ -75,8 +75,9 @@ export class StudentApprovalService {
       throw new BadRequestException('Student is already rejected');
     }
 
-    if (student.approvalStatus === ApprovalStatus.APPROVED) {
-      throw new BadRequestException('Cannot reject an approved student');
+     // Only Super Admin may reject an already APPROVED student
+    if (student.approvalStatus === ApprovalStatus.APPROVED && adminRole !== UserRole.SUPER_ADMIN) {
+      throw new BadRequestException('Only super admins can reject approved students');
     }
 
     await this.prisma.student.update({
